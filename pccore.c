@@ -74,6 +74,9 @@
 #define	CPU_FEATURES_EX		(0)
 #define	CPU_BRAND_STRING	"Intel(R) 80286 Processor "
 #endif
+#if defined(SUPPORT_PC9821)
+#include	"pegc.h"
+#endif
 
 
 const OEMCHAR np2version[] = OEMTEXT(NP2VER_CORE);
@@ -328,6 +331,9 @@ void pccore_init(void) {
 	pal_makelcdpal();
 	pal_makeskiptable();
 	dispsync_initialize();
+#if defined(SUPPORT_PC9821)
+	gv256_initPEGC();
+#endif
 	sxsi_initialize();
 
 	font_initialize();
@@ -393,6 +399,10 @@ void pccore_term(void) {
 	rs232c_destruct();
 
 	sxsi_alltrash();
+
+#if defined(SUPPORT_PC9821)
+	gv256_uninitPEGC();
+#endif
 
 	CPU_DEINITIALIZE();
 }
@@ -612,6 +622,9 @@ void pccore_reset(void) {
 	fddmtr_initialize();
 	wabrly_initialize();
 	calendar_initialize();
+#if defined(SUPPORT_PC9821)
+	gv256ResetRop();
+#endif
 	vram_initialize();
 
 	pal_change(1);

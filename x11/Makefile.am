@@ -192,6 +192,7 @@ COMMON_SOURCES=	$(real_topsrcdir)/x11/main.c \
 		$(real_topsrcdir)/io/mouseif.c \
 		$(real_topsrcdir)/io/nmiio.c \
 		$(real_topsrcdir)/io/np2sysp.c \
+		$(real_topsrcdir)/io/pegc.c \
 		$(real_topsrcdir)/io/pic.c \
 		$(real_topsrcdir)/io/pit.c \
 		$(real_topsrcdir)/io/printif.c \

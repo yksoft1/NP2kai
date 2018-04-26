@@ -17,6 +17,9 @@
 #ifdef SUPPORT_CL_GD5430
 #include	"cirrus_vga_extern.h"
 #endif
+#if defined(SUPPORT_PC9821)
+#include	"pegc.h"
+#endif
 
 
 	_ARTIC		artic;
@@ -542,6 +545,16 @@ void IOOUTCALL iocore_out8(UINT port, REG8 dat) {
 //	}
 //#endif
 //	TRACEOUT(("iocore_out8(%.2x, %.2x)", port, dat));
+#if defined(SUPPORT_PC9821)
+	if(port >= 0xE0000 && port <= 0xE03FF) {
+		gv256WriteIO(port, dat, 1);
+		return;
+	}
+	if(port >= 0xF00000 && port <= 0xF7FFFF) {
+		gv256WriteF0(port, dat, 1);
+		return;
+	}
+#endif
 	CPU_REMCLOCK -= iocore.busclock;
 	iof = iocore.base[(port >> 8) & 0xff];
 	iof->ioout[port & 0xff](port, dat);
@@ -559,6 +572,14 @@ REG8 IOINPCALL iocore_inp8(UINT port) {
 //		return 0xff;
 //	}
 //#endif
+#if defined(SUPPORT_PC9821)
+	if(port >= 0xE0000 && port <= 0xE03FF) {
+		return(gv256ReadIO(port, 1));
+	}
+	if(port >= 0xF00000 && port <= 0xF7FFFF) {
+		return(gv256ReadF0(port, 1));
+	}
+#endif
 	CPU_REMCLOCK -= iocore.busclock;
 	iof = iocore.base[(port >> 8) & 0xff];
 	ret = iof->ioinp[port & 0xff](port);
@@ -572,6 +593,16 @@ void IOOUTCALL iocore_out16(UINT port, REG16 dat) {
 
 //	TRACEOUT(("iocore_out16(%.4x, %.4x)", port, dat));
 	CPU_REMCLOCK -= iocore.busclock;
+#if defined(SUPPORT_PC9821)
+	if(port >= 0xE0000 && port <= 0xE03FF) {
+		gv256WriteIO(port, dat, 2);
+		return;
+	}
+	if(port >= 0xF00000 && port <= 0xF7FFFF) {
+		gv256WriteF0(port, dat, 2);
+		return;
+	}
+#endif
 #if defined(SUPPORT_IDEIO)
 	if (port == 0x0640) {
 		ideio_w16(port, dat);
@@ -634,6 +665,14 @@ REG16 IOINPCALL iocore_inp16(UINT port) {
 	REG8	ret;
 
 	CPU_REMCLOCK -= iocore.busclock;
+#if defined(SUPPORT_PC9821)
+	if(port >= 0xE0000 && port <= 0xE03FF) {
+		return(gv256ReadIO(port, 2));
+	}
+	if(port >= 0xF00000 && port <= 0xF7FFFF) {
+		return(gv256ReadF0(port, 2));
+	}
+#endif
 #if defined(SUPPORT_IDEIO)
 	if (port == 0x0640) {
 		return(ideio_r16(port));
@@ -696,6 +735,14 @@ void IOOUTCALL iocore_out32(UINT port, UINT32 dat) {
 		pcidev_w32(port, dat);
 		return;
 	}
+	if(port >= 0xE0000 && port <= 0xE03FF) {
+		gv256WriteIO(port, dat, 4);
+		return;
+	}
+	if(port >= 0xF00000 && port <= 0xF7FFFF) {
+		gv256WriteF0(port, dat, 4);
+		return;
+	}
 #endif
 #if defined(SUPPORT_CL_GD5430)
 	if(np2clvga.enabled && cirrusvga_opaque){
@@ -719,6 +766,12 @@ UINT32 IOINPCALL iocore_inp32(UINT port) {
 #if defined(SUPPORT_PC9821)
 	if ((port & 0xfffb) == 0x0cf8) {
 		return(pcidev_r32(port));
+	}
+	if(port >= 0xE0000 && port <= 0xE03FF) {
+		return(gv256ReadIO(port, 4));
+	}
+	if(port >= 0xF00000 && port <= 0xF7FFFF) {
+		return(gv256ReadF0(port, 4));
 	}
 #endif
 #if defined(SUPPORT_CL_GD5430)

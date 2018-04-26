@@ -8,7 +8,9 @@
 /* Mod for NP2(pegc.c) by AZO                                           */
 /*----------------------------------------------------------------------*/
 #include "compiler.h"
+#include <stdlib.h>
 #include <string.h>
+#include "vram.h"
 
 typedef UINT32 (*fRead)(UINT32 address, int size);
 typedef void   (*fWrite)(UINT32 address, UINT32 data, int size);
@@ -54,8 +56,7 @@ typedef struct _video_info {
     fWrite pegcFuncInitWrite;
 
     UINT8  *draw256;
-
-    UINT8  gvram256[0x8000 * 16];
+    UINT8  *show256;
 } STRVIDEO;
 
 static const UINT32 g_256pSrcMask[16] = {
@@ -66,6 +67,7 @@ static const UINT32 g_256pSftMaskL[4] = { 0, 0xff000000, 0xffff0000, 0xffffff00 
 
 static STRVIDEO *g_pVInfo = NULL;
 
+const UINT32 dummy256data = 0;
 
 /* bank switching for video RAM */
 /*
@@ -101,6 +103,44 @@ void gvSwitchGVram(int mode)
         memset(&g_memInfo.index[0xe0], type, 8);
     }
 }
+
+void gvChangePegcFunc(fRead egcRead, fWrite egcWrite)
+{
+    int type = mGvram256plane | AC_RF | AC_WF;
+
+    if(egcRead != NULL) {
+        g_memInfo.access[mGvram256plane].read.func  = egcRead;
+    }
+    if(egcWrite != NULL) {
+        g_memInfo.access[mGvram256plane].write.func = egcWrite;
+    }
+    if((g_arch.vramMode & VMODE_256PLANE) != 0) {
+        if(g_memInfo.index[0xa8] != type) {
+            memset(&g_memInfo.index[0xa8], type, 8);
+            if((g_arch.vramBank == 0) && (g_memInfo.index[0xa8] == g_memInfo.index[0xb0])) {
+                memset(&g_memInfo.index[0xb0], type, 8);
+            }
+        }
+    }
+}
+
+void gvSwitchUpperVram(int enable)
+{
+    if(enable) {
+        //if((g_arch.port043b & 0x02) == 0) {
+            g_memInfo.index[255 + 0x0f] = mGvram256f0 | AC_RF | AC_WF;
+        //} else {
+        //    g_memInfo.index[255 + 0x0f] = (g_arch.extMem >= 15) ? (mMain | AC_RP | AC_WP)
+        //                                                        : (mNoAccess | AC_RF | AC_WF);
+        //}
+        g_memInfo.index[270 + 0xff] = mGvram256f0 | AC_RF | AC_WF;
+    } else {
+        g_memInfo.index[255 + 0x0f] = (g_arch.extMem >= 15) ? (mMain | AC_RP | AC_WP)
+                                                            : (mNoAccess | AC_RF | AC_WF);
+        g_memInfo.index[270 + 0xff] = (g_arch.extMem >= 4095) ? (mMain | AC_RP | AC_WP)
+                                                              : (mNoAccess | AC_RF | AC_WF);
+    }
+}
 */
 
 UINT32 gv256Read(UINT32 address, int size)
@@ -133,28 +173,31 @@ void gv256Write(UINT32 address, UINT32 data, int size)
     *g_pVInfo->pStatus |= GDCS_CHG_VRAM;
 }
 
-UINT32 readMainMemory(UINT32 address, int size);
-void writeMainMemory(UINT32 address, UINT32 data, int size);
+//UINT32 readMainMemory(UINT32 address, int size);
+//void writeMainMemory(UINT32 address, UINT32 data, int size);
 
 UINT32 gv256ReadF0(UINT32 address, int size)
 {
     if(((address + size) & 0x00ffffff) <= 0x00f80000) {
         address &= 0x0007ffff;
         if(size == 1) {
-            return g_pVInfo->gvram256[address];
+            return vramex[address];
         } else if(size == 2){
-            return *(UINT16 *)&g_pVInfo->gvram256[address];
+            return *(UINT16 *)&vramex[address];
         }
-        return *(UINT32 *)&g_pVInfo->gvram256[address];
+        return *(UINT32 *)&vramex[address];
     }
     if((address & 0x00ffffff) >= 0x00f80000) {
-        return readMainMemory(address, size);
+//        return readMainMemory(address, size);
+        return 0;
     }
     if(size == 2) {
-        return (g_pVInfo->gvram256[0x0007ffff] << 8) | (UINT8)readMainMemory(address + 1, 1);
+//        return (vramex[0x0007ffff] << 8) | (UINT8)readMainMemory(address + 1, 1);
+        return (vramex[0x0007ffff] << 8);
     }
-    return (*(UINT32 *)&g_pVInfo->gvram256[0x0007fffc] >> ((address & 3) * 8))
-         | (readMainMemory(address & 0xfffffffc, 4) << (32 - ((address & 3) * 8))) ;
+//    return (*(UINT32 *)&vramex[0x0007fffc] >> ((address & 3) * 8))
+//         | (readMainMemory(address & 0xfffffffc, 4) << (32 - ((address & 3) * 8))) ;
+    return (*(UINT32 *)&vramex[0x0007fffc] >> ((address & 3) * 8));
 }
 
 void gv256WriteF0(UINT32 address, UINT32 data, int size)
@@ -162,33 +205,33 @@ void gv256WriteF0(UINT32 address, UINT32 data, int size)
     if(((address + size) & 0x00ffffff) <= 0x00f80000) {
         address &= 0x0007ffff;
         if(size == 1) {
-            g_pVInfo->gvram256[address] = (UINT8)data;
+            vramex[address] = (UINT8)data;
         } else if (size == 2){
-            *(UINT16 *)&g_pVInfo->gvram256[address] = (UINT16)data;
+            *(UINT16 *)&vramex[address] = (UINT16)data;
         } else {
-            *(UINT32 *)&g_pVInfo->gvram256[address] = data;
+            *(UINT32 *)&vramex[address] = data;
         }
         *g_pVInfo->pStatus |= GDCS_CHG_VRAM;
     } else if((address & 0x00ffffff) >= 0x00f80000) {
-        writeMainMemory(address, data, size);
+//        writeMainMemory(address, data, size);
     } else if(size == 2) {
-        g_pVInfo->gvram256[0x0007ffff] = (UINT8)data;
-        writeMainMemory(address + 1, data >> 8, 1);
+        vramex[0x0007ffff] = (UINT8)data;
+//        writeMainMemory(address + 1, data >> 8, 1);
     } else {
         switch(address & 3) {
         case 1:
-            g_pVInfo->gvram256[0x0007fffd] = (UINT8)data;
-            *(UINT16 *)&g_pVInfo->gvram256[0x0007fffe] = (UINT16)(data >> 8);
-            writeMainMemory(address, data >> 24, 1);
+            vramex[0x0007fffd] = (UINT8)data;
+            *(UINT16 *)&vramex[0x0007fffe] = (UINT16)(data >> 8);
+//            writeMainMemory(address, data >> 24, 1);
             break;
         case 2:
-            *(UINT16 *)&g_pVInfo->gvram256[0x0007fffe] = (UINT16)data;
-            writeMainMemory(address, data >> 16, 2);
+            *(UINT16 *)&vramex[0x0007fffe] = (UINT16)data;
+//            writeMainMemory(address, data >> 16, 2);
             break;
         default:
-            g_pVInfo->gvram256[0x0007ffff] = (UINT8)data;
-            writeMainMemory(address, data >> 8,  2);
-            writeMainMemory(address, data >> 24, 1);
+            vramex[0x0007ffff] = (UINT8)data;
+//            writeMainMemory(address, data >> 8,  2);
+//            writeMainMemory(address, data >> 24, 1);
         }
     }
 }
@@ -357,7 +400,7 @@ static UINT32 _gv256ReadPRf(UINT32 address, int size)
     address = (address - 0xa8000) * 8;
     size *= 8;
     gv256ReadPRfsub(address, size);
-    gvChangePegcFunc(_gv256ReadPRc, NULL);
+//    gvChangePegcFunc(_gv256ReadPRc, NULL);
     return 0xffffffff;
 }
 
@@ -374,7 +417,7 @@ static UINT32 _gv256ReadPRCmpf(UINT32 address, int size)
     address = (address - 0xa8000) * 8;
     size *= 8;
     gv256ReadPRfsub(address, size);
-    gvChangePegcFunc(_gv256ReadPRCmpc, NULL);
+//    gvChangePegcFunc(_gv256ReadPRCmpc, NULL);
     return gv256checkCmp(address, size);
 }
 
@@ -391,7 +434,7 @@ static UINT32 _gv256ReadPLf(UINT32 address, int size)
     address = (address - 0xa8000) * 8;
     size *= 8;
     gv256ReadPLfsub(address, size);
-    gvChangePegcFunc(_gv256ReadPLc, NULL);
+//    gvChangePegcFunc(_gv256ReadPLc, NULL);
     return 0xffffffff;
 }
 
@@ -408,7 +451,7 @@ static UINT32 _gv256ReadPLCmpf(UINT32 address, int size)
     address = (address - 0xa8000) * 8;
     size *= 8;
     gv256ReadPLfsub(address, size);
-    gvChangePegcFunc(_gv256ReadPLCmpc, NULL);
+//    gvChangePegcFunc(_gv256ReadPLCmpc, NULL);
     return gv256checkCmp(address, size);
 }
 
@@ -483,7 +526,7 @@ static void _gv256WritePRf(UINT32 address, UINT32 data, int size)
     data = ((data << 16) & 0xffff0000) | ((data >> 16) & 0x0000ffff);
     gv256WritePRsub(dst, data, MIN(size * 8 - shift, g_pVInfo->pegcBlkCnt));
     *g_pVInfo->pStatus |= GDCS_CHG_VRAM;
-    gvChangePegcFunc(NULL, _gv256WritePRc);
+//    gvChangePegcFunc(NULL, _gv256WritePRc);
 }
 
 static void _gv256WritePLc(UINT32 address, UINT32 data, int size)
@@ -505,7 +548,7 @@ static void _gv256WritePLf(UINT32 address, UINT32 data, int size)
     data = ((data << 16) & 0xffff0000) | ((data >> 16) & 0x0000ffff);
     gv256WritePLsub(dst, data, MIN(size * 8 - shift, g_pVInfo->pegcBlkCnt));
     *g_pVInfo->pStatus |= GDCS_CHG_VRAM;
-    gvChangePegcFunc(NULL, _gv256WritePLc);
+//    gvChangePegcFunc(NULL, _gv256WritePLc);
 }
 
 static void gv256RopPostProcR(int size)
@@ -518,7 +561,7 @@ static void gv256RopPostProcR(int size)
     if(g_pVInfo->pegcBlkCnt == 0) {
         g_pVInfo->pegcShfCnt = 0;
         g_pVInfo->pegcBlkCnt = g_pVInfo->pegcBlkSize;
-        gvChangePegcFunc(g_pVInfo->pegcFuncInitRead, g_pVInfo->pegcFuncInitWrite);
+//        gvChangePegcFunc(g_pVInfo->pegcFuncInitRead, g_pVInfo->pegcFuncInitWrite);
     } else {
         src = (UINT32 *)&g_pVInfo->pegcSftTop[size];
         dst = (UINT32 *)g_pVInfo->pegcSftTop;
@@ -539,7 +582,7 @@ static void gv256RopPostProcL(int size)
     if(g_pVInfo->pegcBlkCnt == 0) {
         g_pVInfo->pegcShfCnt = 0;
         g_pVInfo->pegcBlkCnt = g_pVInfo->pegcBlkSize;
-        gvChangePegcFunc(g_pVInfo->pegcFuncInitRead, g_pVInfo->pegcFuncInitWrite);
+//        gvChangePegcFunc(g_pVInfo->pegcFuncInitRead, g_pVInfo->pegcFuncInitWrite);
     } else {
         src = (UINT32 *)&g_pVInfo->pegcSftTop[-size];
         dst = (UINT32 *)g_pVInfo->pegcSftTop;
@@ -900,7 +943,7 @@ static void _gv256WritePRVramRopf(UINT32 address, UINT32 data, int size)
         g_pVInfo->pegcFuncRopSubR(dst, MIN(size * 8 - shift, g_pVInfo->pegcBlkCnt));
     }
     if(g_pVInfo->pegcBlkCnt < g_pVInfo->pegcBlkSize) {
-        gvChangePegcFunc(NULL, _gv256WritePRVramRopc);
+//        gvChangePegcFunc(NULL, _gv256WritePRVramRopc);
     }
     *g_pVInfo->pStatus |= GDCS_CHG_VRAM;
 }
@@ -922,7 +965,7 @@ static void _gv256WritePLVramRopf(UINT32 address, UINT32 data, int size)
         g_pVInfo->pegcFuncRopSubL(dst, MIN(size * 8 - shift, g_pVInfo->pegcBlkCnt));
     }
     if(g_pVInfo->pegcBlkCnt < g_pVInfo->pegcBlkSize) {
-        gvChangePegcFunc(NULL, _gv256WritePLVramRopc);
+//        gvChangePegcFunc(NULL, _gv256WritePLVramRopc);
     }
     *g_pVInfo->pStatus |= GDCS_CHG_VRAM;
 }
@@ -967,7 +1010,7 @@ static void _gv256WritePRCpuRopf(UINT32 address, UINT32 data, int size)
         g_pVInfo->pegcFuncRopSubR(dst, MIN(size - shift, g_pVInfo->pegcBlkCnt));
     }
     if(g_pVInfo->pegcBlkCnt < g_pVInfo->pegcBlkSize) {
-        gvChangePegcFunc(NULL, _gv256WritePRCpuRopc);
+//        gvChangePegcFunc(NULL, _gv256WritePRCpuRopc);
     }
     *g_pVInfo->pStatus |= GDCS_CHG_VRAM;
 }
@@ -1012,7 +1055,7 @@ static void _gv256WritePLCpuRopf(UINT32 address, UINT32 data, int size)
         g_pVInfo->pegcFuncRopSubL(dst, MIN(size - shift, g_pVInfo->pegcBlkCnt));
     }
     if(g_pVInfo->pegcBlkCnt < g_pVInfo->pegcBlkSize) {
-        gvChangePegcFunc(NULL, _gv256WritePLCpuRopc);
+//        gvChangePegcFunc(NULL, _gv256WritePLCpuRopc);
     }
     *g_pVInfo->pStatus |= GDCS_CHG_VRAM;
 }
@@ -1060,7 +1103,7 @@ void gvSetPegcFunc()
         }
     }
     g_pVInfo->pegcFuncInitWrite = g_256pfuncWrite[type][isInc];
-    gvChangePegcFunc(g_pVInfo->pegcFuncInitRead, g_pVInfo->pegcFuncInitWrite);
+//    gvChangePegcFunc(g_pVInfo->pegcFuncInitRead, g_pVInfo->pegcFuncInitWrite);
 }
 
 UINT32 gv256ReadIO(UINT32 address, int size)
@@ -1158,8 +1201,8 @@ void gv256WriteIO(UINT32 address, UINT32 data, int size)
             }
             g_pVInfo->mioBank[4] &= 0x0f;
             g_pVInfo->mioBank[6] &= 0x0f;
-            g_pVInfo->bankTop[0] = &g_pVInfo->gvram256[g_pVInfo->mioBank[4] * 0x8000];
-            g_pVInfo->bankTop[1] = &g_pVInfo->gvram256[g_pVInfo->mioBank[6] * 0x8000];
+            g_pVInfo->bankTop[0] = &vramex[g_pVInfo->mioBank[4] * 0x8000];
+            g_pVInfo->bankTop[1] = &vramex[g_pVInfo->mioBank[6] * 0x8000];
         }
     } else if(address < 0x120) {
         offset = (address - 0x100) >> 2;
@@ -1183,10 +1226,10 @@ void gv256WriteIO(UINT32 address, UINT32 data, int size)
                     ropUpdate = TRUE;
                     g_pVInfo->vMode |= VMODE_256PLANE;
                 }
-                gvSwitchGVram(g_pVInfo->vMode);
+//                gvSwitchGVram(g_pVInfo->vMode);
             }
             if(((prev ^ src) & 0x00030000) != 0) {
-                gvSwitchUpperVram((src & 0x00010000) != 0);
+//                gvSwitchUpperVram((src & 0x00010000) != 0);
             }
             break;
         case 1: /* access plane */
@@ -1328,5 +1371,27 @@ static const UINT8 gv256_initialPalette[] = {
 void gv256_initPalette()
 {
     memcpy(g_pVInfo->palette256, gv256_initialPalette, 256 * 4);
+}
+
+void gv256_initPEGC()
+{
+    if(!g_pVInfo)
+        g_pVInfo = (STRVIDEO*)calloc(1, sizeof(STRVIDEO));
+
+    g_pVInfo->draw256 = vramex;
+    g_pVInfo->show256 = vramex;
+    gv256_initPalette();
+    g_pVInfo->bankTop[0] = vramex;
+    g_pVInfo->bankTop[1] = vramex;
+    g_pVInfo->bankTop[2] = (UINT8*)&dummy256data;
+    memcpy(g_pVInfo->palette256, gv256_initialPalette, 256 * 4);
+}
+
+void gv256_uninitPEGC()
+{
+    if(g_pVInfo) {
+        free(g_pVInfo);
+        g_pVInfo = NULL;
+    }
 }
 
