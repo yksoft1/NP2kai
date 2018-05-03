@@ -23,6 +23,9 @@
 #if defined(SUPPORT_CL_GD5430)
 #include	"cirrus_vga_extern.h"
 #endif
+#if defined(SUPPORT_PC9821)
+#include	"pegc.h"
+#endif
 
 
 	UINT8	mem[0x200000];
@@ -458,6 +461,14 @@ static const MEMFNF memfnf = {
 // ----
 REG8 MEMCALL memp_read8(UINT32 address) {
 	
+#if defined(SUPPORT_PC9821)
+	if(address >= 0xE0000 && address <= 0xE03FF) {
+		return(gv256ReadIO(address, 1));
+	}
+	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+		return(gv256ReadF0(address, 1));
+	}
+#endif
 	//if(0x400 <= address && address < 0x600){
 	//	switch(address){
 	//	case 0x58a:
@@ -543,6 +554,14 @@ REG16 MEMCALL memp_read16(UINT32 address) {
 
 	REG16	ret;
 	
+#if defined(SUPPORT_PC9821)
+	if(address >= 0xE0000 && address <= 0xE03FF) {
+		return(gv256ReadIO(address, 2));
+	}
+	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+		return(gv256ReadF0(address, 2));
+	}
+#endif
 	//if(0x400 <= address && address < 0x600){
 	//	switch(address){
 	//	case 0x58a:
@@ -633,6 +652,14 @@ UINT32 MEMCALL memp_read32(UINT32 address) {
 	UINT32	pos;
 	UINT32	ret;
 	
+#if defined(SUPPORT_PC9821)
+	if(address >= 0xE0000 && address <= 0xE03FF) {
+		return(gv256ReadIO(address, 4));
+	}
+	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+		return(gv256ReadF0(address, 4));
+	}
+#endif
 	//if(0x400 <= address && address < 0x600){
 	//	switch(address){
 	//	case 0x58a:
@@ -861,6 +888,16 @@ UINT32 MEMCALL memp_read32_codefetch(UINT32 address) {
 
 void MEMCALL memp_write8(UINT32 address, REG8 value) {
 	
+#if defined(SUPPORT_PC9821)
+	if(address >= 0xE0000 && address <= 0xE03FF) {
+		gv256WriteIO(address, value, 1);
+		return;
+	}
+	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+		gv256WriteF0(address, value, 1);
+		return;
+	}
+#endif
 	//if(0x400 <= address && address < 0x600){
 	//	switch(address){
 	//	case 0x58a:
@@ -956,6 +993,16 @@ void MEMCALL memp_write8(UINT32 address, REG8 value) {
 void MEMCALL memp_write16(UINT32 address, REG16 value) {
 
 	
+#if defined(SUPPORT_PC9821)
+	if(address >= 0xE0000 && address <= 0xE03FF) {
+		gv256WriteIO(address, value, 2);
+		return;
+	}
+	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+		gv256WriteF0(address, value, 2);
+		return;
+	}
+#endif
 	//if(0x400 <= address && address < 0x600){
 	//	switch(address){
 	//	case 0x58a:
@@ -1073,6 +1120,16 @@ void MEMCALL memp_write32(UINT32 address, UINT32 value) {
 
 	UINT32	pos;
 	
+#if defined(SUPPORT_PC9821)
+	if(address >= 0xE0000 && address <= 0xE03FF) {
+		gv256WriteIO(address, value, 4);
+		return;
+	}
+	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+		gv256WriteF0(address, value, 4);
+		return;
+	}
+#endif
 	//if(0x400 <= address && address < 0x600){
 	//	switch(address){
 	//	case 0x58a:
