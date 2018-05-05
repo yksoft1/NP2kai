@@ -30,6 +30,7 @@
 
 	UINT8	mem[0x200000];
 
+extern int vmode256;
 
 typedef void (MEMCALL * MEM8WRITE)(UINT32 address, REG8 value);
 typedef REG8 (MEMCALL * MEM8READ)(UINT32 address);
@@ -462,10 +463,10 @@ static const MEMFNF memfnf = {
 REG8 MEMCALL memp_read8(UINT32 address) {
 	
 #if defined(SUPPORT_PC9821)
-	if(address >= 0xE0000 && address <= 0xE03FF) {
+	if(vmode256 && (address >= 0xE0000 && address <= 0xE03FF)) {
 		return(gv256ReadIO(address, 1));
 	}
-	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+	if(vmode256 && (address >= 0xF00000 && address <= 0xF7FFFF)) {
 		return(gv256ReadF0(address, 1));
 	}
 #endif
@@ -555,10 +556,10 @@ REG16 MEMCALL memp_read16(UINT32 address) {
 	REG16	ret;
 	
 #if defined(SUPPORT_PC9821)
-	if(address >= 0xE0000 && address <= 0xE03FF) {
+	if(vmode256 && (address >= 0xE0000 && address <= 0xE03FF)) {
 		return(gv256ReadIO(address, 2));
 	}
-	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+	if(vmode256 && (address >= 0xF00000 && address <= 0xF7FFFF)) {
 		return(gv256ReadF0(address, 2));
 	}
 #endif
@@ -653,10 +654,10 @@ UINT32 MEMCALL memp_read32(UINT32 address) {
 	UINT32	ret;
 	
 #if defined(SUPPORT_PC9821)
-	if(address >= 0xE0000 && address <= 0xE03FF) {
+	if(vmode256 && (address >= 0xE0000 && address <= 0xE03FF)) {
 		return(gv256ReadIO(address, 4));
 	}
-	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+	if(vmode256 && (address >= 0xF00000 && address <= 0xF7FFFF)) {
 		return(gv256ReadF0(address, 4));
 	}
 #endif
@@ -889,11 +890,11 @@ UINT32 MEMCALL memp_read32_codefetch(UINT32 address) {
 void MEMCALL memp_write8(UINT32 address, REG8 value) {
 	
 #if defined(SUPPORT_PC9821)
-	if(address >= 0xE0000 && address <= 0xE03FF) {
+	if(vmode256 && (address >= 0xE0000 && address <= 0xE03FF)) {
 		gv256WriteIO(address, value, 1);
 		return;
 	}
-	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+	if(vmode256 && (address >= 0xF00000 && address <= 0xF7FFFF)) {
 		gv256WriteF0(address, value, 1);
 		return;
 	}
@@ -994,11 +995,11 @@ void MEMCALL memp_write16(UINT32 address, REG16 value) {
 
 	
 #if defined(SUPPORT_PC9821)
-	if(address >= 0xE0000 && address <= 0xE03FF) {
+	if(vmode256 && (address >= 0xE0000 && address <= 0xE03FF)) {
 		gv256WriteIO(address, value, 2);
 		return;
 	}
-	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+	if(vmode256 && (address >= 0xF00000 && address <= 0xF7FFFF)) {
 		gv256WriteF0(address, value, 2);
 		return;
 	}
@@ -1121,11 +1122,11 @@ void MEMCALL memp_write32(UINT32 address, UINT32 value) {
 	UINT32	pos;
 	
 #if defined(SUPPORT_PC9821)
-	if(address >= 0xE0000 && address <= 0xE03FF) {
+	if(vmode256 && (address >= 0xE0000 && address <= 0xE03FF)) {
 		gv256WriteIO(address, value, 4);
 		return;
 	}
-	if(address >= 0xF00000 && address <= 0xF7FFFF) {
+	if(vmode256 && (address >= 0xF00000 && address <= 0xF7FFFF)) {
 		gv256WriteF0(address, value, 4);
 		return;
 	}

@@ -14,6 +14,8 @@
 #endif
 #define	TURE_SYNC
 
+int vmode256 = 0;
+
 typedef struct {
 	UINT32	clock;
 	UINT	minx;
@@ -540,10 +542,12 @@ static void IOOUTCALL gdc_o6a(UINT port, REG8 dat) {
 				break;
 			case 0x68:
 				gdc.analog &= ~(1 << GDCANALOG_256E);
+				vmode256 = 0;
 				break;
 
 			case 0x69:
 				gdc.analog |= (1 << GDCANALOG_256E);
+				vmode256 = 1;
 				break;
 #endif
 #endif
