@@ -8,3 +8,4 @@
 *.wasm
 *.data
 *.html
+*.mem
