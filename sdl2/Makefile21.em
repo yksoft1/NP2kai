@@ -2,11 +2,16 @@ CC=emcc
 CXX=em++
 AR=emar
 
+ifeq ($(EMSCRIPTEN_ROOT),)
+#Set it yourself if EMSCRIPTEN_ROOT not there
+	EMSCRIPTEN_ROOT=c:/emsdk/emscripten/1.38.12
+endif
+
 DEBUG=0
 SUPPORT_NET?= 0
 #STATIC_LINKING=1
 
-SDL_CONFIG ?= C:/emsdk/emscripten/1.38.12/system/bin/sdl2-config
+SDL_CONFIG ?= $(EMSCRIPTEN_ROOT)/system/bin/sdl2-config
 SDL_CFLAGS := $(shell $(SDL_CONFIG) --cflags) -DUSE_SDL_CONFIG
 SDL_LIBS := $(shell $(SDL_CONFIG) --libs)
 
