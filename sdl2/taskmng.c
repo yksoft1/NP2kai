@@ -206,7 +206,11 @@ BOOL taskmng_sleep(UINT32 tick) {
 #if defined(__LIBRETRO__)
       retro_sleep(1);
 #else	/* __LIBRETRO__ */
+#ifndef EMSCRIPTEN
 		SDL_Delay(1);
+#else
+		emscripten_sleep_with_yield(1);
+#endif
 #endif	/* __LIBRETRO__ */
 	}
 	return(task_avail);

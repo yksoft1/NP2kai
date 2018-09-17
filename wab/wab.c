@@ -148,6 +148,10 @@ void wabwin_writeini()
 	}
 }
 
+void scrnmng_updatefsres(void);
+void scrnmng_blthdc(void);
+void scrnmng_bltwab(void);
+
 /**
  * ‰æ–ÊƒTƒCƒYİ’è
  */

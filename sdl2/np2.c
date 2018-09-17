@@ -84,6 +84,7 @@ UINT bmpfilenumber;
 char modulefile[MAX_PATH];
 char draw32bit;
 
+static void np2exec();
 static void usage(const char *progname) {
 
 	printf("Usage: %s [options]\n", progname);
@@ -194,7 +195,8 @@ int np2_main(int argc, char *argv[]) {
 		}*/
 	}
 
-#if !defined(__LIBRETRO__)
+#if !defined(EMSCRIPTEN)
+#if !defined(__LIBRETRO__) && !defined (WIN32)
 	char *config_home = getenv("XDG_CONFIG_HOME");
 	char *home = getenv("HOME");
 	if (config_home && config_home[0] == '/') {
@@ -211,6 +213,13 @@ int np2_main(int argc, char *argv[]) {
 	}
 	file_setcd(np2cfg.biospath);
 #endif	/* __LIBRETRO__ */
+#else
+	milstr_ncat(np2cfg.biospath, "/", sizeof(np2cfg.biospath));
+#endif
+#ifdef WIN32
+	milstr_ncpy(np2cfg.biospath, "./", sizeof(np2cfg.biospath));
+	file_setcd(np2cfg.biospath);
+#endif
 
 	initload();
 #if defined(SUPPORT_WAB)
@@ -418,67 +427,8 @@ np2main_err1:
 
 int np2_end(){
 #else	/* __LIBRETRO__ */
-	
-	while(taskmng_isavail()) {
-		taskmng_rol();
-		if (np2oscfg.NOWAIT) {
-			joymng_sync();
-			pccore_exec(framecnt == 0);
-			if (np2oscfg.DRAW_SKIP) {			// nowait frame skip
-				framecnt++;
-				if (framecnt >= np2oscfg.DRAW_SKIP) {
-					processwait(0);
-				}
-			}
-			else {							// nowait auto skip
-				framecnt = 1;
-				if (timing_getcount()) {
-					processwait(0);
-				}
-			}
-		}
-		else if (np2oscfg.DRAW_SKIP) {		// frame skip
-			if (framecnt < np2oscfg.DRAW_SKIP) {
-				joymng_sync();
-				pccore_exec(framecnt == 0);
-				framecnt++;
-			}
-			else {
-				processwait(np2oscfg.DRAW_SKIP);
-			}
-		}
-		else {								// auto skip
-			if (!waitcnt) {
-				UINT cnt;
-				joymng_sync();
-				pccore_exec(framecnt == 0);
-				framecnt++;
-				cnt = timing_getcount();
-				if (framecnt > cnt) {
-					waitcnt = framecnt;
-					if (framemax > 1) {
-						framemax--;
-					}
-				}
-				else if (framecnt >= framemax) {
-					if (framemax < 12) {
-						framemax++;
-					}
-					if (cnt >= 12) {
-						timing_reset();
-					}
-					else {
-						timing_setcount(cnt - framecnt);
-					}
-					framereset(0);
-				}
-			}
-			else {
-				processwait(waitcnt);
-				waitcnt = framecnt;
-			}
-		}
-	}
+	np2exec();
+
 #endif	/* __LIBRETRO__ */
 
 	pccore_cfgupdate();
@@ -579,4 +529,71 @@ havemmx(void)
 #endif /* GCC_CPU_ARCH_AMD64 */
 	return rv;
 #endif /* GCC_CPU_ARCH_IA32 */
+}
+
+static void np2exec()
+{
+	while(taskmng_isavail()) {
+		taskmng_rol();
+#ifdef EMSCRIPTEN
+		emscripten_sleep_with_yield(0);
+#endif
+		if (np2oscfg.NOWAIT) {
+			joymng_sync();
+			pccore_exec(framecnt == 0);
+			if (np2oscfg.DRAW_SKIP) {			// nowait frame skip
+				framecnt++;
+				if (framecnt >= np2oscfg.DRAW_SKIP) {
+					processwait(0);
+				}
+			}
+			else {							// nowait auto skip
+				framecnt = 1;
+				if (timing_getcount()) {
+					processwait(0);
+				}
+			}
+		}
+		else if (np2oscfg.DRAW_SKIP) {		// frame skip
+			if (framecnt < np2oscfg.DRAW_SKIP) {
+				joymng_sync();
+				pccore_exec(framecnt == 0);
+				framecnt++;
+			}
+			else {
+				processwait(np2oscfg.DRAW_SKIP);
+			}
+		}
+		else {								// auto skip
+			if (!waitcnt) {
+				UINT cnt;
+				joymng_sync();
+				pccore_exec(framecnt == 0);
+				framecnt++;
+				cnt = timing_getcount();
+				if (framecnt > cnt) {
+					waitcnt = framecnt;
+					if (framemax > 1) {
+						framemax--;
+					}
+				}
+				else if (framecnt >= framemax) {
+					if (framemax < 12) {
+						framemax++;
+					}
+					if (cnt >= 12) {
+						timing_reset();
+					}
+					else {
+						timing_setcount(cnt - framecnt);
+					}
+					framereset(0);
+				}
+			}
+			else {
+				processwait(waitcnt);
+				waitcnt = framecnt;
+			}
+		}
+	}	
 }
