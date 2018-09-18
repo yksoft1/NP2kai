@@ -2,6 +2,9 @@
 #include	"mousemng.h"
 
 MOUSEMNG	mousemng;
+#ifdef EMSCRIPTEN
+int captured=0;
+#endif
 
 UINT8 mousemng_getstat(SINT16 *x, SINT16 *y, int clear) {
 	*x = mousemng.x;
@@ -14,8 +17,26 @@ UINT8 mousemng_getstat(SINT16 *x, SINT16 *y, int clear) {
 }
 
 static void mousecapture(BOOL capture) {
-
+#ifdef EMSCRIPTEN
+	captured = capture;
+	if(captured)
+	{
+		SDL_CaptureMouse(TRUE);
+		mousemng_hidecursor();
+	}	
+	else
+	{
+		mousemng_showcursor();
+		SDL_CaptureMouse(FALSE);
+	}
+#endif
 }
+
+#ifdef EMSCRIPTEN
+int ismouse_captured(void){
+	return captured;
+}
+#endif
 
 void mousemng_initialize(void) {
 
@@ -57,6 +78,14 @@ BOOL mousemng_buttonevent(UINT event) {
 #else	/* __LIBRETRO__ */
 void mousemng_buttonevent(SDL_MouseButtonEvent *button) {
 	UINT8 bit;
+#ifdef EMSCRIPTEN
+/*	if(!captured)
+	{
+		if (button->button == SDL_BUTTON_LEFT && button->type == SDL_MOUSEBUTTONUP)
+			mousemng_enable(MOUSEPROC_SYSTEM);
+	}*/
+	if(captured) {
+#endif
 	switch (button->button) {
 	case SDL_BUTTON_LEFT:
 		bit = uPD8255A_LEFTBIT;
@@ -71,6 +100,9 @@ void mousemng_buttonevent(SDL_MouseButtonEvent *button) {
 		mousemng.btn &= ~bit;
 	else
 		mousemng.btn |= bit;
+#ifdef EMSCRIPTEN
+	}
+#endif
 }
 #endif	/* __LIBRETRO__ */
 
@@ -108,22 +140,41 @@ void mousemng_toggle(UINT proc) {
 
 #if !defined(__LIBRETRO__)
 void mousemng_hidecursor() {
+#ifdef EMSCRIPTEN
+	if(captured) {
+		SDL_ShowCursor(SDL_DISABLE);
+		SDL_SetRelativeMouseMode(SDL_TRUE);
+	}
+#else
 	if (!--mousemng.showcount) {
 		SDL_ShowCursor(SDL_DISABLE);
 		SDL_SetRelativeMouseMode(SDL_TRUE);
 	}
+#endif
 }
 
 void mousemng_showcursor() {
+#ifdef EMSCRIPTEN
+	SDL_ShowCursor(SDL_ENABLE);
+	SDL_SetRelativeMouseMode(SDL_FALSE);
+#else
 	if (!mousemng.showcount++) {
 		SDL_ShowCursor(SDL_ENABLE);
 		SDL_SetRelativeMouseMode(SDL_FALSE);
 	}
+#endif
 }
 
 void mousemng_onmove(SDL_MouseMotionEvent *motion) {
+#ifdef EMSCRIPTEN	
+	if(captured) {
+		mousemng.x += motion->xrel;
+		mousemng.y += motion->yrel;
+	}
+#else
 	mousemng.x += motion->xrel;
 	mousemng.y += motion->yrel;
+#endif
 }
 #else	/* __LIBRETRO__ */
 void mousemng_onmove(int x, int y) {

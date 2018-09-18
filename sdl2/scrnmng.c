@@ -480,7 +480,9 @@ const UINT8		*a;
 	if (surface == NULL) {
 		return;
 	}
+#ifndef EMSCRIPTEN
 	mousemng_hidecursor();
+#endif
 	SDL_LockSurface(surface);
 	if (calcdrawrect(surface, &dr, menuvram, &rt) == SUCCESS) {
 		switch(scrnmng.bpp) {
@@ -552,8 +554,10 @@ const UINT8		*a;
 		}
 	}
 	SDL_UnlockSurface(surface);
+#ifndef EMSCRIPTEN
 	mousemng_showcursor();
-
+#endif
+	
 	SDL_UpdateTexture(s_texture, NULL, surface->pixels, surface->pitch);
 	SDL_RenderClear(s_renderer);
 	SDL_RenderCopy(s_renderer, s_texture, NULL, NULL);
@@ -630,6 +634,7 @@ BRESULT scrnmng_entermenu(SCRNMENU *smenu) {
 		smenu->bpp = 16;
 	}
 	mousemng_showcursor();
+	
 #endif	/* __LIBRETRO__ */
 	return(SUCCESS);
 
@@ -643,7 +648,10 @@ void scrnmng_leavemenu(void) {
 	VRAM_RELEASE(vram);
 #else	/* __LIBRETRO__ */
 	VRAM_RELEASE(scrnmng.vram);
-	mousemng_hidecursor();
+
+	if(ismouse_captured())
+		mousemng_hidecursor();
+
 #endif	/* __LIBRETRO__ */
 }
 
@@ -687,7 +695,9 @@ const UINT8		*q;
 	if (surface == NULL) {
 		return;
 	}
+#ifndef EMSCRIPTEN
 	mousemng_hidecursor();
+#endif
 	SDL_LockSurface(surface);
 	if (calcdrawrect(surface, &dr, menuvram, rct) == SUCCESS) {
 		switch(scrnmng.bpp) {
@@ -788,7 +798,9 @@ const UINT8		*q;
 		}
 	}
 	SDL_UnlockSurface(surface);
+#ifndef EMSCRIPTEN
 	mousemng_showcursor();
+#endif
 
 	SDL_UpdateTexture(s_texture, NULL, surface->pixels, surface->pitch);
 	SDL_RenderClear(s_renderer);

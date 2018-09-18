@@ -165,7 +165,11 @@ void taskmng_rol(void) {
         return;
       }
 #endif //GCW0
+
 			if (e.key.keysym.scancode == SDL_SCANCODE_F11) {
+#ifdef EMSCRIPTEN //in web browsers, F11 is commonly occupied. Use SHIFT+F11
+			if ((e.key.keysym.mod == KMOD_LSHIFT) || (e.key.keysym.mod == KMOD_RSHIFT)) {
+#endif 
 				if (menuvram == NULL) {
 					sysmenu_menuopen(0, 0, 0);
 				}
@@ -173,6 +177,15 @@ void taskmng_rol(void) {
 					menubase_close();
 				}
 			}
+#ifdef EMSCRIPTEN
+			}
+			else if (e.key.keysym.scancode == SDL_SCANCODE_F12) {
+				if ((e.key.keysym.mod == KMOD_LCTRL) || (e.key.keysym.mod == KMOD_RCTRL)) {
+					//use CTRL+F12 to lock mouse like win32 builds do
+					mousemng_toggle(MOUSEPROC_SYSTEM);
+				}
+			}
+#endif
 			else {
 				sdlkbd_keydown(e.key.keysym.scancode);
 			}

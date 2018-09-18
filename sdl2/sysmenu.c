@@ -7,6 +7,7 @@
 #include	"taskmng.h"
 #include	"kbtrans.h"
 #include	"kbdmng.h"
+#include	"mousemng.h"
 #include	"pccore.h"
 #include	"iocore.h"
 #include	"pc9861k.h"
@@ -618,6 +619,12 @@ static void sys_cmd(MENUID id) {
 			pc9861k_midipanic();
 			break;
 
+#ifdef EMSCRIPTEN
+		case MID_CAPMOUSE:
+			mousemng_toggle(MOUSEPROC_SYSTEM);
+			
+			break;
+#endif			
 		case MID_BMPSAVE:
 			{
 				SCRNSAVE bmp = NULL;
@@ -846,6 +853,9 @@ BRESULT sysmenu_menuopen(UINT menutype, int x, int y) {
 	menusys_setcheck(MID_ITFWORK, (np2cfg.ITF_WORK & 1));
 	menusys_setcheck(MID_FIXMMTIMER, (np2cfg.timerfix & 1));
 	menusys_setcheck(MID_SKIP16MBMEMCHK, (np2cfg.memchkmx != 0));
+#ifdef EMSCRIPTEN
+	menusys_setcheck(MID_CAPMOUSE, (ismouse_captured() != 0));
+#endif
 	return(menusys_open(x, y));
 }
 

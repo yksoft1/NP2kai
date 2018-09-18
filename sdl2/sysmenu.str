@@ -140,6 +140,9 @@ static const char str_midipanic[] = "MIDI Panic";
 static const char str_sndopt[] = "Sound option...";
 
 static const char str_other[] = "Other";
+#ifdef EMSCRIPTEN
+static const char str_capmouse[] = "Capture Mouse";
+#endif
 static const char str_bmpsave[] = "BMP Save...";
 static const char str_s98log[] = "S98 logging...";
 static const char str_calendar[] = "Calendar...";
@@ -429,6 +432,9 @@ static const MSYSITEM s_sc[] = {
 		{str_altf4,			NULL,		MID_ALTF4,			MENU_DELETED}};
 
 static const MSYSITEM s_other[] = {
+#ifdef EMSCRIPTEN
+		{str_capmouse,		NULL,		MID_CAPMOUSE,			0},
+#endif
 		{str_bmpsave,		NULL,		MID_BMPSAVE,			0},
 		{str_s98log,		NULL,		MID_S98LOGGING,		MENU_GRAY},
 #if !defined(__LIBRETRO__)
