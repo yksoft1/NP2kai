@@ -167,8 +167,8 @@ void taskmng_rol(void) {
 #endif //GCW0
 
 			if (e.key.keysym.scancode == SDL_SCANCODE_F11) {
-#ifdef EMSCRIPTEN //in web browsers, F11 is commonly occupied. Use SHIFT+F11
-			if ((e.key.keysym.mod == KMOD_LSHIFT) || (e.key.keysym.mod == KMOD_RSHIFT)) {
+#ifdef EMSCRIPTEN //in web browsers, F11 is commonly occupied. Use CTRL+F11
+			if ((e.key.keysym.mod == KMOD_LCTRL) || (e.key.keysym.mod == KMOD_RCTRL)) {
 #endif 
 				if (menuvram == NULL) {
 					sysmenu_menuopen(0, 0, 0);
