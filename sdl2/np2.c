@@ -215,6 +215,7 @@ int np2_main(int argc, char *argv[]) {
 #endif	/* __LIBRETRO__ */
 #else
 	milstr_ncat(np2cfg.biospath, "/", sizeof(np2cfg.biospath));
+	file_setcd(np2cfg.biospath);
 #endif
 #ifdef WIN32
 	milstr_ncpy(np2cfg.biospath, "./", sizeof(np2cfg.biospath));
