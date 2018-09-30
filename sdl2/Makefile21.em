@@ -71,6 +71,13 @@ CXXFLAGS += -DSUPPORT_NET -DSUPPORT_LGY98
 CFLAGS   += -DSUPPORT_NET -DSUPPORT_LGY98
 endif
 
+ifeq ($(EMULARITY), 1)
+	CFLAGS	+= -DUSE_EMULARITY_NP2DIR
+endif
+
+ifeq ($(TRACE), 1)
+	CFLAGS	+= -DTRACE
+endif
 
 all: $(TARGET)
 $(TARGET): $(OBJECTS)
@@ -84,10 +91,10 @@ html: $(TARGET)
 ifeq ($(PRELOAD), 1)
 	$(CC) -O3 -s USE_SDL=2 -s WASM=$(WASM) -s TOTAL_MEMORY=$(EMSCRIPTEN_TOTAL_MEMORY)  -s EMTERPRETIFY=1 -s EMTERPRETIFY_ASYNC=1 \
 	-s EMTERPRETIFY_WHITELIST=@d3.txt $(TARGET) \
-	--preload-file $(PREFILE) -o $(basename $(TARGET)).html 
+	--preload-file $(PREFILE) -s BINARYEN_TRAP_MODE="js" -o $(basename $(TARGET)).html 
 else
 	$(CC) -O3 -s USE_SDL=2 -s WASM=$(WASM) -s TOTAL_MEMORY=$(EMSCRIPTEN_TOTAL_MEMORY)  -s EMTERPRETIFY=1 -s EMTERPRETIFY_ASYNC=1 \
-	-s EMTERPRETIFY_WHITELIST=@d3.txt $(TARGET) -o $(basename $(TARGET)).html 
+	-s EMTERPRETIFY_WHITELIST=@d3.txt $(TARGET) -s BINARYEN_TRAP_MODE="js" -o $(basename $(TARGET)).html 
 endif
 	
 %.o: %.c

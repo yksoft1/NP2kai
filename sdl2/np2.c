@@ -73,6 +73,11 @@ NP2OSCFG np2oscfg = {
 static	UINT		framecnt;
 static	UINT		waitcnt;
 static	UINT		framemax = 1;
+#if defined (EMSCRIPTEN) && defined(USE_EMULARITY_NP2DIR)
+static	char		datadir[256] = EMSCRIPTEN_DIR;
+#else
+static	char		datadir[3] = "/";
+#endif
 
 BOOL s98logging = FALSE;
 int s98log_count = 0;
@@ -214,7 +219,7 @@ int np2_main(int argc, char *argv[]) {
 	file_setcd(np2cfg.biospath);
 #endif	/* __LIBRETRO__ */
 #else
-	milstr_ncat(np2cfg.biospath, "/", sizeof(np2cfg.biospath));
+	milstr_ncat(np2cfg.biospath, datadir, sizeof(np2cfg.biospath));
 	file_setcd(np2cfg.biospath);
 #endif
 #ifdef WIN32

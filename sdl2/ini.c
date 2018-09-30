@@ -767,6 +767,8 @@ void initload(void) {
 	char	path[MAX_PATH];
 
 	milstr_ncpy(path, file_getcd(inifile), sizeof(path));
+	fprintf(stderr, "Loading %s from %s", inifile, path);
+	TRACEOUT(("Loading %s from %s", inifile, path));
 	ini_read(path, ini_title, iniitem, INIITEMS);
 }
 
@@ -775,6 +777,7 @@ void initsave(void) {
 	char	path[MAX_PATH];
 
 	milstr_ncpy(path, file_getcd(inifile), sizeof(path));
+	fprintf(stderr, "Saving %s to %s", inifile, path);
 	ini_write(path, ini_title, iniitem, INIITEMS);
 }
 

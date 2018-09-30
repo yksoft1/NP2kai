@@ -248,3 +248,4 @@ typedef SINT32	FILELEN;
 
 #include	"common.h"
 
+#define EMSCRIPTEN_DIR "/emulator/np2kai/"
