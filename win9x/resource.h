@@ -426,6 +426,7 @@
 #define IDS_HDDTITLE                    31041
 #define IDS_HDDEXT                      31042
 #define IDS_HDDFILTER                   31043
+#define IDS_HDDFILTER_NVL				31046
 #define IDS_SASITITLE                   31044
 #define IDS_IDETITLE                    31045
 #define IDS_ISOTITLE                    31051

@@ -21,12 +21,16 @@ WINBASEAPI BOOL WINAPI SetFilePointerEx(HANDLE, LARGE_INTEGER, PLARGE_INTEGER, D
 }
 # endif
 #endif
-#if !defined(__GNUC__)
+#if !defined(__GNUC__) || defined(__MINGW32__)
 #include <tchar.h>
 #endif	// !defined(__GNUC__)
 #include <stdio.h>
+#include <ctype.h>
 #include <stddef.h>
 #include <setjmp.h>
+#ifdef __MINGW32__
+#include <stdint.h>
+#endif
 #if defined(TRACE)
 #include <assert.h>
 #endif
@@ -43,7 +47,7 @@ WINBASEAPI BOOL WINAPI SetFilePointerEx(HANDLE, LARGE_INTEGER, PLARGE_INTEGER, D
 #endif
 #define	OSLINEBREAK_CRLF
 
-#if !defined(__GNUC__)
+#if !defined(__GNUC__) || defined(__MINGW32__)
 typedef	signed int			SINT;
 typedef	signed char			SINT8;
 typedef	unsigned char		UINT8;
@@ -82,7 +86,7 @@ typedef	signed __int64		SINT64;
 #define	STOREINTELDWORD(a, b)	*(UINT32 *)(a) = (b)
 #define	STOREINTELWORD(a, b)	*(UINT16 *)(a) = (b)
 
-#if !defined(__GNUC__)
+#if !defined(__GNUC__) || defined(__MINGW32__)
 #define	sigjmp_buf				jmp_buf
 #define	sigsetjmp(env, mask)	setjmp(env)
 #define	siglongjmp(env, val)	longjmp(env, val)
@@ -135,8 +139,9 @@ typedef	signed __int64		SINT64;
 #if !defined(_WIN64)
 #define	OPNGENX86
 #endif
-
+#ifndef __MINGW32__
 #define	VERMOUTH_LIB
+#endif
 #define	MT32SOUND_DLL
 #define	PARTSCALL	__fastcall
 #define	CPUCALL		__fastcall
@@ -181,13 +186,20 @@ typedef	signed __int64		SINT64;
 #define	SUPPORT_KEYDISP
 #define	SUPPORT_MEMDBG32
 #define	SUPPORT_HOSTDRV
+
+#ifdef __MINGW32__
+#define	SUPPORT_IDEIO
+#else
 #define	SUPPORT_SASI
 #define	SUPPORT_SCSI
-/* #define	SUPPORT_IDEIO */
+#endif
+
 #define SUPPORT_ARC
 #define SUPPORT_ZLIB
 #if !defined(SUPPORT_PC9821)
+#ifndef __MINGW32__ //Incomplete?
 #define SUPPORT_BMS
+#endif
 #endif
 #if !defined(_WIN64)
 #define	SUPPORT_DCLOCK
@@ -199,8 +211,10 @@ typedef	signed __int64		SINT64;
 
 #define SOUND_CRITICAL
 #define	SOUNDRESERVE	20
+#ifndef __MINGW32__
 #define SUPPORT_VSTi
 #define SUPPORT_ASIO
+#endif
 #if (_MSC_VER >= 1500)
 #define SUPPORT_WASAPI
 #endif	/* (_MSC_VER >= 1500) */

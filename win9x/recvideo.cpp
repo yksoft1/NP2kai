@@ -7,6 +7,10 @@
 
 #if defined(SUPPORT_RECVIDEO)
 
+#ifndef comptypeDIB
+#define comptypeDIB  mmioFOURCC('D','I','B',' ')
+#endif
+
 #include "recvideo.h"
 #include "pccore.h"
 #include "iocore.h"
@@ -366,8 +370,8 @@ void RecodeVideo::Update()
 	}
 	(*fnMix)(m_pWork8, p, q);
 
-	const int nWidth = min(dsync.scrnxmax, VIDEO_WIDTH);
-	const int nHeight = min(dsync.scrnymax, VIDEO_HEIGHT);
+	const int nWidth = np2min(dsync.scrnxmax, VIDEO_WIDTH);
+	const int nHeight = np2min(dsync.scrnymax, VIDEO_HEIGHT);
 	p = m_pWork8;
 	q = m_pWork24 + (VIDEO_WIDTH * nHeight * 3);
 	for (int y = 0; y < nHeight; y++)
