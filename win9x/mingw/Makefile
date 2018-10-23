@@ -9,7 +9,7 @@ RM		=	rm -f
 
 NP2_PATH	= ../..
 
-CFLAGS	=	 -O3 -Wstrict-overflow=0 -Wstrict-aliasing=0 -Wno-narrowing -DNDEBUG \
+CFLAGS	=	-O3 -fno-tree-vectorize -Wstrict-overflow=0 -Wstrict-aliasing=0 -Wno-narrowing -DNDEBUG \
 			-DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES \
 			-I. -I.. \
 			-I$(NP2_PATH) \
@@ -32,6 +32,7 @@ CFLAGS	=	 -O3 -Wstrict-overflow=0 -Wstrict-aliasing=0 -Wno-narrowing -DNDEBUG \
 			-I$(NP2_PATH)/win9x/ext/romeo \
 			-I$(NP2_PATH)/win9x/ext/scci 
 
+CXXFLAGS = -std=gnu++0x $(CFLAGS)
 
 #CFLAGS	+=	$(shell sdl2-config --cflags)
 LFLAGS	= -static -mwindows
@@ -131,7 +132,7 @@ $(TARGET):	$(OBJS) $(NP2_PATH)/win9x/mingw/np2_mingw.o
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(NP2_PATH)/win9x/mingw/np2_mingw.o: $(NP2_PATH)/win9x/resources/1252/np2.rc
 	$(WINDRES) -i $< -o $@
