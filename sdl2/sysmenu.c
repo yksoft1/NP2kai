@@ -712,7 +712,12 @@ static void sys_cmd(MENUID id) {
 			np2cfg.timerfix ^= 1;
 			update |= SYS_UPDATECFG;
 			break;
-
+			
+		case MID_WINNTIDEFIX:
+ 			np2cfg.winntfix ^= 1;
+ 			update |= SYS_UPDATECFG;
+ 			break;
+			
 		case MID_SKIP16MBMEMCHK:
 			if(np2cfg.memchkmx == 0)
 				np2cfg.memchkmx = 15;
@@ -852,6 +857,7 @@ BRESULT sysmenu_menuopen(UINT menutype, int x, int y) {
 	menusys_setcheck(MID_MSRAPID, (np2cfg.MOUSERAPID & 1));
 	menusys_setcheck(MID_ITFWORK, (np2cfg.ITF_WORK & 1));
 	menusys_setcheck(MID_FIXMMTIMER, (np2cfg.timerfix & 1));
+	menusys_setcheck(MID_WINNTIDEFIX, (np2cfg.winntfix & 1));
 	menusys_setcheck(MID_SKIP16MBMEMCHK, (np2cfg.memchkmx != 0));
 #ifdef EMSCRIPTEN
 	menusys_setcheck(MID_CAPMOUSE, (ismouse_captured() != 0));
