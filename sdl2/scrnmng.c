@@ -649,8 +649,10 @@ void scrnmng_leavemenu(void) {
 #else	/* __LIBRETRO__ */
 	VRAM_RELEASE(scrnmng.vram);
 
+#ifdef EMSCRIPTEN
 	if(ismouse_captured())
 		mousemng_hidecursor();
+#endif
 
 #endif	/* __LIBRETRO__ */
 }
