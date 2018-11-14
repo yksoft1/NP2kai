@@ -149,7 +149,9 @@ void wabwin_writeini()
 }
 
 void scrnmng_updatefsres(void);
-//void scrnmng_blthdc(void);
+#ifdef EMSCRIPTEN
+void scrnmng_blthdc(void);
+#endif
 void scrnmng_bltwab(void);
 
 /**
