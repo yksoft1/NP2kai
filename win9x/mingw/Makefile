@@ -10,7 +10,7 @@ RM		=	rm -f
 NP2_PATH	= ../..
 
 CFLAGS	=	-O3 -fno-tree-vectorize -Wstrict-overflow=0 -Wstrict-aliasing=0 -Wno-narrowing -DNDEBUG \
-			-DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES \
+			-DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DSUPPORT_SOUND_SB16 -DUSE_MAME -DSUPPORT_FMGEN \
 			-I. -I.. \
 			-I$(NP2_PATH) \
 			-I$(NP2_PATH)/codecnv \
@@ -86,6 +86,8 @@ CPPSRCS	=	$(NP2_PATH)/calendar.c \
 			$(NP2_PATH)/sound/soundrom.c \
 			$(NP2_PATH)/sound/tms3631c.c \
 			$(NP2_PATH)/sound/tms3631g.c \
+			$(wildcard $(NP2_PATH)/sound/mame/*.c) \
+			$(wildcard $(NP2_PATH)/sound/fmgen/*.cpp) \
 			$(wildcard $(NP2_PATH)/trap/*.c) \
 			$(wildcard $(NP2_PATH)/vram/*.c) \
 			$(wildcard $(NP2_PATH)/i286c/*.c) \
