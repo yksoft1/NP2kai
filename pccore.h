@@ -150,6 +150,7 @@ struct tagNP2Config
 
 	UINT8	BEEP_VOL;
 	UINT8	vol14[6];
+	UINT8	vol_master;
 	UINT8	vol_fm;
 	UINT8	vol_ssg;
 	UINT8	vol_adpcm;
@@ -224,6 +225,12 @@ struct tagNP2Config
 	UINT8	gpibirq; // GPIB IRQ
 	UINT8	gpibmode; // GPIB Master/Slave
 	UINT8	gpibaddr; // GPIB Address
+	UINT8	gpibexio; // GPIB custom I/O port base
+#endif
+#if defined(SUPPORT_PCI)
+	UINT8	usepci; // PCI Bus使用
+	UINT8	pci_bios32; // BIOS32使用
+	UINT8	pci_pcmc; // PCMC選択
 #endif
 
 #if defined(SUPPORT_STATSAVE)
@@ -238,6 +245,8 @@ struct tagNP2Config
 	UINT8	memchkmx;
 	UINT8	sbeeplen;
 	UINT8	sbeepadj;
+	
+	UINT8	biosioemu;
 
 	char	cpu_vendor[16]; // ベンダー（12byte）
 	UINT32	cpu_family; // ファミリ
@@ -248,6 +257,8 @@ struct tagNP2Config
 	char	cpu_brandstring[64]; // ブランド名（48byte）
 	OEMCHAR	cpu_vendor_o[16]; // ベンダー（12byte）OEMCHAR
 	OEMCHAR	cpu_brandstring_o[64]; // ブランド名（48byte）OEMCHAR
+	UINT32	cpu_brandid; // ブランドID
+	UINT32  cpu_feature_ecx; // ECX機能フラグ
 	
 	UINT8	fpu_type; // FPU種類（0=Berkeley SoftFloat, 1=DOSBox FPU, 2=DOSBox FPU+INT64）
 };

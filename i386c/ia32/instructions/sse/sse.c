@@ -28,7 +28,7 @@
 #include <math.h>
 #include <float.h>
 
-#ifndef isnan
+#if defined(_WIN32) && !defined(__LIBRETRO__)
 #define isnan(x) (_isnan(x))
 #endif
 
@@ -39,7 +39,7 @@
 
 #if defined(USE_SSE) && defined(USE_FPU)
 
-#define CPU_SSEWORKCLOCK(a)	CPU_WORKCLOCK(8)
+#define CPU_SSEWORKCLOCK	CPU_WORKCLOCK(8)
 
 static INLINE void
 SSE_check_NM_EXCEPTION(){
@@ -100,7 +100,7 @@ MMX_setTag(void)
 	FPU_STATUSWORD |= (FPU_STAT_TOP&7)<<11;
 }
 
-static float SSE_ROUND(float val){
+float SSE_ROUND(float val){
 	float floorval;
 	int rndbit = (SSE_MXCSR >> 13) & 0x3;
 	switch(rndbit){
@@ -120,10 +120,8 @@ static float SSE_ROUND(float val){
 		break;
 	case 1:
 		return (float)floor(val);
-		break;
 	case 2:
 		return (float)ceil(val);
-		break;
 	case 3:
 		if(val < 0){
 			return (float)ceil(val); // ゼロ方向への切り捨て
@@ -133,7 +131,6 @@ static float SSE_ROUND(float val){
 		break;
 	default:
 		return val;
-		break;
 	}
 }
 
@@ -149,7 +146,7 @@ static INLINE void SSE_PART_GETDATA1DATA2_P(float **data1, float **data2, float 
 
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -175,7 +172,7 @@ static INLINE void SSE_PART_GETDATA1DATA2_S(float **data1, float **data2, float 
 
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -201,7 +198,7 @@ static INLINE void SSE_PART_GETDATA1DATA2_P_MMX2XMM(float **data1, SINT32 **data
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
 	MMX_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -223,7 +220,7 @@ static INLINE void SSE_PART_GETDATA1DATA2_S_MMX2XMM(float **data1, SINT32 **data
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
 	MMX_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -245,7 +242,7 @@ static INLINE void SSE_PART_GETDATA1DATA2_P_XMM2MMX(SINT32 **data1, float **data
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
 	MMX_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -267,7 +264,7 @@ static INLINE void SSE_PART_GETDATA1DATA2_S_XMM2MMX(SINT32 **data1, float **data
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
 	MMX_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -289,7 +286,7 @@ static INLINE void SSE_PART_GETDATA1DATA2_S_REG2XMM(float **data1, SINT32 **data
 
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -309,7 +306,7 @@ static INLINE void SSE_PART_GETDATA1DATA2_S_XMM2REG(SINT32 **data1, float **data
 
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -332,7 +329,7 @@ static INLINE void SSE_PART_GETDATA1DATA2_P_MMX2MMX_SB(SINT8 **data1, SINT8 **da
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
 	MMX_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -667,7 +664,7 @@ void SSE_MINSS(void)
 		data1[0] = (data1[0] < data2[0] ? data1[0] : data2[0]);
 	}
 }
-void SSE_MOVAPSmem2reg(void)
+void SSE_MOVAPSmem2xmm(void)
 {
 	UINT32 op;
 	UINT idx, sub;
@@ -677,7 +674,7 @@ void SSE_MOVAPSmem2reg(void)
 	
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -697,7 +694,7 @@ void SSE_MOVAPSmem2reg(void)
 		data1[i] = data2[i];
 	}
 }
-void SSE_MOVAPSreg2mem(void)
+void SSE_MOVAPSxmm2mem(void)
 {
 	UINT32 op;
 	UINT idx, sub;
@@ -706,7 +703,7 @@ void SSE_MOVAPSreg2mem(void)
 	
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -730,7 +727,7 @@ void SSE_MOVHLPS(float *data1, float *data2)
 	data1[0] = data2[2];
 	data1[1] = data2[3];
 }
-void SSE_MOVHPSmem2reg(void)
+void SSE_MOVHPSmem2xmm(void)
 {
 	UINT32 op;
 	UINT idx, sub;
@@ -740,7 +737,7 @@ void SSE_MOVHPSmem2reg(void)
 	
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -759,7 +756,7 @@ void SSE_MOVHPSmem2reg(void)
 		}
 	}
 }
-void SSE_MOVHPSreg2mem(void)
+void SSE_MOVHPSxmm2mem(void)
 {
 	UINT32 op;
 	UINT idx, sub;
@@ -767,7 +764,7 @@ void SSE_MOVHPSreg2mem(void)
 	
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -786,7 +783,7 @@ void SSE_MOVLHPS(float *data1, float *data2)
 	data1[2] = data2[0];
 	data1[3] = data2[1];
 }
-void SSE_MOVLPSmem2reg(void)
+void SSE_MOVLPSmem2xmm(void)
 {
 	UINT32 op;
 	UINT idx, sub;
@@ -796,7 +793,7 @@ void SSE_MOVLPSmem2reg(void)
 	
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -815,7 +812,7 @@ void SSE_MOVLPSmem2reg(void)
 		}
 	}
 }
-void SSE_MOVLPSreg2mem(void)
+void SSE_MOVLPSxmm2mem(void)
 {
 	UINT32 op;
 	UINT idx, sub;
@@ -823,7 +820,7 @@ void SSE_MOVLPSreg2mem(void)
 	
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -846,8 +843,7 @@ void SSE_MOVMSKPS(void)
 
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	MMX_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -862,7 +858,7 @@ void SSE_MOVMSKPS(void)
 			 ((data2[2] >> 29) & 0x4)|
 			 ((data2[3] >> 28) & 0x8);
 }
-void SSE_MOVSSmem2reg(void)
+void SSE_MOVSSmem2xmm(void)
 {
 	UINT32 op;
 	UINT idx, sub;
@@ -871,7 +867,7 @@ void SSE_MOVSSmem2reg(void)
 	
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -883,11 +879,11 @@ void SSE_MOVSSmem2reg(void)
 		maddr = calc_ea_dst((op));
 		*((UINT32*)(data2buf+ 0)) = cpu_vmemoryread_d(CPU_INST_SEGREG_INDEX, maddr+ 0);
 		data2 = data2buf;
-		*(UINT32*)(data1+1) = *(UINT32*)(data1+2) = *(UINT32*)(data1+3) = 0;
 	}
 	data1[0] = data2[0];
+	*(UINT32*)(data1+1) = *(UINT32*)(data1+2) = *(UINT32*)(data1+3) = 0;
 }
-void SSE_MOVSSreg2mem(void)
+void SSE_MOVSSxmm2mem(void)
 {
 	UINT32 op;
 	UINT idx, sub;
@@ -895,7 +891,7 @@ void SSE_MOVSSreg2mem(void)
 	
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -909,13 +905,13 @@ void SSE_MOVSSreg2mem(void)
 		cpu_vmemorywrite_d(CPU_INST_SEGREG_INDEX, madr+ 0, *((UINT32*)(data1+ 0)));
 	}
 }
-void SSE_MOVUPSmem2reg(void)
+void SSE_MOVUPSmem2xmm(void)
 {
-	SSE_MOVAPSmem2reg(); // エミュレーションではアライメント制限がないのでMOVAPSと同じ
+	SSE_MOVAPSmem2xmm(); // エミュレーションではアライメント制限がないのでMOVAPSと同じ
 }
-void SSE_MOVUPSreg2mem(void)
+void SSE_MOVUPSxmm2mem(void)
 {
-	SSE_MOVAPSreg2mem(); // エミュレーションではアライメント制限がないのでMOVAPSと同じ
+	SSE_MOVAPSxmm2mem(); // エミュレーションではアライメント制限がないのでMOVAPSと同じ
 }
 void SSE_MULPS(void)
 {
@@ -983,7 +979,7 @@ void SSE_RSQRTSS(void)
 	float *data1, *data2;
 	
 	SSE_PART_GETDATA1DATA2_S(&data1, &data2, data2buf);
-	data1[0] = 1.0f / sqrt(data2[0]);
+	data1[0] = (float)(1.0f / sqrt(data2[0]));
 }
 void SSE_SHUFPS(void)
 {
@@ -997,16 +993,16 @@ void SSE_SHUFPS(void)
 
 	GET_PCBYTE((imm8));
 
-	for(i=0;i<4;i++){
-		data1buf[i] = data1[i];
-	}
 	for(i=0;i<2;i++){
-		data1[i] = data1buf[imm8 & 0x3];
+		data1buf[i] = data1[imm8 & 0x3];
 		imm8 = (imm8 >> 2);
 	}
 	for(i=2;i<4;i++){
-		data1[i] = data2[imm8 & 0x3];
+		data1buf[i] = data2[imm8 & 0x3];
 		imm8 = (imm8 >> 2);
+	}
+	for(i=0;i<4;i++){
+		data1[i] = data1buf[i];
 	}
 }
 void SSE_SQRTPS(void)
@@ -1131,7 +1127,7 @@ void SSE_PEXTRW(void)
 
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -1154,7 +1150,7 @@ void SSE_PINSRW(void)
 
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -1222,7 +1218,7 @@ void SSE_PMOVMSKB(void)
 
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -1251,7 +1247,7 @@ void SSE_PMULHUW(void)
 	
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -1262,7 +1258,7 @@ void SSE_PMULHUW(void)
 		UINT32 maddr;
 		maddr = calc_ea_dst((op));
 		*((UINT32*)(data2buf+0)) = cpu_vmemoryread_d(CPU_INST_SEGREG_INDEX, maddr);
-		*((UINT32*)(data2buf+2)) = cpu_vmemoryread_d(CPU_INST_SEGREG_INDEX, maddr);
+		*((UINT32*)(data2buf+2)) = cpu_vmemoryread_d(CPU_INST_SEGREG_INDEX, maddr+4);
 		data2 = data2buf;
 	}
 	for(i=0;i<4;i++){
@@ -1340,7 +1336,7 @@ void SSE_MOVNTPS(void)
 	
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -1372,7 +1368,7 @@ void SSE_MOVNTQ(void)
 	SSE_check_NM_EXCEPTION();
 	SSE_setTag();
 	MMX_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -1398,7 +1394,7 @@ void SSE_PREFETCHTx(void)
 	
 	//SSE_check_NM_EXCEPTION();
 	//SSE_setTag();
-	CPU_SSEWORKCLOCK(a);
+	CPU_SSEWORKCLOCK;
 	GET_PCBYTE((op));
 	idx = (op >> 3) & 7;
 	sub = (op & 7);
@@ -1543,11 +1539,11 @@ void SSE_MINSS(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
-void SSE_MOVAPSmem2reg(void)
+void SSE_MOVAPSmem2xmm(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
-void SSE_MOVAPSreg2mem(void)
+void SSE_MOVAPSxmm2mem(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
@@ -1555,11 +1551,11 @@ void SSE_MOVHLPS(float *data1, float *data2)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
-void SSE_MOVHPSmem2reg(void)
+void SSE_MOVHPSmem2xmm(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
-void SSE_MOVHPSreg2mem(void)
+void SSE_MOVHPSxmm2mem(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
@@ -1567,11 +1563,11 @@ void SSE_MOVLHPS(float *data1, float *data2)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
-void SSE_MOVLPSmem2reg(void)
+void SSE_MOVLPSmem2xmm(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
-void SSE_MOVLPSreg2mem(void)
+void SSE_MOVLPSxmm2mem(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
@@ -1579,19 +1575,19 @@ void SSE_MOVMSKPS(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
-void SSE_MOVSSmem2reg(void)
+void SSE_MOVSSmem2xmm(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
-void SSE_MOVSSreg2mem(void)
+void SSE_MOVSSxmm2mem(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
-void SSE_MOVUPSmem2reg(void)
+void SSE_MOVUPSmem2xmm(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }
-void SSE_MOVUPSreg2mem(void)
+void SSE_MOVUPSxmm2mem(void)
 {
 	EXCEPTION(UD_EXCEPTION, 0);
 }

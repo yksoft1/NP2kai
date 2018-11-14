@@ -1,6 +1,6 @@
 Neko Project II 0.86 kai rev.17
 ===
-Jun 27, 2018  
+Oct 28, 2018  
 
 Build SDL2 port
 ---
@@ -12,8 +12,8 @@ Build SDL2 port
 
 or
 
-	(Windows + MSYS2)
-	$ pacman -S git gcc make mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_mixer
+	(Windows + MSYS2 64bit (32bit console))
+	$ pacman -S git gcc make mingw-w64-i686-gcc mingw-w64-i686-SDL2 mingw-w64-i686-SDL2_ttf mingw-w64-i686-SDL2_mixer
 
 or
 
@@ -27,43 +27,40 @@ or
 	(Linux)
 	$ cd NP2kai/sdl2
 	$ make -j4 -f Makefile.unix
+	or
+	$ make -j4 -f Makefile21.unix
 
 or
-
-	$ make -j4 -f Makefile21.unix
 
 	(Windows + MSYS2)
 	$ cd NP2kai/sdl2
 	$ make -j4 -f Makefile.win
+	or
+	$ make -j4 -f Makefile21.win
 
 or
-
-	$ make -j4 -f Makefile21.win
 
 	(Mac)
 	$ cd NP2kai/sdl2
 	$ make -j4 -f Makefile.mac
+	or
+	$ make -j4 -f Makefile21.mac
 
 or
 
-	$ make -j4 -f Makefile21.mac
-
-or for GCW Zero (GCW0) game device only
-
+	GCW Zero (GCW0) game device only
 	$ make -j4 -f Makefile21.gcw0
-
-
 
 ３． Install NP2kai.  
 
-	$ sudo -f Makefile.unix install
+	$ sudo make -f Makefile.unix install
 
 or
 
-	$ sudo -f Makefile21.unix install
+	$ sudo make -f Makefile21.unix install
 
-or for GCW Zero (GCW0) game device only
-
+or
+	GCW Zero (GCW0) game device only
 	$ make -j4 -f Makefile21.gcw0 buildopk
 
 	then transfer np2kai.opk to /media/apps/
@@ -604,6 +601,12 @@ WAB Type normally uses 'PC-9821Xe10,Xa7e,Xb10 built-in'.
 
 Release
 ---
+* Oct 28, 2018
+	- Merge NP21/W 0.86 rev.46
+* Oct 14, 2018
+	- Merge NP21/W 0.86 rev.45
+* Sep 27, 2018
+	- Merge NP21/W 0.86 rev.44
 * Aug 22, 2018
 	- Apply for libnvl.so
 	- Merge NP21/W 0.86 rev.43

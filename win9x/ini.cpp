@@ -544,7 +544,8 @@ static const PFTBL s_IniItems[] =
 	PFVAL("optsb16d", PFTYPE_UINT8,		&np2cfg.sndsb16dma),
 	PFVAL("optsb16i", PFTYPE_UINT8,		&np2cfg.sndsb16irq),
 #endif	/* SUPPORT_SOUND_SB16 */
-
+	
+	PFMAX("volume_M", PFTYPE_UINT8,		&np2cfg.vol_master,		100),
 	PFMAX("volume_F", PFTYPE_UINT8,		&np2cfg.vol_fm,			128),
 	PFMAX("volume_S", PFTYPE_UINT8,		&np2cfg.vol_ssg,		128),
 	PFMAX("volume_A", PFTYPE_UINT8,		&np2cfg.vol_adpcm,		128),
@@ -614,6 +615,12 @@ static const PFTBL s_IniItems[] =
 	PFVAL("GPIB_IRQ", PFTYPE_UINT8,		&np2cfg.gpibirq),
 	PFVAL("GPIBMODE", PFTYPE_UINT8,		&np2cfg.gpibmode),
 	PFVAL("GPIBADDR", PFTYPE_UINT8,		&np2cfg.gpibaddr),
+	PFVAL("GPIBEXIO", PFTYPE_UINT8,		&np2cfg.gpibexio),
+#endif
+#if defined(SUPPORT_PCI)
+	PFVAL("USE98PCI", PFTYPE_BOOL,		&np2cfg.usepci),
+	PFVAL("P_BIOS32", PFTYPE_BOOL,		&np2cfg.pci_bios32),
+	PFVAL("PCI_PCMC", PFTYPE_UINT8,		&np2cfg.pci_pcmc),
 #endif
 	
 	PFMAX("DAVOLUME", PFTYPE_UINT8,		&np2cfg.davolume,		255),
@@ -628,6 +635,8 @@ static const PFTBL s_IniItems[] =
 	PFMAX("MEMCHKMX", PFTYPE_UINT8,		&np2cfg.memchkmx,		0), // メモリチェックする最大サイズ（最小は15MB・0は制限無し・メモリチェックが長いのが嫌だけど見かけ上カウントだけはしておきたい人向け）
 	PFMAX("SBEEPLEN", PFTYPE_UINT8,		&np2cfg.sbeeplen,		0), // ピポ音の長さ（0でデフォルト・4がNP2標準）
 	PFMAX("SBEEPADJ", PFTYPE_BOOL,		&np2cfg.sbeepadj,		0), // ピポ音の長さ自動調整
+
+	PFVAL("BIOSIOEM", PFTYPE_BOOL,		&np2cfg.biosioemu), // np21w ver0.86 rev46 BIOS I/O emulation
 	
 	PFSTR("cpu_vend", PFRO_STR,			np2cfg.cpu_vendor_o),
 	PFVAL("cpu_fami", PFTYPE_UINT32,	&np2cfg.cpu_family),
@@ -636,12 +645,15 @@ static const PFTBL s_IniItems[] =
 	PFVAL("cpu_feat", PFTYPE_HEX32,		&np2cfg.cpu_feature),
 	PFVAL("cpu_f_ex", PFTYPE_HEX32,		&np2cfg.cpu_feature_ex),
 	PFSTR("cpu_bran", PFRO_STR,			np2cfg.cpu_brandstring_o),
+	PFVAL("cpu_brid", PFTYPE_HEX32,		&np2cfg.cpu_brandid),
+	PFVAL("cpu_fecx", PFTYPE_HEX32,		&np2cfg.cpu_feature_ecx),
 
 	PFMAX("FPU_TYPE", PFTYPE_UINT8,		&np2cfg.fpu_type,		0), // FPU種類
 
 
 	// OS依存？
 	PFVAL("keyboard", PFRO_KB,			&np2oscfg.KEYBOARD),
+	PFVAL("usenlock", PFTYPE_BOOL,		&np2oscfg.USENUMLOCK),
 	PFVAL("F12_COPY", PFTYPE_UINT8,		&np2oscfg.F12COPY),
 	PFVAL("Joystick", PFTYPE_BOOL,		&np2oscfg.JOYPAD1),
 	PFEXT("Joy1_btn", PFTYPE_BIN,		np2oscfg.JOY1BTN,		4),
@@ -699,6 +711,10 @@ static const PFTBL s_IniItems[] =
 	PFVAL("fscrnbpp", PFRO_UINT8,		&np2oscfg.fscrnbpp),
 	PFVAL("fscrnmod", PFTYPE_HEX8,		&np2oscfg.fscrnmod),
 
+#if defined(SUPPORT_SCRN_DIRECT3D)
+	PFVAL("D3D_IMODE", PFTYPE_UINT8,	&np2oscfg.d3d_imode),
+#endif
+
 	PFVAL("snddev_t", PFTYPE_UINT8,		&np2oscfg.cSoundDeviceType),
 	PFSTR("snddev_n", PFTYPE_STR,		np2oscfg.szSoundDeviceName),
 
@@ -707,6 +723,7 @@ static const PFTBL s_IniItems[] =
 #endif	// defined(SUPPORT_VSTi)
 	
 	PFVAL("EMUDDRAW", PFTYPE_BOOL,		&np2oscfg.emuddraw), // 最近はEMULATIONONLYにした方速かったりする（特にピクセル操作する場合とか）
+	PFVAL("DRAWTYPE", PFTYPE_UINT8,		&np2oscfg.drawtype),
 	
 	PFVAL("DRAGDROP", PFRO_BOOL,		&np2oscfg.dragdrop), // ドラッグアンドドロップサポート
 	PFVAL("MAKELHDD", PFRO_BOOL,		&np2oscfg.makelhdd), // 巨大HDDイメージ作成サポート

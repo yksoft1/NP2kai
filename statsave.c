@@ -56,6 +56,9 @@
 #if defined(CPUCORE_IA32)
 #include "ia32/instructions/fpu/fp.h"
 #endif
+#if defined(BIOS_IO_EMULATION)
+#include "bios/bios.h"
+#endif
 
 #if defined(MACOS)
 #define	CRCONST		str_cr
@@ -1565,6 +1568,10 @@ const SFENTRY	*tblterm;
 	cbuscore_bind();
 	fmboard_bind();
 	
+#if defined(SUPPORT_PC9821)&&defined(SUPPORT_PCI)
+	pcidev_bind();
+#endif
+
 #if defined(CPUCORE_IA32)
 	fpu_initialize();
 #endif
