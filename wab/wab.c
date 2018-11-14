@@ -506,7 +506,7 @@ void np2wab_drawframe()
 #endif
 }
 #if !defined(NP2_X11) && !defined(NP2_SDL2) && !defined(__LIBRETRO__)
-}
+//}
 /**
  * ”ñ“¯Šú•`‰æiga_threadmode‚ª^j
  */

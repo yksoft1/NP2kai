@@ -92,7 +92,7 @@ endif
 clean:
 	rm -f $(OBJECTS) $(TARGET)
 	rm -f $(basename $(TARGET)).html 
-	rm -f $(basename $(TARGET)).orig.js
+	rm -f $(basename $(TARGET)).js.orig.js
 	rm -f $(basename $(TARGET)).js
 	rm -f $(basename $(TARGET)).html.mem
 	rm -f $(basename $(TARGET)).wasm 	

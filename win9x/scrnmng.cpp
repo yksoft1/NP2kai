@@ -343,7 +343,7 @@ BOOL scrnmng_isdispclockclick(const POINT *pt) {
 }
 
 void scrnmng_dispclock(void)
-	
+{	
 #ifdef SUPPORT_SCRN_DIRECT3D
 	if(scrnmng_current_drawtype==DRAWTYPE_INVALID) return;
 	if(scrnmng_current_drawtype==DRAWTYPE_DIRECT3D){

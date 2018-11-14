@@ -26,6 +26,7 @@ WINBASEAPI BOOL WINAPI SetFilePointerEx(HANDLE, LARGE_INTEGER, PLARGE_INTEGER, D
 #endif	// !defined(__GNUC__)
 #include <stdio.h>
 #include <ctype.h>
+#include <math.h>
 #include <stddef.h>
 #include <setjmp.h>
 #ifdef __MINGW32__
@@ -221,7 +222,9 @@ typedef	signed __int64		SINT64;
 
 #define	SUPPORT_TEXTCNV
 
+#ifndef __MINGW32__
 #define SUPPORT_WIN2000HOST
+#endif
 
 #if defined(CPUCORE_IA32)
 #pragma warning(disable: 4819)
