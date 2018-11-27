@@ -17,9 +17,9 @@ DEBUG=0
 SUPPORT_NET?= 0
 #STATIC_LINKING=1
 
-SDL_CONFIG ?= $(EMSCRIPTEN_ROOT)/system/bin/sdl2-config
-SDL_CFLAGS := $(shell $(SDL_CONFIG) --cflags) -DUSE_SDL_CONFIG
-SDL_LIBS := $(shell $(SDL_CONFIG) --libs)
+#SDL_CONFIG ?= $(EMSCRIPTEN_ROOT)/system/bin/sdl2-config
+SDL_CFLAGS := -s USE_SDL=2
+SDL_LIBS := -s USE_SDL=2
 
 TARGET_NAME := np2kai.bc
 
