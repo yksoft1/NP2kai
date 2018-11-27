@@ -18,9 +18,7 @@ extern "C" {
 # endif
 WINBASEAPI BOOL WINAPI SetFilePointerEx(HANDLE, LARGE_INTEGER, PLARGE_INTEGER, DWORD);
 # ifdef __cplusplus
-}
-# endif
-#endif
+
 #if !defined(__GNUC__) || defined(__MINGW32__)
 #include <tchar.h>
 #endif	// !defined(__GNUC__)
@@ -112,13 +110,6 @@ typedef	signed __int64		SINT64;
 #include "misc\tickcounter.h"
 #include "misc\trace.h"
 #include "misc\vc6macros.h"
-
-#ifndef	np2max
-#define	np2max(a,b)	(((a) > (b)) ? (a) : (b))
-#endif
-#ifndef	np2min
-#define	np2min(a,b)	(((a) < (b)) ? (a) : (b))
-#endif
 
 #define	GETTICK()			GetTickCounter()
 #if defined(TRACE)
@@ -240,6 +231,12 @@ typedef long	FILEPOS;
 typedef long	FILELEN;
 #define	NHD_MAXSIZE		2000
 #define	NHD_MAXSIZE2	2000
+#endif
+
+#if defined(SUPPORT_LARGE_MEMORY)
+#define	MEMORY_MAXSIZE		4000
+#else
+#define	MEMORY_MAXSIZE		230
 #endif
 
 

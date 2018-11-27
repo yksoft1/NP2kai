@@ -726,6 +726,16 @@ static void sys_cmd(MENUID id) {
 			update |= SYS_UPDATECFG;
 			break;
 
+#if defined(SUPPORT_FAST_MEMORYCHECK)
+		case MID_FASTMEMCHK:
+			if(np2cfg.memcheckspeed == 1)
+				np2cfg.memcheckspeed = 8;
+			else
+				np2cfg.memcheckspeed = 1;
+			update |= SYS_UPDATECFG;
+			break;
+#endif
+
 		case MID_ABOUT:
 			menudlg_create(DLGABOUT_WIDTH, DLGABOUT_HEIGHT,
 											(char *)mstr_about, dlgabout_cmd);
