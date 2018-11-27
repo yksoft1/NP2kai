@@ -18,7 +18,9 @@ extern "C" {
 # endif
 WINBASEAPI BOOL WINAPI SetFilePointerEx(HANDLE, LARGE_INTEGER, PLARGE_INTEGER, DWORD);
 # ifdef __cplusplus
-
+}
+# endif
+#endif
 #if !defined(__GNUC__) || defined(__MINGW32__)
 #include <tchar.h>
 #endif	// !defined(__GNUC__)
@@ -110,6 +112,13 @@ typedef	signed __int64		SINT64;
 #include "misc\tickcounter.h"
 #include "misc\trace.h"
 #include "misc\vc6macros.h"
+
+#ifndef	np2max
+#define	np2max(a,b)	(((a) > (b)) ? (a) : (b))
+#endif
+#ifndef	np2min
+#define	np2min(a,b)	(((a) < (b)) ? (a) : (b))
+#endif
 
 #define	GETTICK()			GetTickCounter()
 #if defined(TRACE)

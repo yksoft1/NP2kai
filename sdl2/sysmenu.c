@@ -872,6 +872,7 @@ BRESULT sysmenu_menuopen(UINT menutype, int x, int y) {
 #ifdef EMSCRIPTEN
 	menusys_setcheck(MID_CAPMOUSE, (ismouse_captured() != 0));
 #endif
+	menusys_setcheck(MID_FASTMEMCHK, (np2cfg.memcheckspeed > 1));
 	return(menusys_open(x, y));
 }
 
