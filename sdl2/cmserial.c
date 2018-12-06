@@ -23,7 +23,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined(__LIBRETRO__)
+#if !defined(__LIBRETRO__) && !defined(__MINGW32__) && !defined (EMSCRIPTEN)
 
 #include "compiler.h"
 

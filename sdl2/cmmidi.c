@@ -6,6 +6,7 @@
 #include "sound.h"
 #include "cpucore.h"
 #include "pccore.h"
+#include "keydisp.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -145,7 +146,7 @@ getmidiout(const char *midiout)
 {
 	int hmidiout = -1;
 
-#if !defined(__LIBRETRO__)
+#if !defined(__LIBRETRO__) && !defined (__MINGW32__) && !defined (EMSCRIPTEN)
 	if (midiout && midiout[0] != '\0') {
 		if ((!milstr_cmp(midiout, cmmidi_midiout_device))
 		 && (np2oscfg.MIDIDEV[0][0] != '\0')) {
@@ -168,7 +169,7 @@ getmidiin(const char *midiin)
 	int hmidiin = -1;
 
 	if (midiin && midiin[0] != '\0') {
-#if !defined(__LIBRETRO__)
+#if !defined(__LIBRETRO__) && !defined(__MINGW32__) && !defined (EMSCRIPTEN)
 		if ((!milstr_cmp(midiin, cmmidi_midiin_device))
 		 && (np2oscfg.MIDIDEV[1][0] != '\0')) {
 			hmidiin = open(np2oscfg.MIDIDEV[1], O_RDONLY | O_NONBLOCK);
