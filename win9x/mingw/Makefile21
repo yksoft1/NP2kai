@@ -12,7 +12,7 @@ NP2_PATH	= ../..
 CFLAGS	=	-O3 -fno-tree-vectorize -Wstrict-overflow=0 -Wstrict-aliasing=0 -Wno-narrowing -DNDEBUG \
 			-DSUPPORT_PC9821 -DUSE_FPU -DSUPPORT_FPU_DOSBOX -DSUPPORT_FPU_DOSBOX2 -DSUPPORT_FPU_SOFTFLOAT \
 			-DSUPPORT_GPIB -DUSE_MMX -DUSE_3DNOW -DUSE_SSE -DUSE_SSE2 -DUSE_SSE3 -DUSE_TSC \
-			-DSUPPORT_WAB -DSUPPORT_CL_GD5430 \
+			-DSUPPORT_PCI -DSUPPORT_WAB -DSUPPORT_CL_GD5430 -DSUPPORT_NET -DSUPPORT_LGY98 \
 			-DUSE_MAME -DSUPPORT_FMGEN -DSUPPORT_SOUND_SB16 \
 			-D_WINDOWS -DUSE_FASTPAGING -DUSE_VME -DBIOS_IO_EMULATION \
 			-DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES \
@@ -27,8 +27,10 @@ CFLAGS	=	-O3 -fno-tree-vectorize -Wstrict-overflow=0 -Wstrict-aliasing=0 -Wno-na
 			-I$(NP2_PATH)/i386c/ia32/instructions/fpu \
 			-I$(NP2_PATH)/mem \
 			-I$(NP2_PATH)/io \
+			-I$(NP2_PATH)/io/pci \
 			-I$(NP2_PATH)/fdd \
 			-I$(NP2_PATH)/cbus \
+			-I$(NP2_PATH)/network \
 			-I$(NP2_PATH)/sound \
 			-I$(NP2_PATH)/vram \
 			-I$(NP2_PATH)/wab \
@@ -68,8 +70,10 @@ CPPSRCS	=	$(NP2_PATH)/calendar.c \
 			$(wildcard $(NP2_PATH)/font/*.c) \
 			$(wildcard $(NP2_PATH)/generic/*.c) \
 			$(wildcard $(NP2_PATH)/io/*.c) \
+			$(wildcard $(NP2_PATH)/io/pci/*.c) \
 			$(wildcard $(NP2_PATH)/lio/*.c) \
 			$(wildcard $(NP2_PATH)/mem/*.c) \
+			$(wildcard $(NP2_PATH)/network/*.c) \
 			$(wildcard $(NP2_PATH)/sound/vermouth/*.c) \
 			$(wildcard $(NP2_PATH)/sound/getsnd/*.c) \
 			$(NP2_PATH)/sound/adpcmg.c \
