@@ -241,6 +241,7 @@ typedef SINT32	FILELEN;
 #define	FASTCALL
 #endif
 #define	CPUCALL
+#undef MEMCALL
 #define	MEMCALL
 #define	DMACCALL
 #define	IOOUTCALL
