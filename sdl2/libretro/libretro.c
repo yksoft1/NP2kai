@@ -833,9 +833,10 @@ void retro_set_environment(retro_environment_t cb)
       { "np2kai_skipline" , "Skipline Revisions; Full 255 lines|ON|OFF" },
       { "np2kai_realpal" , "Real Palettes; OFF|ON" },
       { "np2kai_lcd" , "LCD; OFF|ON" },
-      { "np2kai_SNDboard" , "Sound Board (Restart); PC9801-86|PC9801-26K + 86|PC9801-86 + Chibi-oto|PC9801-118|PC9801-86 + Mate-X PCM(B460)|Mate-X PCM(B460)|Chibi-oto|Speak Board|Spark Board|Sound Orchestra|Sound Orchestra-V|Sound Blaster 16|AMD-98|Otomi-chanx2|Otomi-chanx2 + 86|None|PC9801-14|PC9801-26K" },
+      { "np2kai_SNDboard" , "Sound Board (Restart); PC9801-86|PC9801-26K + 86|PC9801-86 + Chibi-oto|PC9801-118|PC9801-86 + Mate-X PCM(B460)|PC9801-86 + 118|Mate-X PCM(B460)|Chibi-oto|Speak Board|Spark Board|Sound Orchestra|Sound Orchestra-V|Sound Blaster 16|AMD-98|Otomi-chanx2|Otomi-chanx2 + 86|None|PC9801-14|PC9801-26K" },
       { "np2kai_jast_snd" , "JastSound; OFF|ON" },
       { "np2kai_usefmgen" , "Sound Generator; fmgen|Default" },
+      { "np2kai_volume_M" , "Volume Master; 100|0|5|10|15|20|25|30|35|40|45|50|55|60|65|70|75|80|85|90|95" },
       { "np2kai_volume_F" , "Volume FM; 64|68|72|76|80|84|88|92|96|100|104|108|112|116|120|124|128|0|4|8|12|16|20|24|28|32|36|40|44|48|52|56|60" },
       { "np2kai_volume_S" , "Volume SSG; 64|68|72|76|80|84|88|92|96|100|104|108|112|116|120|124|128|0|4|8|12|16|20|24|28|32|36|40|44|48|52|56|60" },
       { "np2kai_volume_A" , "Volume ADPCM; 64|68|72|76|80|84|88|92|96|100|104|108|112|116|120|124|128|0|4|8|12|16|20|24|28|32|36|40|44|48|52|56|60" },
@@ -847,7 +848,7 @@ void retro_set_environment(retro_environment_t cb)
       { "np2kai_BEEP_vol" , "Volume Beep; 3|0|1|2" },
 #if defined(SUPPORT_WAB)
       { "np2kai_CLGD_en" , "Enable WAB (Restart App); OFF|ON" },
-      { "np2kai_CLGD_type" , "WAB Type; PC-9821Xe10,Xa7e,Xb10 built-in|PC-9821Bp,Bs,Be,Bf built-in|PC-9821Xe built-in|PC-9821Cb built-in|PC-9821Cf built-in|PC-9821Cb2 built-in|PC-9821Cx2 built-in|PC-9821 PCI CL-GD5446 built-in|MELCO WAB-S|MELCO WSN-A2F|MELCO WSN-A4F|I-O DATA GA-98NBI/C|I-O DATA GA-98NBII|I-O DATA GA-98NBIV|PC-9801-96(PC-9801B3-E02)|Auto Select(Xe10, WAB-S), PCI|Auto Select(Xe10, WSN-A2F), PCI|Auto Select(Xe10, WSN-A4F), PCI|Auto Select(Xe10, WAB-S)|Auto Select(Xe10, WSN-A2F)|Auto Select(Xe10, WSN-A4F)" },
+      { "np2kai_CLGD_type" , "WAB Type; PC-9821Xe10,Xa7e,Xb10 built-in|PC-9821Bp,Bs,Be,Bf built-in|PC-9821Xe built-in|PC-9821Cb built-in|PC-9821Cf built-in|PC-9821Cb2 built-in|PC-9821Cx2 built-in|PC-9821 PCI CL-GD5446 built-in|MELCO WAB-S|MELCO WSN-A2F|MELCO WSN-A4F|I-O DATA GA-98NBI/C|I-O DATA GA-98NBII|I-O DATA GA-98NBIV|PC-9801-96(PC-9801B3-E02)|Auto Select(Xe10, GA-98NBI/C), PCI|Auto Select(Xe10, GA-98NBII), PCI|Auto Select(Xe10, GA-98NBIV), PCI|Auto Select(Xe10, WAB-S), PCI|Auto Select(Xe10, WSN-A2F), PCI|Auto Select(Xe10, WSN-A4F), PCI|Auto Select(Xe10, WAB-S)|Auto Select(Xe10, WSN-A2F)|Auto Select(Xe10, WSN-A4F)" },
       { "np2kai_CLGD_fc" , "Use Fake Hardware Cursor; OFF|ON" },
 #endif	/* defined(SUPPORT_WAB) */
 #if defined(SUPPORT_PCI)
@@ -1001,6 +1002,8 @@ static void update_variables(void)
          np2cfg.SOUND_SW = 0x08;
       else if (strcmp(var.value, "PC9801-86 + Mate-X PCM(B460)") == 0)
          np2cfg.SOUND_SW = 0x64;
+      else if (strcmp(var.value, "PC9801-86 + 118") == 0)
+         np2cfg.SOUND_SW = 0x68;
       else if (strcmp(var.value, "Mate-X PCM(B460)") == 0)
          np2cfg.SOUND_SW = 0x60;
       else if (strcmp(var.value, "Speak Board") == 0)
@@ -1047,6 +1050,14 @@ static void update_variables(void)
          np2cfg.usefmgen = 0x00;
       else if (strcmp(var.value, "fmgen") == 0)
          np2cfg.usefmgen = 0x01;
+   }
+
+   var.key = "np2kai_volume_M";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      np2cfg.vol_master = atoi(var.value);
    }
 
    var.key = "np2kai_volume_F";
@@ -1195,6 +1206,12 @@ static void update_variables(void)
          np2cfg.gd5430type = CIRRUS_98ID_GA98NBIV;
       else if (strcmp(var.value, "PC-9801-96(PC-9801B3-E02)") == 0)
          np2cfg.gd5430type = CIRRUS_98ID_96;
+      else if (strcmp(var.value, "Auto Select(Xe10, GA-98NBI/C), PCI") == 0)
+         np2cfg.gd5430type = CIRRUS_98ID_AUTO_XE_G1_PCI;
+      else if (strcmp(var.value, "Auto Select(Xe10, GA-98NBII), PCI") == 0)
+         np2cfg.gd5430type = CIRRUS_98ID_AUTO_XE_G2_PCI;
+      else if (strcmp(var.value, "Auto Select(Xe10, GA-98NBIV), PCI") == 0)
+         np2cfg.gd5430type = CIRRUS_98ID_AUTO_XE_G4_PCI;
       else if (strcmp(var.value, "Auto Select(Xe10, WAB-S), PCI") == 0)
          np2cfg.gd5430type = CIRRUS_98ID_AUTO_XE_WA_PCI;
       else if (strcmp(var.value, "Auto Select(Xe10, WSN-A2F), PCI") == 0)

@@ -93,12 +93,12 @@ const OEMCHAR np2version[] = OEMTEXT(NP2VER_CORE);
 	NP2CFG	np2cfg = {
 				0, 1, 0, 32, 0, 0, 0x40,
 				0, 0, 0, 0,
-				{0x3e, 0xf3, 0x7b}, 0,
+				{0x3e, 0xe3, 0x7b}, 0,
 				0, 0, {1, 1, 6, 1, 8, 1},
 				128, 0x00, 1, 
 
 				OEMTEXT("VX"), PCBASECLOCK25, PCBASEMULTIPLE, 1,
-				{0x48, 0x05, 0x04, 0x00, 0x01, 0x00, 0x00, 0x6e},
+				{0x48, 0x05, 0x04, 0x08, 0x01, 0x00, 0x00, 0x6e},
 				1, 13, 2, 1, 0x000000, 0xffffff,
 				44100, 150, 4, 0,
 				{0, 0, 0}, 0xd1, 0x7f, 0xd1, 0, 0, 1, 
@@ -146,7 +146,7 @@ const OEMCHAR np2version[] = OEMTEXT(NP2VER_CORE);
 #endif
 #endif
 #if defined(SUPPORT_CL_GD5430)
-				0, 0x5B, 0, CIRRUS_MELCOWAB_OFS_DEFAULT,
+				0, 0x5B, 0, CIRRUS_MELCOWAB_OFS_DEFAULT, 0,
 #endif
 #if defined(SUPPORT_GPIB)
 				0, 12, 1, 0, 0, 
@@ -166,6 +166,7 @@ const OEMCHAR np2version[] = OEMTEXT(NP2VER_CORE);
 #if defined(SUPPORT_FAST_MEMORYCHECK)
 				1,
 #endif
+				0,
 	};
 
 	PCCORE	pccore = {	PCBASECLOCK25, PCBASEMULTIPLE,
@@ -637,7 +638,7 @@ void pccore_reset(void) {
 #endif
 
 	epson = (pccore.model & PCMODEL_EPSON) ? TRUE : FALSE;
-	if (epson) {
+	if (epson || np2cfg.useram_d) {
 		/* enable RAM (D0000-DFFFF) */
 		CPU_RAM_D000 = 0xffff;
 	}

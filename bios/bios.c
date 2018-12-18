@@ -191,16 +191,17 @@ static void bios_reinitbyswitch(void) {
 					  (sxsi_getdevtype(1)==SXSIDEV_HDD ? 0x2 : 0x0)|(sxsi_getdevtype(0)==SXSIDEV_HDD ? 0x1 : 0x0);
 	}
 	
-	mem[0x5B8] = 0x00; // No C-Bus PnP boards
-
 	mem[0x45B] |= 0x80; // XXX: TEST OUT 5Fh,AL wait
 #endif
 	mem[0xF8E80+0x0011] = mem[0xF8E80+0x0011] & ~0x20; // 0x20のビットがONだとWin2000でマウスがカクカクする？
 	if(np2cfg.modelnum) mem[0xF8E80+0x003F] = np2cfg.modelnum; // PC-9821 Model Number
+	
 #endif
 	
 #if defined(SUPPORT_PCI)
 	mem[0xF8E80+0x0004] |= 0x2c;
+	//mem[0x5B7] = (0x277 >> 2); // READ_DATA port address
+	mem[0x5B8] = 0x00; // No C-Bus PnP boards
 #endif
 	
 #if defined(SUPPORT_HRTIMER)
@@ -379,6 +380,7 @@ void bios_initialize(void) {
 		mem[ITF_ADRS + 5924] = 0x90;
 	}
 #endif
+	np2cfg.memchkmx = 0; // 無効化 (obsolete)
 	if(np2cfg.memchkmx){ // メモリカウント最大値変更
 		mem[ITF_ADRS + 6057] = mem[ITF_ADRS + 6061] = (UINT8)np2max((int)np2cfg.memchkmx-14, 1); // XXX: 場所決め打ち
 	}else{
@@ -603,7 +605,7 @@ UINT MEMCALL biosfunc(UINT32 adrs) {
 	// 高速メモリチェック
 	if (CPU_ITFBANK && adrs == 0xf9724) {
 		UINT16 subvalue = LOADINTELWORD((mem + ITF_ADRS + 5886)) / 128;
-		UINT16 memaddr = cpu_codefetch_w(CPU_EIP);
+		UINT16 memaddr = MEMP_READ16(CPU_EIP);
 		UINT16 counter = MEMR_READ16(CPU_SS, CPU_EBP + 6);
 		if(subvalue == 0) subvalue = 1;
 		if(counter >= subvalue){
