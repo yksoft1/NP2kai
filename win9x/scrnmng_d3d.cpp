@@ -943,8 +943,6 @@ BRESULT scrnmngD3D_create(UINT8 scrnmode) {
 
 	d3d.d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &d3d.d3dbacksurf);
 	
-	d3d_leave_criticalsection();
-	
 	scrnmng.bpp = (UINT8)bitcolor;
 	scrnsurf.bpp = bitcolor;
 	d3d.scrnmode = scrnmode;
@@ -960,6 +958,8 @@ BRESULT scrnmngD3D_create(UINT8 scrnmode) {
 	mt_wabpausedrawing = 0; // MultiThread‘Îô
 #endif
 
+	d3d_leave_criticalsection();
+	
 	return(SUCCESS);
 
 scre_err:
@@ -1036,7 +1036,8 @@ RGB16 scrnmngD3D_makepal16(RGB32 pal32) {
 void scrnmngD3D_fullscrnmenu(int y) {
 
 	UINT8	menudisp;
-
+	
+	if(d3d.d3ddev == NULL) return;
 	if(devicelostflag) return;
 	
 	d3d_enter_criticalsection();
@@ -1062,7 +1063,8 @@ void scrnmngD3D_fullscrnmenu(int y) {
 }
 
 void scrnmngD3D_topwinui(void) {
-
+	
+	if(d3d.d3ddev == NULL) return;
 	if(devicelostflag) return;
 
 	mousemng_disable(MOUSEPROC_WINUI);
@@ -1077,7 +1079,8 @@ void scrnmngD3D_topwinui(void) {
 }
 
 void scrnmngD3D_clearwinui(void) {
-
+	
+	if(d3d.d3ddev == NULL) return;
 	if(devicelostflag) return;
 	
 	d3d_enter_criticalsection();
@@ -1117,7 +1120,12 @@ void scrnmngD3D_clearwinui(void) {
 }
 
 void scrnmngD3D_setwidth(int posx, int width) {
-
+	
+#if defined(SUPPORT_WAB)
+	if(width > WAB_MAX_WIDTH) width = WAB_MAX_WIDTH;
+#else
+	if(width > 640) width = 640;
+#endif
 	if(scrnstat.width != width){
 		scrnstat.width = width;
 		if(d3d.d3dbacksurf){
@@ -1164,6 +1172,11 @@ void scrnmngD3D_setextend(int extend) {
 
 void scrnmngD3D_setheight(int posy, int height) {
 	
+#if defined(SUPPORT_WAB)
+	if(height > WAB_MAX_HEIGHT) height = WAB_MAX_HEIGHT;
+#else
+	if(height > 1024) height = 1024;
+#endif
 	if(scrnstat.height != height){
 		scrnstat.height = height;
 		if(d3d.d3dbacksurf){
@@ -1190,6 +1203,13 @@ void scrnmngD3D_setheight(int posy, int height) {
 
 void scrnmngD3D_setsize(int posx, int posy, int width, int height) {
 	
+#if defined(SUPPORT_WAB)
+	if(width > WAB_MAX_WIDTH) width = WAB_MAX_WIDTH;
+	if(height > WAB_MAX_HEIGHT) height = WAB_MAX_HEIGHT;
+#else
+	if(width > 640) width = 640;
+	if(height > 1024) height = 1024;
+#endif
 	if(scrnstat.width != width || scrnstat.height != height){
 		scrnstat.width = width;
 		scrnstat.height = height;
@@ -1253,6 +1273,7 @@ const SCRNSURF *scrnmngD3D_surflock(void) {
 
 void scrnmngD3D_surfunlock(const SCRNSURF *surf) {
 	
+	if(d3d.backsurf == NULL) return;
 	d3d.backsurf->UnlockRect();
 	scrnmngD3D_update();
 	recvideo_update();
@@ -1261,6 +1282,7 @@ void scrnmngD3D_surfunlock(const SCRNSURF *surf) {
 
 void scrnmngD3D_update(void) {
 	
+	if(d3d.d3ddev == NULL) return;
 	if(devicelostflag){
 		restoresurfaces();
 		return;
@@ -1507,6 +1529,8 @@ void scrnmngD3D_dispclock(void)
 		return;
 	}
 	DispClock::GetInstance()->Make();
+	
+	if(d3d.clocksurf == NULL) return;
 
 	D3DLOCKED_RECT dest;
 	ZeroMemory(&dest, sizeof(dest));
@@ -1654,7 +1678,8 @@ void scrnmngD3D_updatefsres(void) {
 	RECT rect;
 	int width = scrnstat.width;
 	int height = scrnstat.height;
-
+	
+	if(d3d.d3ddev == NULL) return;
 	if(devicelostflag) return;
 	
 	rect.left = rect.top = 0;
@@ -1724,6 +1749,7 @@ void scrnmngD3D_blthdc(HDC hdc) {
 	HRESULT	r;
 	HDC hDCDD;
 	mt_wabdrawing = 0;
+	if(d3d.d3ddev == NULL) return;
 	if(devicelostflag) return;
 	if (np2wabwnd.multiwindow) return;
 	if (mt_wabpausedrawing) return;
@@ -1752,6 +1778,7 @@ void scrnmngD3D_bltwab() {
 	RECT	dstmp;
 	//DDBLTFX ddfx;
 	int exmgn = 0;
+	if(d3d.d3ddev == NULL) return;
 	if(devicelostflag) return;
 	if (np2wabwnd.multiwindow) return;
 	if (d3d.backsurf != NULL) {
@@ -1806,6 +1833,8 @@ void scrnmngD3D_bltwab() {
 #endif
 
 static	SCRNSURF	scrnsurf;
+
+BRESULT scrnmngD3D_check() {return(FAILURE);}
 
 void scrnmngD3D_initialize(void){}
 BRESULT scrnmngD3D_create(UINT8 scrnmode){return 0;}
