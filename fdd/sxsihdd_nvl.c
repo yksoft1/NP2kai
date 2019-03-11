@@ -2,7 +2,7 @@
 
 #ifdef SUPPORT_NVL_IMAGES
 
-#if !defined(_WIN32)
+#if !defined(_WIN32) && !defined(GEKKO) && !defined(HAVE_LIBNX) && !defined(__CELLOS_LV2__) && !defined(PSP) && !defined(VITA) && !defined(_3DS)
 #include	<dlfcn.h>
 #endif
 #include	"strres.h"
@@ -26,6 +26,11 @@ typedef BOOL sxsihdd_nvl_5(void *pv, INT64 p, UINT32 s, const void *b);
 #else
 typedef SINT32 sxsihdd_nvl_4(void *pv, SINT64 p, UINT32 s, void *b);
 typedef SINT32 sxsihdd_nvl_5(void *pv, SINT64 p, UINT32 s, const void *b);
+#endif
+#if defined(_WIN32)
+typedef BOOL sxsihdd_nvl_7(LPCTSTR spath, LPCTSTR path);
+#else
+typedef BOOL sxsihdd_nvl_7(const char *spath, const char *path);
 #endif
 
 
@@ -53,7 +58,9 @@ BOOL nvl_check()
 #else
 	void *hModule = NULL;
 
+#if !defined(GEKKO) && !defined(HAVE_LIBNX) && !defined(__CELLOS_LV2__) && !defined(PSP) && !defined(VITA) && !defined(_3DS)
 	hModule = dlopen("libnvl.so", RTLD_LAZY);
+#endif
 #endif
 	if(!hModule) return FALSE;
 
@@ -63,16 +70,20 @@ BOOL nvl_check()
 	if(!GetProcAddress(hModule, MAKEINTRESOURCEA(3))) goto check_err;
 	if(!GetProcAddress(hModule, MAKEINTRESOURCEA(4))) goto check_err;
 	if(!GetProcAddress(hModule, MAKEINTRESOURCEA(5))) goto check_err;
+	if(!GetProcAddress(hModule, MAKEINTRESOURCEA(7))) goto check_err;
 
 	FreeLibrary(hModule);
 #else
+#if !defined(GEKKO) && !defined(HAVE_LIBNX) && !defined(__CELLOS_LV2__) && !defined(PSP) && !defined(VITA) && !defined(_3DS)
 	if(!dlsym(hModule, "_1")) goto check_err;
 	if(!dlsym(hModule, "_2")) goto check_err;
 	if(!dlsym(hModule, "_3")) goto check_err;
 	if(!dlsym(hModule, "_4")) goto check_err;
 	if(!dlsym(hModule, "_5")) goto check_err;
+	if(!dlsym(hModule, "_7")) goto check_err;
 
 	dlclose(hModule);
+#endif
 #endif
 
 	return TRUE;
@@ -98,7 +109,9 @@ static void nvl_close(sxsihdd_nvl *p)
 #if defined(_WIN32)
 		FreeLibrary(p->hModule);
 #else
+#if !defined(GEKKO) && !defined(HAVE_LIBNX) && !defined(__CELLOS_LV2__) && !defined(PSP) && !defined(VITA) && !defined(_3DS)
 		dlclose(p->hModule);
+#endif
 #endif
 	}
 
@@ -127,7 +140,9 @@ static sxsihdd_nvl *nvl_open(const OEMCHAR *fname)
 #if defined(_WIN32)
 	p->hModule = LoadLibrary(_T("NVL.DLL"));
 #else
+#if !defined(GEKKO) && !defined(HAVE_LIBNX) && !defined(__CELLOS_LV2__) && !defined(PSP) && !defined(VITA) && !defined(_3DS)
 	p->hModule = dlopen("libnvl.so", RTLD_LAZY);
+#endif
 #endif
 	if (p->hModule == NULL)
 	{
@@ -185,7 +200,7 @@ static BRESULT hdd_reopen(SXSIDEV sxsi)
 
 static REG8 hdd_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size)
 {
-	sxsihdd_nvl *p = (sxsihdd_nvl *)sxsi->hdl;
+	sxsihdd_nvl *p;
 
 	if (sxsi_prepare(sxsi) != SUCCESS)
 	{
@@ -195,6 +210,8 @@ static REG8 hdd_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size)
 	{
 		return (0x40);
 	}
+
+	p = (sxsihdd_nvl *)sxsi->hdl;
 
 	pos = pos * sxsi->size;
 
@@ -221,7 +238,7 @@ static REG8 hdd_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size)
 
 static REG8 hdd_write(SXSIDEV sxsi, FILEPOS pos, const UINT8 *buf, UINT size)
 {
-	sxsihdd_nvl *p = (sxsihdd_nvl *)sxsi->hdl;
+	sxsihdd_nvl *p;
 
 	if (sxsi_prepare(sxsi) != SUCCESS)
 	{
@@ -231,6 +248,8 @@ static REG8 hdd_write(SXSIDEV sxsi, FILEPOS pos, const UINT8 *buf, UINT size)
 	{
 		return (0x40);
 	}
+
+	p = (sxsihdd_nvl *)sxsi->hdl;
 
 	pos = pos * sxsi->size;
 
@@ -257,7 +276,7 @@ static REG8 hdd_write(SXSIDEV sxsi, FILEPOS pos, const UINT8 *buf, UINT size)
 
 static REG8 hdd_format(SXSIDEV sxsi, FILEPOS pos)
 {
-	sxsihdd_nvl *p = (sxsihdd_nvl *)sxsi->hdl;
+	sxsihdd_nvl *p;
 	UINT16 i;
 	UINT8 work[256];
 
@@ -269,6 +288,8 @@ static REG8 hdd_format(SXSIDEV sxsi, FILEPOS pos)
 	{
 		return (0x40);
 	}
+
+	p = (sxsihdd_nvl *)sxsi->hdl;
 
 	pos = pos * sxsi->size;
 
@@ -329,6 +350,128 @@ static UINT8 gethddtype(SXSIDEV sxsi)
 }
 
 
+static BRESULT hdd_state_save(SXSIDEV sxsi, const OEMCHAR *sfname)
+{
+	BRESULT r;
+#if defined(_WIN32)
+	HMODULE hModule = NULL;
+#else
+	void *hModule = NULL;
+#endif
+	sxsihdd_nvl_7 *f7;
+
+#if defined(_WIN32)
+	hModule = LoadLibrary(_T("NVL.DLL"));
+#else
+#if !defined(GEKKO) && !defined(HAVE_LIBNX) && !defined(__CELLOS_LV2__) && !defined(PSP) && !defined(VITA) && !defined(_3DS)
+	hModule = dlopen("libnvl.so", RTLD_LAZY);
+#endif
+#endif
+	if (!hModule)
+	{
+		r = FAILURE;
+		goto sxsiope_err;
+	}
+
+#if defined(_WIN32)
+	f7 = (sxsihdd_nvl_7 *)GetProcAddress(hModule, MAKEINTRESOURCEA(7));
+#else
+#if !defined(GEKKO) && !defined(HAVE_LIBNX) && !defined(__CELLOS_LV2__) && !defined(PSP) && !defined(VITA) && !defined(_3DS)
+	f7 = (sxsihdd_nvl_7 *)dlsym(hModule, "_7");
+#endif
+#endif
+
+	if (file_rename(sxsi->fname, sfname) != 0)
+	{
+		r = FAILURE;
+		goto sxsiope_err;
+	}
+
+	if (!f7(sfname, sxsi->fname))
+	{
+		r = FAILURE;
+		goto sxsiope_err;
+	}
+
+	r = SUCCESS;
+
+sxsiope_err:
+	if (hModule != NULL)
+	{
+#if defined(_WIN32)
+		FreeLibrary(hModule);
+#else
+#if !defined(GEKKO) && !defined(HAVE_LIBNX) && !defined(__CELLOS_LV2__) && !defined(PSP) && !defined(VITA) && !defined(_3DS)
+		dlclose(hModule);
+#endif
+#endif
+	}
+
+	return (r);
+}
+
+
+static BRESULT hdd_state_load(SXSIDEV sxsi, const OEMCHAR *sfname)
+{
+	BRESULT r;
+#if defined(_WIN32)
+	HMODULE hModule = NULL;
+#else
+	void *hModule = NULL;
+#endif
+	sxsihdd_nvl_7 *f7;
+
+#if defined(_WIN32)
+	hModule = LoadLibrary(_T("NVL.DLL"));
+#else
+#if !defined(GEKKO) && !defined(HAVE_LIBNX) && !defined(__CELLOS_LV2__) && !defined(PSP) && !defined(VITA) && !defined(_3DS)
+	hModule = dlopen("libnvl.so", RTLD_LAZY);
+#endif
+#endif
+	if (!hModule)
+	{
+		r = FAILURE;
+		goto sxsiope_err;
+	}
+
+#if defined(_WIN32)
+	f7 = (sxsihdd_nvl_7 *)GetProcAddress(hModule, MAKEINTRESOURCEA(7));
+#else
+#if !defined(GEKKO) && !defined(HAVE_LIBNX) && !defined(__CELLOS_LV2__) && !defined(PSP) && !defined(VITA) && !defined(_3DS)
+	f7 = (sxsihdd_nvl_7 *)dlsym(hModule, "_7");
+#endif
+#endif
+
+	if (file_delete(sxsi->fname) != 0)
+	{
+		r = FAILURE;
+		goto sxsiope_err;
+	}
+
+	if (!f7(sfname, sxsi->fname))
+	{
+		r = FAILURE;
+		goto sxsiope_err;
+	}
+
+	r = SUCCESS;
+
+sxsiope_err:
+	if (hModule != NULL)
+	{
+#if defined(_WIN32)
+		FreeLibrary(hModule);
+#else
+#if !defined(GEKKO) && !defined(HAVE_LIBNX) && !defined(__CELLOS_LV2__) && !defined(PSP) && !defined(VITA) && !defined(_3DS)
+		dlclose(hModule);
+#endif
+#endif
+	}
+
+	return (r);
+}
+
+
 BRESULT sxsihdd_nvl_open(SXSIDEV sxsi, const OEMCHAR *fname)
 {
 	sxsihdd_nvl *p = NULL;
@@ -347,6 +490,8 @@ BRESULT sxsihdd_nvl_open(SXSIDEV sxsi, const OEMCHAR *fname)
 	sxsi->write = hdd_write;
 	sxsi->format = hdd_format;
 	sxsi->close = hdd_close;
+	sxsi->state_save = hdd_state_save;
+	sxsi->state_load = hdd_state_load;
 
 	sxsi->hdl = (INTPTR)p;
 	sxsi->totals = a[0];
