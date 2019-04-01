@@ -1,6 +1,6 @@
 /*!
  * @file	revcideo.cpp
- * @brief	˜^‰æƒNƒ‰ƒX‚ÌéŒ¾‚¨‚æ‚ÑƒCƒ“ƒ^[ƒtƒFƒCƒX‚Ì’è‹`‚ğ‚µ‚Ü‚·
+ * @brief	éŒ²ç”»ã‚¯ãƒ©ã‚¹ã®å®£è¨€ãŠã‚ˆã³ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã®å®šç¾©ã‚’ã—ã¾ã™
  */
 
 #include "compiler.h"
@@ -28,7 +28,7 @@
 RecodeVideo RecodeVideo::sm_instance;
 
 /**
- * ƒwƒbƒ_[’è‹`
+ * ãƒ˜ãƒƒãƒ€ãƒ¼å®šç¾©
  */
 static const BITMAPINFOHEADER s_bmih =
 {
@@ -40,7 +40,7 @@ static const BITMAPINFOHEADER s_bmih =
 // ----
 
 /**
- * ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+ * ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
  */
 RecodeVideo::RecodeVideo()
 	: m_bEnabled(false)
@@ -68,7 +68,7 @@ RecodeVideo::RecodeVideo()
 }
 
 /**
- * ƒfƒXƒgƒ‰ƒNƒ^
+ * ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
  */
 RecodeVideo::~RecodeVideo()
 {
@@ -77,10 +77,10 @@ RecodeVideo::~RecodeVideo()
 }
 
 /**
- * ƒtƒ@ƒCƒ‹ ƒI[ƒvƒ“
- * @param[in] lpFilename ƒtƒ@ƒCƒ‹–¼
- * @retval true ¬Œ÷
- * @retval false ¸”s
+ * ãƒ•ã‚¡ã‚¤ãƒ« ã‚ªãƒ¼ãƒ—ãƒ³
+ * @param[in] lpFilename ãƒ•ã‚¡ã‚¤ãƒ«å
+ * @retval true æˆåŠŸ
+ * @retval false å¤±æ•—
  */
 bool RecodeVideo::OpenFile(LPCTSTR lpFilename)
 {
@@ -160,7 +160,7 @@ bool RecodeVideo::OpenFile(LPCTSTR lpFilename)
 }
 
 /**
- * ƒtƒ@ƒCƒ‹ ƒNƒ[ƒY
+ * ãƒ•ã‚¡ã‚¤ãƒ« ã‚¯ãƒ­ãƒ¼ã‚º
  */
 void RecodeVideo::CloseFile()
 {
@@ -184,11 +184,11 @@ void RecodeVideo::CloseFile()
 }
 
 /**
- * ŠJ‚­
- * @param[in] hWnd ƒEƒBƒ“ƒhƒE ƒnƒ“ƒhƒ‹
- * @param[in] lpFilename ƒtƒ@ƒCƒ‹–¼
- * @retval true ¬Œ÷
- * @retval false ¸”s
+ * é–‹ã
+ * @param[in] hWnd ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ ãƒãƒ³ãƒ‰ãƒ«
+ * @param[in] lpFilename ãƒ•ã‚¡ã‚¤ãƒ«å
+ * @retval true æˆåŠŸ
+ * @retval false å¤±æ•—
  */
 bool RecodeVideo::Open(HWND hWnd, LPCTSTR lpFilename)
 {
@@ -216,7 +216,7 @@ bool RecodeVideo::Open(HWND hWnd, LPCTSTR lpFilename)
 }
 
 /**
- * •Â‚¶‚é
+ * é–‰ã˜ã‚‹
  */
 void RecodeVideo::Close()
 {
@@ -238,7 +238,7 @@ void RecodeVideo::Close()
 }
 
 /**
- * ƒtƒŒ[ƒ€‚ğ‘‚«‚Ş
+ * ãƒ•ãƒ¬ãƒ¼ãƒ ã‚’æ›¸ãè¾¼ã‚€
  */
 void RecodeVideo::Write()
 {
@@ -313,7 +313,7 @@ static void screenmix3(UINT8* dest, const UINT8* src1, const UINT8* src2)
 {
 	for (int y = 0; y < (SURFACE_HEIGHT / 2); y++)
 	{
-		// dest == src1, dest == src2 ‚Ì‚ª‚ ‚é‚Ì‚Åc
+		// dest == src1, dest == src2 ã®æ™‚ãŒã‚ã‚‹ã®ã§â€¦
 		for (int x = 0; x < SURFACE_WIDTH; x++)
 		{
 			UINT8 c = (src1[x + SURFACE_WIDTH]) >> 4;
@@ -331,7 +331,7 @@ static void screenmix3(UINT8* dest, const UINT8* src1, const UINT8* src2)
 }
 
 /**
- * ƒtƒŒ[ƒ€‚ğXV
+ * ãƒ•ãƒ¬ãƒ¼ãƒ ã‚’æ›´æ–°
  */
 void RecodeVideo::Update()
 {

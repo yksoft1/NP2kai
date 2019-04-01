@@ -78,7 +78,7 @@ typedef struct {
 extern "C" {
 #endif
 
-extern	SCRNMNG		scrnmng;			// É}ÉNÉçóp
+extern	SCRNMNG		scrnmng;			// „Éû„ÇØ„É≠Áî®
 extern	SCRNSTAT	scrnstat;
 
 extern UINT8 scrnmng_current_drawtype;
@@ -88,6 +88,7 @@ void scrnmng_setwindowsize(HWND hWnd, int width, int height);
 void scrnmng_initialize(void);
 BRESULT scrnmng_create(UINT8 scrnmode);
 void scrnmng_destroy(void);
+void scrnmng_shutdown(void);
 
 void scrnmng_setwidth(int posx, int width);
 void scrnmng_setextend(int extend);

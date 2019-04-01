@@ -46,15 +46,13 @@
 #include <windows.h>
 #include <mmsystem.h>
 #endif
-#elif defined(GEKKO)
-#include "gx_pthread.h"
-//#elif defined(HAVE_LIBNX)
-//#include "switch_pthread.h"
-#elif defined(_3DS)
-#include "ctr_pthread.h"
 #elif defined(__CELLOS_LV2__)
 #include <pthread.h>
+#if defined(__PSL1GHT__)
+#include <sys/systime.h>
+#else
 #include <sys/sys_time.h>
+#endif
 #else
 #include <pthread.h>
 #include <time.h>

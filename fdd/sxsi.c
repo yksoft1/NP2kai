@@ -15,6 +15,11 @@
 #include <sys/time.h>
 #endif
 
+#if defined(_MSC_VER)
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#endif
+
 	_SXSIDEV	sxsi_dev[SASIHDD_MAX + SCSIHDD_MAX];
 
 #if !defined(_WIN32)
@@ -242,7 +247,7 @@ UINT8 sxsi_getdevtype(REG8 drv) {
 	}
 }
 
-// CD“ü‚ê‘Ö‚¦‚Ìƒ^ƒCƒ€ƒAƒEƒgi“Š‚°‚â‚èj
+// CDå…¥ã‚Œæ›¿ãˆã®ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆï¼ˆæŠ•ã’ã‚„ã‚Šï¼‰
 char cdchange_flag = 0;
 DWORD cdchange_reqtime = 0;
 REG8 cdchange_drv;
@@ -292,15 +297,16 @@ BRESULT sxsi_devopen(REG8 drv, const OEMCHAR *fname) {
 		case SXSIDEV_CDROM:
 #if defined(SUPPORT_IDEIO)
 			if (cdchange_flag) {
-				// CDŒğŠ·’†
+				// CDäº¤æ›ä¸­
 				if(GetTickCount()-cdchange_reqtime>5000){
-					// ‹­§ŒğŠ·
+					// å¼·åˆ¶äº¤æ›
 					cdchange_timeoutproc(NULL);
 				}
 				return(FAILURE);
 			}
 			if ((fname == NULL) || (fname[0] == '\0')) {
 				int num = drv & 0x0f;
+				sxsi->close(sxsi);
 				ideio_notify(sxsi->drv, 0);
 				file_cpyname(sxsi->fname, _T("\0\0\0\0"), 1);
 				sxsi->flag = 0;
@@ -310,7 +316,8 @@ BRESULT sxsi_devopen(REG8 drv, const OEMCHAR *fname) {
 			}
 			else {
 				if((sxsi->flag & SXSIFLAG_READY) && (_tcsnicmp(sxsi->fname, OEMTEXT("\\\\.\\"), 4)!=0 || _tcsicmp(sxsi->fname, np2cfg.idecd[drv & 0x0f])==0) ){
-					// ‚¢‚Á‚½‚ñæ‚èo‚·
+					// ã„ã£ãŸã‚“å–ã‚Šå‡ºã™
+					sxsi->close(sxsi);
 					ideio_notify(sxsi->drv, 0);
 					sxsi->flag = 0;
 					cdchange_drv = drv;
@@ -320,7 +327,7 @@ BRESULT sxsi_devopen(REG8 drv, const OEMCHAR *fname) {
 					cdchange_flag = 1;
 					cdchange_timeoutset();
 					cdchange_reqtime = GetTickCount();
-					return(FAILURE); // XXX: ‚±‚±‚Å¸”s•Ô‚µ‚Ä‚¦‚¦‚ÌH
+					return(FAILURE); // XXX: ã“ã“ã§å¤±æ•—è¿”ã—ã¦ãˆãˆã®ï¼Ÿ
 				}
 				r = sxsicd_open(sxsi, fname);
 				if (r == SUCCESS || _tcsnicmp(fname, OEMTEXT("\\\\.\\"), 4)==0) {

@@ -3,6 +3,13 @@ SUPPORT_NET?=1
 GIT_VERSION := " $(shell git rev-parse --short HEAD)"
 HAS_GCC = 1
 
+SPACE :=
+SPACE := $(SPACE) $(SPACE)
+BACKSLASH :=
+BACKSLASH := \$(BACKSLASH)
+filter_out1 = $(filter-out $(firstword $1),$1)
+filter_out2 = $(call filter_out1,$(call filter_out1,$1))
+
 ifeq ($(platform),)
 platform = unix
 ifeq ($(shell uname -a),)
@@ -47,9 +54,9 @@ else ifeq ($(platform), osx)
 	SHARED := -dynamiclib
 	OSXVER = `sw_vers -productVersion | cut -d. -f 2`
 	OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
-	LDFLAGS += -mmacosx-version-min=10.7
+	LDFLAGS += -mmacosx-version-min=10.7 -stdlib=libc++
 	CFLAGS += -mmacosx-version-min=10.7
-	CXXFLAGS += -mmacosx-version-min=10.7
+	CXXFLAGS += -mmacosx-version-min=10.7 -std=libc++
 	ifndef ($(NOUNIVERSAL))
 		CFLAGS  += $(ARCHFLAGS)
 		CXXFLAGS  += $(ARCHFLAGS)
@@ -66,31 +73,34 @@ else ifneq (,$(findstring ios,$(platform)))
 	endif
 	ifeq ($(platform),"ios-arm64")
 	  CC = cc -arch arm64 -isysroot $(IOSSDK)
-	  CCX = c++ -arch arm64 -isysroot $(IOSSDK)
+	  CCX = c++ -arch arm64 -isysroot $(IOSSDK) -stdlib=libc++
+	  LDFLAGS = -stdlib=libc++
 	else
 	  CC = cc -arch armv7 -isysroot $(IOSSDK)
-	  CXX = c++ -arch armv7 -isysroot $(IOSSDK)
+	  CXX = c++ -arch armv7 -isysroot $(IOSSDK) -stdlib=libc++
+	  LDFLAGS = -stdlib=libc++
 	endif
 ifeq ($(platform),$(filter $(platform),ios9 ios-arm64))
 	CC               += -miphoneos-version-min=8.0
-	CXX              += -miphoneos-version-min=8.0
-	PLATFORM_DEFINES += -miphoneos-version-min=8.0
+	CXX              += -miphoneos-version-min=8.0 -std=libc++
+	PLATFORM_DEFINES += -miphoneos-version-min=8.0 -stdlib=libc++
 else
 	CC               += -miphoneos-version-min=5.0
-	CXX              += -miphoneos-version-min=5.0
-	PLATFORM_DEFINES += -miphoneos-version-min=5.0
+	CXX              += -miphoneos-version-min=5.0 -std=libc++
+	PLATFORM_DEFINES += -miphoneos-version-min=5.0 -stdlib=libc++
 endif
 
-# Theos
-else ifeq ($(platform), theos_ios)
+# Theos iOS
+ifeq ($(platform), theos_ios)
 	HAS_GCC := 0
 	DEPLOYMENT_IOSVERSION = 5.0
 	TARGET = iphone:latest:$(DEPLOYMENT_IOSVERSION)
-	ARCHS = armv7 armv7s
+	ARCHS = armv7 armv7s arm64
 	TARGET_IPHONEOS_DEPLOYMENT_VERSION=$(DEPLOYMENT_IOSVERSION)
 	THEOS_BUILD_DIR := objs
 	include $(THEOS)/makefiles/common.mk
 	LIBRARY_NAME = $(TARGET_NAME)_libretro_ios
+endif
 
 # QNX
 else ifeq ($(platform), qnx)
@@ -143,7 +153,7 @@ else ifeq ($(platform), psl1ght)
 	CC = $(PS3DEV)/ppu/bin/ppu-gcc$(EXE_EXT)
 	CXX = $(PS3DEV)/ppu/bin/ppu-g++$(EXE_EXT)
 	AR = $(PS3DEV)/ppu/bin/ppu-ar$(EXE_EXT)
-	PLATFORM_DEFINES := -D__CELLOS_LV2__
+	PLATFORM_DEFINES := -D__CELLOS_LV2__ -D__PSL1GHT__ -I$(PS3DEV)/psl1ght/ppu/include
 	STATIC_LINKING = 1
 	DISABLE_GCC_SECURITY_FLAGS = 1
 
@@ -173,28 +183,20 @@ else ifeq ($(platform), ctr)
 	CC = $(DEVKITARM)/bin/arm-none-eabi-gcc$(EXE_EXT)
 	CXX = $(DEVKITARM)/bin/arm-none-eabi-g++$(EXE_EXT)
 	AR = $(DEVKITARM)/bin/arm-none-eabi-ar$(EXE_EXT)
-	PLATFORM_DEFINES := -DARM11 -D_3DS -I$(LIBCTRU)/include/ -DHAVE_LIBCTRU
+	PLATFORM_DEFINES := -DARM11 -D_3DS -I$(DEVKITPRO)/libctru/include -DHAVE_LIBCTRU
 	PLATFORM_DEFINES += -march=armv6k -mtune=mpcore -mfloat-abi=hard
 	PLATFORM_DEFINES += -mword-relocations
 	PLATFORM_DEFINES += -fomit-frame-pointer -fstrict-aliasing -ffast-math
 	STATIC_LINKING = 1
 	DISABLE_GCC_SECURITY_FLAGS = 1
 
-# Raspberry Pi 2 (Raspbian)
-else ifeq ($(platform), rpi2)
+# Raspberry Pi (Raspbian)
+else ifneq (,$(findstring rpi,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
-	fpic := -fPIC
+	fpic = -fPIC
 	SHARED := -shared -Wl,-version-script=link.T
-	PLATFORM_DEFINES += -marm -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -ffast-math
-	PLATFORM_DEFINES += -DARM
-
-# Raspberry Pi 3 (Raspbian)
-else ifeq ($(platform), rpi3)
-	TARGET := $(TARGET_NAME)_libretro.so
-	fpic := -fPIC
-	SHARED := -shared -Wl,-version-script=link.T
-	PLATFORM_DEFINES += -marm -mcpu=cortex-a53 -mfpu=neon-fp-armv8 -mfloat-abi=hard -ffast-math
-	PLATFORM_DEFINES += -DARM
+	PLATFORM_DEFINES += -DARM -D_POSIX_MONOTONIC_CLOCK
+	NO_DIRENT = 1
 
 # Windows MSVC 2003 Xbox 1
 else ifeq ($(platform), xbox1_msvc2003)
@@ -203,9 +205,9 @@ else ifeq ($(platform), xbox1_msvc2003)
 	CXX = CL.exe
 	LD  = lib.exe
 
-	export INCLUDE := $(XDK)/xbox/include
-	export LIB := $(XDK)/xbox/lib
-	PATH := $(call unixcygpath,$(XDK)/xbox/bin/vc71):$(PATH)
+	export INCLUDE := "$(XDK)\xbox\include"
+	export LIB := "$(XDK)\xbox\lib"
+	PATH := $(shell IFS=$$'\n'; cygpath -w "$(XDK)\xbox\bin\vc71"):$(PATH)
 	PSS_STYLE :=2
 	CFLAGS   += -D_XBOX -D_XBOX1
 	CXXFLAGS += -D_XBOX -D_XBOX1
@@ -215,13 +217,13 @@ else ifeq ($(platform), xbox1_msvc2003)
 # Windows MSVC 2010 Xbox 360
 else ifeq ($(platform), xbox360_msvc2010)
 	TARGET := $(TARGET_NAME)_libretro_xdk360.lib
-	MSVCBINDIRPREFIX = $(XEDK)/bin/win32
-	CC  = "$(MSVCBINDIRPREFIX)/cl.exe"
-	CXX = "$(MSVCBINDIRPREFIX)/cl.exe"
-	LD  = "$(MSVCBINDIRPREFIX)/lib.exe"
+	CC  = cl.exe
+	CXX = cl.exe
+	LD  = lib.exe
 
-	export INCLUDE := $(XEDK)/include/xbox
-	export LIB := $(XEDK)/lib/xbox
+	export INCLUDE := "$(XEDK)\include\xbox"
+	export LIB := "$(XEDK)\lib\xbox"
+	PATH := $(shell IFS=$$'\n'; cygpath -w "$(XEDK)\bin\win32"):$(PATH)
 	PSS_STYLE :=2
 	CFLAGS   += -D_XBOX -D_XBOX360
 	CXXFLAGS += -D_XBOX -D_XBOX360
@@ -265,8 +267,8 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 		LIBS += WindowsApp.lib
 	endif
 
-	CFLAGS += $(MSVC2017CompileFlags)
-	CXXFLAGS += $(MSVC2017CompileFlags)
+	CFLAGS += $(MSVC2017CompileFlags) -source-charset:utf-8
+	CXXFLAGS += $(MSVC2017CompileFlags) -source-charset:utf-8
 
 	TargetArchMoniker = $(subst $(WinPartition)_,,$(PlatformSuffix))
 
@@ -343,12 +345,13 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 
 # Xbox 360
 else ifeq ($(platform), xenon)
-	TARGET := $(TARGET_NAME)_libretro_xenon360.a
+	TARGET := $(TARGET_NAME)_libretro.a
 	CC = xenon-gcc$(EXE_EXT)
 	CXX = xenon-g++$(EXE_EXT)
 	AR = xenon-ar$(EXE_EXT)
-	PLATFORM_DEFINES := -D__LIBXENON__
+	PLATFORM_DEFINES := -D__LIBXENON__ -D_POSIX_MONOTONIC_CLOCK -D_POSIX_THREADS -I$(DEVKITXENON)/xenon/include
 	STATIC_LINKING = 1
+	NO_DIRENT = 1
 
 # Nintendo Game Cube / Nintendo Wii
 else ifneq (,$(filter $(platform),ngc wii))
@@ -356,7 +359,7 @@ else ifneq (,$(filter $(platform),ngc wii))
 	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-	PLATFORM_DEFINES += -DGEKKO -DHW_DOL -mrvl -mcpu=750 -meabi -mhard-float -I$(LIBOGC)/include/ -DHAVE_LIBOGC
+	PLATFORM_DEFINES += -DGEKKO -DHW_DOL -mrvl -mcpu=750 -meabi -mhard-float -I$(DEVKITPRO)/libogc/include/ -DHAVE_LIBOGC
 	PLATFORM_DEFINES += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int
 	STATIC_LINKING = 1
 	DISABLE_GCC_SECURITY_FLAGS = 1
@@ -367,7 +370,7 @@ else ifeq ($(platform), wiiu)
 	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-	PLATFORM_DEFINES += -DGEKKO -DWIIU -DHW_RVL -mcpu=750 -meabi -mhard-float -I$(LIBOGC)/include/ -DHAVE_LIBOGC
+	PLATFORM_DEFINES += -DGEKKO -DWIIU -DHW_RVL -mcpu=750 -meabi -mhard-float -I$(DEVKITPRO)/libogc/include/ -DHAVE_LIBOGC
 	PLATFORM_DEFINES += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int
 	STATIC_LINKING = 1
 	DISABLE_GCC_SECURITY_FLAGS = 1
@@ -386,7 +389,7 @@ else ifeq ($(platform), libnx)
 	EXT=a
 	TARGET := $(TARGET_NAME)_libretro_$(platform).$(EXT)
 	DEFINES := -DSWITCH=1 -U__linux__ -U__linux -DRARCH_INTERNAL
-	CFLAGS := $(DEFINES) -g -O3 -fPIE -I$(LIBNX)/include/ -ffunction-sections -fdata-sections -ftls-model=local-exec -Wl,--allow-multiple-definition -specs=$(LIBNX)/switch.specs
+	CFLAGS := $(DEFINES) -g -O3 -fPIE -I$(DEVKITPRO)/libnx/include/ -ffunction-sections -fdata-sections -ftls-model=local-exec -Wl,--allow-multiple-definition -specs=$(DEVKITPRO)/libnx/switch.specs
 	CFLAGS += $(INCDIRS)
 	CFLAGS += -D__SWITCH__ -DHAVE_LIBNX -march=armv8-a -mtune=cortex-a57 -mtp=soft
 	CXXFLAGS := $(ASFLAGS) $(CFLAGS) -fno-rtti -std=gnu++11
@@ -395,7 +398,7 @@ else ifeq ($(platform), libnx)
 	DISABLE_GCC_SECURITY_FLAGS = 1
 
 # Classic Platforms ####################
-# Platform affix = classic_<ISA>_<µARCH>
+# Platform affix = classic_<ISA>_<ﾂｵARCH>
 # Help at https://modmyclassic.com/comp
 
 # (armv7 a7, hard point, neon based) ### 
@@ -431,7 +434,7 @@ else ifeq ($(platform), classic_armv7_a7)
 #######################################
 
 # ARM
-else ifneq (,$(findstring cortex,$(platform)))
+else ifneq (,$(findstring armv,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
 	SHARED := -shared -Wl,-version-script=link.T
@@ -452,6 +455,7 @@ else ifneq (,$(findstring cortex,$(platform)))
 		PLATFORM_DEFINES += -mfloat-abi=hard
 	endif
 	PLATFORM_DEFINES += -DARM
+	NO_DIRENT = 1
 
 else ifeq ($(platform), wincross64)
 
@@ -472,6 +476,7 @@ else ifeq ($(platform), emscripten)
 	CXX = em++
 	TARGET := $(TARGET_NAME)_libretro_$(platform).bc
 	PLATFORM_DEFINES += -DEMSCRIPTEN -I$(EMSCRIPTEN)/system/include
+	STATIC_LINKING = 1
 
 # Windows MSVC 2010 x64
 else ifeq ($(platform), windows_msvc2010_x64)
@@ -627,6 +632,26 @@ INCFLAGS += 	-I$(NP2_PATH)/sdl2/libretro \
 		-I$(NP2_PATH)/i386c/ia32/instructions \
 		-I$(NP2_PATH)/i386c/ia32/instructions/fpu
 
+SOURCES_C += $(NP2_PATH)/sdl2/libretro/libretro.c \
+		$(wildcard $(NP2_PATH)/i386c/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/*.c) \
+		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpdummy.c \
+		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpemul_dosbox.c \
+		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpemul_dosbox2.c \
+		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpemul_softfloat.c \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/fpu/softfloat/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/mmx/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/sse/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/sse2/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/sse3/*.c)
+
+#		$(NP2_PATH)/sdl2/libretro/libretro-common/file/archive_file_zlib.c \
+#		$(NP2_PATH)/sdl2/libretro/libretro-common/formats/libchdr/libchdr_flac.c \
+#		$(NP2_PATH)/sdl2/libretro/libretro-common/formats/libchdr/libchdr_flac_codec.c \
+#		$(NP2_PATH)/sdl2/libretro/libretro-common/streams/trans_stream_zlib.c
+
+ifneq ($(STATIC_LINKING), 1)
 SOURCES_C += 	$(NP2_PATH)/sdl2/libretro/libretro-common/compat/compat_strcasestr.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/compat/compat_fnmatch.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/compat/compat_getopt.c \
@@ -665,6 +690,7 @@ SOURCES_C += 	$(NP2_PATH)/sdl2/libretro/libretro-common/compat/compat_strcasestr
 		$(NP2_PATH)/sdl2/libretro/libretro-common/formats/xml/rxml.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/formats/image_texture.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/formats/image_transfer.c \
+		$(NP2_PATH)/sdl2/libretro/libretro-common/hash/rhash.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/lists/dir_list.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/lists/file_list.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/lists/string_list.c \
@@ -680,35 +706,18 @@ SOURCES_C += 	$(NP2_PATH)/sdl2/libretro/libretro-common/compat/compat_strcasestr
 		$(NP2_PATH)/sdl2/libretro/libretro-common/streams/trans_stream.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/streams/trans_stream_pipe.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/string/stdstring.c \
-		$(NP2_PATH)/sdl2/libretro/libretro-common/vfs/vfs_implementation.c \
-		$(NP2_PATH)/sdl2/libretro/libretro.c \
-		$(wildcard $(NP2_PATH)/i386c/*.c) \
-		$(wildcard $(NP2_PATH)/i386c/ia32/*.c) \
-		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/*.c) \
-		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpdummy.c \
-		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpemul_dosbox.c \
-		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpemul_dosbox2.c \
-		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpemul_softfloat.c \
-		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/fpu/softfloat/*.c) \
-		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/mmx/*.c) \
-		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/sse/*.c) \
-		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/sse2/*.c) \
-		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/sse3/*.c)
 
-#		$(NP2_PATH)/sdl2/libretro/libretro-common/file/archive_file_zlib.c \
-#		$(NP2_PATH)/sdl2/libretro/libretro-common/formats/libchdr/libchdr_flac.c \
-#		$(NP2_PATH)/sdl2/libretro/libretro-common/formats/libchdr/libchdr_flac_codec.c \
-#		$(NP2_PATH)/sdl2/libretro/libretro-common/streams/trans_stream_zlib.c
-
-#ifeq ($(platform), libnx)
-#SOURCES_C += $(NP2_PATH)/sdl2/libretro/libretro-common/rthreads/switch_pthread.c
-#endif
-ifeq ($(platform), xenon)
-SOURCES_C += $(NP2_PATH)/sdl2/libretro/libretro-common/rthreads/xenon_sdl_threads.c
-endif
-ifeq ($(platform), unix)
-#SOURCES_C += $(NP2_PATH)/sdl2/libretro/libretro-common/compat/compat_ifaddrs.c
-SOURCES_C += $(NP2_PATH)/sdl2/libretro/libretro-common/file/nbio/nbio_linux.c
+#	ifeq ($(platform), libnx)
+#		SOURCES_C += $(NP2_PATH)/sdl2/libretro/libretro-common/rthreads/switch_pthread.c
+#	endif
+#	SOURCES_C += $(NP2_PATH)/sdl2/libretro/libretro-common/rthreads/xenon_sdl_threads.c
+	ifneq ($(NO_DIRENT), 1)
+		SOURCES_C += $(NP2_PATH)/sdl2/libretro/libretro-common/vfs/vfs_implementation.c
+	endif
+	ifeq ($(platform), unix)
+#		SOURCES_C += $(NP2_PATH)/sdl2/libretro/libretro-common/compat/compat_ifaddrs.c
+		SOURCES_C += $(NP2_PATH)/sdl2/libretro/libretro-common/file/nbio/nbio_linux.c
+	endif
 endif
 
 ifeq ($(platform), windows_msvc2003_x86)
@@ -749,11 +758,14 @@ endif
 	endif
 endif
 
-DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) $(GCC_FLAGS) $(GCC_WARNINGS) $(GCC_SECURITY_FLAGS) -DNST_NO_ZLIB $(INCFLAGS) $(INCFLAGS_PLATFORM) -DCPUCORE_IA32 -DSUPPORT_PC9821 -DUSE_FPU -DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DHOOK_SYSKEY -DALLOW_MULTIRUN -DSUPPORT_WAB -DSUPPORT_LARGE_MEMORY -DSUPPORT_CL_GD5430 -DUSE_MAME -DSUPPORT_FMGEN -DSUPPORT_SOUND_SB16 -DSUPPORT_FPU_DOSBOX -DSUPPORT_FPU_DOSBOX2 -DSUPPORT_FPU_SOFTFLOAT -DSUPPORT_FAST_MEMORYCHECK -DSUPPORT_GPIB -DSUPPORT_PEGC -DSUPPORT_ASYNC_CPU -DSUPPORT_PCI -DUSE_MMX -DUSE_3DNOW -DUSE_SSE -DUSE_SSE2 -DUSE_SSE3 -DUSE_TSC -DSUPPORT_NVL_IMAGES -DUSE_FASTPAGING -DUSE_VME -DBIOS_IO_EMULATION
+DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) $(GCC_FLAGS) $(GCC_WARNINGS) $(GCC_SECURITY_FLAGS) -DNST_NO_ZLIB $(INCFLAGS) $(INCFLAGS_PLATFORM) -DCPUCORE_IA32 -DSUPPORT_PC9821 -DUSE_FPU -DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DHOOK_SYSKEY -DALLOW_MULTIRUN -DSUPPORT_WAB -DSUPPORT_LARGE_MEMORY -DSUPPORT_CL_GD5430 -DUSE_MAME -DSUPPORT_FMGEN -DSUPPORT_SOUND_SB16 -DSUPPORT_FPU_DOSBOX -DSUPPORT_FPU_DOSBOX2 -DSUPPORT_FPU_SOFTFLOAT -DSUPPORT_FAST_MEMORYCHECK -DSUPPORT_GPIB -DSUPPORT_PEGC -DSUPPORT_ASYNC_CPU -DSUPPORT_PCI -DUSE_MMX -DUSE_3DNOW -DUSE_SSE -DUSE_SSE2 -DUSE_SSE3 -DUSE_TSC -DUSE_FASTPAGING -DUSE_VME -DBIOS_IO_EMULATION
 
 CFLAGS += $(fpic) $(DEFINES) $(C_VER)
 CXXFLAGS += $(fpic) $(DEFINES)
-LDFLAGS  += $(fpic) -lm -lpthread
+LDFLAGS  += $(fpic)
+ifeq ($(HAS_GCC), 1)
+LDFLAGS  += -lm -lpthread -v
+endif
 
 OBJOUT   = -o
 LINKOUT  = -o 

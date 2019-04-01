@@ -20,7 +20,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#if !defined(BSD) && !defined(__APPLE__)
 #define _POSIX_C_SOURCE 199309L
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -46,7 +48,7 @@
 #endif
 #elif defined(_XBOX360)
 #include <PPCIntrinsics.h>
-#elif defined(_POSIX_MONOTONIC_CLOCK) || defined(ANDROID) || defined(__QNX__) || defined(DJGPP)
+#elif defined(_POSIX_MONOTONIC_CLOCK) || defined(ANDROID) || defined(__QNX__) || defined(DJGPP) || defined(__LIBXENON__)
 /* POSIX_MONOTONIC_CLOCK is not being defined in Android headers despite support being present. */
 #include <time.h>
 #endif
@@ -127,6 +129,7 @@ static int ra_clock_gettime(int clk_ik, struct timespec *t)
 #endif
 
 #if defined(BSD) || defined(__APPLE__)
+#include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
 
@@ -175,7 +178,7 @@ retro_perf_tick_t cpu_features_get_perf_counter(void)
    time_ticks = (retro_perf_tick_t)a | ((retro_perf_tick_t)d << 32);
 #elif defined(__ARM_ARCH_6__)
    __asm__ volatile( "mrc p15, 0, %0, c9, c13, 0" : "=r"(time_ticks) );
-#elif defined(__CELLOS_LV2__) || defined(_XBOX360) || defined(__powerpc__) || defined(__ppc__) || defined(__POWERPC__)
+#elif defined(__CELLOS_LV2__) || defined(_XBOX360) || defined(__powerpc__) || defined(__ppc__) || defined(__POWERPC__) || defined(__LIBXENON__)
    time_ticks = __mftb();
 #elif defined(GEKKO)
    time_ticks = gettime();
