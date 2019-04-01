@@ -515,7 +515,6 @@ void np2wab_drawframe()
 }
 
 #if !defined(NP2_X11) && !defined(NP2_SDL2) && !defined(__LIBRETRO__)
-//}
 /**
  * 非同期描画（ga_threadmodeが真）
  */
@@ -703,6 +702,8 @@ void np2wab_unbind(void)
 	iocore_detachinp(0xfac);
 }
 
+// NP2終了時の処理
+void np2wab_shutdown()
 {
 #if defined(NP2_SDL2) || defined(__LIBRETRO__)
 	free(np2wabwnd.pBuffer);
@@ -732,7 +733,8 @@ void np2wab_unbind(void)
 
 	//// 専用INIセクション書き込み
 	//wabwin_writeini();
-	
+}
+
 // 内蔵ディスプレイ切り替えリレー状態を設定する。stateのbit0は外部ｱｸｾﾗ(=1)/内蔵ｱｸｾﾗ(=0)切替、bit1は内蔵ｱｸｾﾗ(=1)/98ｸﾞﾗﾌ(=0)切替。他は0。
 // 外部・内部の区別をしていないので事実上どちらかのビットが1ならアクセラレータ表示になる
 void np2wab_setRelayState(REG8 state)
