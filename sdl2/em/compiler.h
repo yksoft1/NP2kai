@@ -183,7 +183,14 @@ typedef SINT32	FILELEN;
 #define	SOUNDCALL
 
 #define	VERMOUTH_LIB
-#define	SOUND_CRITICAL
+//#define	SOUND_CRITICAL
+
+#ifndef SOUND_CRITICAL
+#define	SNDCSEC_INIT
+#define	SNDCSEC_TERM
+#define	SNDCSEC_ENTER
+#define	SNDCSEC_LEAVE
+#endif
 
 #define	SUPPORT_UTF8
 
