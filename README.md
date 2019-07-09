@@ -1,6 +1,6 @@
 Neko Project II 0.86 kai rev.19
 ===
-Mar 24, 2019  
+Jun 23, 2019  
 
 Build SDL2 port
 ---
@@ -13,14 +13,15 @@ Build SDL2 port
 or
 
 	(Windows + MSYS2 64bit (32bit console))
-	$ pacman -S git gcc make mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_mixer
+	$ pacman -S git gcc make mingw-w64-i686-SDL2 mingw-w64-i686-SDL2_ttf mingw-w64-i686-SDL2_mixer
 
 or
 
 	(Mac)
-        1.Install XCode
-        2.Install module of SDL2, SDL2_mixier, freetype, SDL2_ttf from source
-        3.Install framework of SDL2, SDL2_mixier, SDL2_ttf
+	1. Install XCode
+	2. Install brew
+	3. Execute follow command
+	$ brew install sdl2 sdl2_mixier sdl2_ttf
 
 ２． Build.  
 
@@ -74,14 +75,16 @@ or
 
 	$ np21kai
 
-BIOS files locate in ~/.config/np2kai .
+BIOS files locate in 
+(Linux) /home/(user)/.config/np2kai or /home/(user)/.config/np21kai.
+(Mac) /Users/(user)/.config/np2kai or /Users/(user)/.config/np21kai.
 
-Build X11 port
+Build Linux X11 port
 ---
 
 １． Install SDL2.  
 
-	$ sudo apt-get install libsdl2-dev libsdl2-ttf-dev
+	$ sudo apt-get install libsdl2-dev libsdl2-mixer-dev libsdl2-ttf-dev
 
 ２． Build.  
 
@@ -103,7 +106,11 @@ or
 
 	$ xnp2kai
 
-BIOS files locate in ~/.config/xnp2kai .
+or
+
+	$ xnp21kai
+
+BIOS files locate in ~/.config/xnp2kai or ~/.config/xnp21kai.
 
 NP2 menu is opened when F11 key or mouse middle button.  
 NP2 menu can swap FDD/HDD diskimages.
@@ -184,7 +191,7 @@ https://developer.android.com/studio/index.html
 About libretro port
 ---
 BIOS files locate in "np2kai" directory at BIOS directory (configured by RetroArch).  
-Configure file (np2.cfg) is made in "np2kai" BIOS directory.
+Configure file (np2kai.cfg) is made in "np2kai" BIOS directory.
 
 NP2 menu is opened when F12 key or mouse middle button or joypad L2 button.  
 NP2 menu can swap FDD/HDD diskimages.  
@@ -195,15 +202,15 @@ F1 key menu durling play game, you can swap disk.
 
 Mouse is cuptured (hidden/show toggle) by F11 key.
 
-Mouse cursor is able to move with joypad when Joy2Mouse mode.  
-Switch Joy2Mouse mode in config.  
+Mouse cursor is able to move with joypad.  
+Switch Joy2Mouse/Keyboard mode in config to 'Mouse'.  
 D-UP/DOWN/LEFT/RIGHT: mouse move  
 B button: left click  
 A button: right click
 R button: mouse speed up durling hold  
 
-Keyboard is able to control with joypad when Joy2Key mode.  
-Switch Joy2Key mode in config.  
+Keyboard is able to control with joypad.  
+Switch Joy2Mouse/Keyboard mode in config to 'Arrows' or 'Keypad' (or 'Manual').  
 D-UP/DOWN/LEFT/RIGHT: Arrow key or Keypad(2468) key
 B button: Z key  
 A button: X key  
@@ -214,7 +221,7 @@ R button: right Shift key
 Select button: Escape key  
 Start button: Return key
 
-By setting Joy2Key mode to 'Manual', you can custom keycode for button.  
+By setting Joy2Mouse/Keyboard mode to 'Manual', you can custom keycode for button.  
 Change 'lrjoybtn' value in system/np2kai/np2kai.cfg.  
 This value is little endian and 12 values ​​of 16bits(2Bytes) are arranged.  
 Write the key code of RETROK (see libretro.h) to this value.  
@@ -611,6 +618,12 @@ https://www.iodata.jp/lib/product/g/175_win95.htm
 
 Release
 ---
+* Jun 23, 2019
+	- modify default cfg/BIOS location (np2kai or 'np21kai')
+* Jun 21, 2019
+	- Fix SDL2 build and install
+	- Merge NP21/W 0.86 rev.57-61
+...
 * Jan 24, 2019
 	- Merge NP21/W 0.86 rev.56
 * Jan 13, 2019
