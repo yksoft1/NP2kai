@@ -18,7 +18,7 @@ fpic = -fPIC
 ifeq ($(DEBUG), 1)
 COMMONFLAGS += -O0 -g
 else
-COMMONFLAGS += -O3 -DNDEBUG 
+COMMONFLAGS += -O3 -DNDEBUG -DGIT_VERSION=\"0\"
 endif
 
 CORE_DIR    := ..

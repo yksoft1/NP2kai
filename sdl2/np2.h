@@ -132,6 +132,6 @@ extern int mmxflag;
 int havemmx(void);
 
 extern UINT8 changescreeninit;
-
+extern void changescreen(UINT8 newmode);
 #endif	/* __LIBRETRO__ */
 

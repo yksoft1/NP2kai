@@ -110,6 +110,9 @@ char modulefile[MAX_PATH];
 char draw32bit;
 
 static void np2exec();
+UINT8 scrnmode = 0;
+UINT8 changescreeninit = 0;
+
 static void usage(const char *progname) {
 
 	printf("Usage: %s [options]\n", progname);

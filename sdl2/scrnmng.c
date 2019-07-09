@@ -281,76 +281,13 @@ void scrnmng_setheight(int posy, int height) {
 	} else {
 		SDL_SetWindowSize(s_window, scrnmng.width, height);
 	}
-#ifndef EMSCRIPTEN
-	mousemng_hidecursor();
-#endif
-	SDL_LockSurface(surface);
-	if (calcdrawrect(surface, &dr, menuvram, &rt) == SUCCESS) {
-		switch(scrnmng.bpp) {
-#if defined(SUPPORT_16BPP)
-			case 16:
-				p = scrnmng.vram->ptr + (dr.srcpos * 2);
-				q = (UINT8 *)surface->pixels + dr.dstpos;
-				a = menuvram->alpha + dr.srcpos;
-				salign = menuvram->width;
-				dalign = dr.yalign - (dr.width * dr.xalign);
-				do {
-					x = 0;
-					do {
-						if (a[x] == 0) {
-							*(UINT16 *)q = *(UINT16 *)(p + (x * 2));
-						}
-						q += dr.xalign;
-					} while(++x < dr.width);
-					p += salign * 2;
-					q += dalign;
-					a += salign;
-				} while(--dr.height);
-				break;
-#endif
-#if defined(SUPPORT_24BPP)
-			case 24:
-				p = scrnmng.vram->ptr + (dr.srcpos * 3);
-				q = (UINT8 *)surface->pixels + dr.dstpos;
-				a = menuvram->alpha + dr.srcpos;
-				salign = menuvram->width;
-				dalign = dr.yalign - (dr.width * dr.xalign);
-				do {
-					x = 0;
-					do {
-						if (a[x] == 0) {
-							q[0] = p[x*3+0];
-							q[1] = p[x*3+1];
-							q[2] = p[x*3+2];
-						}
-						q += dr.xalign;
-					} while(++x < dr.width);
-					p += salign * 3;
-					q += dalign;
-					a += salign;
-				} while(--dr.height);
-				break;
-#endif
-#if defined(SUPPORT_32BPP)
-			case 32:
-				p = scrnmng.vram->ptr + (dr.srcpos * 4);
-				q = (UINT8 *)surface->pixels + dr.dstpos;
-				a = menuvram->alpha + dr.srcpos;
-				salign = menuvram->width;
-				dalign = dr.yalign - (dr.width * dr.xalign);
-				do {
-					x = 0;
-					do {
-						if (a[x] == 0) {
-							*(UINT32 *)q = *(UINT32 *)(p + (x * 4));
-						}
-						q += dr.xalign;
-					} while(++x < dr.width);
-					p += salign * 4;
-					q += dalign;
-					a += salign;
-				} while(--dr.height);
-				break;
+	if(scrnmode & SCRNMODE_ROTATEMASK) {
+		SDL_RenderSetLogicalSize(s_renderer, height, scrnmng.width);
+	} else {
+		SDL_RenderSetLogicalSize(s_renderer, scrnmng.width, height);
+	}
+#ifdef GCW0
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
 #endif
 	switch(scrnmng.bpp) {
 	case 16:
@@ -372,15 +309,7 @@ void scrnmng_setheight(int posy, int height) {
 		scrnmng.dispsurf = SDL_CreateRGBSurface(SDL_SWSURFACE, scrnmng.width, height, scrnmng.bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
 		break;
 	}
-	SDL_UnlockSurface(surface);
-#ifndef EMSCRIPTEN
-	mousemng_showcursor();
-#endif
-	
-	SDL_UpdateTexture(s_texture, NULL, surface->pixels, surface->pitch);
-	SDL_RenderClear(s_renderer);
-	SDL_RenderCopy(s_renderer, s_texture, NULL, NULL);
-	SDL_RenderPresent(s_renderer);
+	scrnmng.height = height;
 #endif	/* __LIBRETRO__ */
 
 	scrnmng.height = height;
@@ -484,17 +413,16 @@ BRESULT scrnmng_entermenu(SCRNMENU *smenu) {
 }
 
 void scrnmng_leavemenu(void) {
-
-#if defined(__LIBRETRO__)
-	VRAM_RELEASE(vram);
-#else	/* __LIBRETRO__ */
-	VRAM_RELEASE(scrnmng.vram);
-
+#if !defined(__LIBRETRO__)
 #ifdef EMSCRIPTEN
 	if(ismouse_captured())
 		mousemng_hidecursor();
+#else
+#if !defined(TARGET_OS_MAC)
+/* once hide mouse cursor, can't show it on macOS */
+	mousemng_hidecursor();
 #endif
-
+#endif
 #endif	/* __LIBRETRO__ */
 }
 
@@ -526,32 +454,8 @@ void scrnmng_menudraw(const RECT_T *rct) {
 		dispsurf = scrnmng.dispsurf->pixels;
 #endif	/* __LIBRETRO__ */
 
-	if (calcdrawrect( &dr, rct) == SUCCESS)
-		draw2(dr);
-#else	/* __LIBRETRO__ */
-	SDL_Surface	*surface;
-	DRAWRECT	dr;
-const UINT8		*p;
-const UINT8		*q;
-	UINT8		*r;
-	UINT8		*a;
-	int			salign;
-	int			dalign;
-	int			x;
-
-	if ((!scrnmng.enable) && (menuvram == NULL)) {
-		return;
-	}
-	surface = s_surface;
-	if (surface == NULL) {
-		return;
-	}
-#ifndef EMSCRIPTEN
-	mousemng_hidecursor();
-#endif
-	SDL_LockSurface(surface);
-	if (calcdrawrect(surface, &dr, menuvram, rct) == SUCCESS) {
-		switch(scrnmng.bpp) {
+		if(calcdrawrect(&dr, rct) == SUCCESS) {
+			switch(scrnmng.bpp) {
 #if defined(SUPPORT_16BPP)
 			case 16:
 				p = (UINT8*)pc98surf + (dr.srcpos * dr.xalign);
@@ -615,16 +519,6 @@ const UINT8		*q;
 			scrnmng_update();
 		}
 	}
-	SDL_UnlockSurface(surface);
-#ifndef EMSCRIPTEN
-	mousemng_showcursor();
-#endif
-
-	SDL_UpdateTexture(s_texture, NULL, surface->pixels, surface->pitch);
-	SDL_RenderClear(s_renderer);
-	SDL_RenderCopy(s_renderer, s_texture, NULL, NULL);
-	SDL_RenderPresent(s_renderer);
-#endif	/* __LIBRETRO__ */
 }
 
 void
