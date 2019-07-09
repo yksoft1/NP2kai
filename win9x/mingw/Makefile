@@ -11,6 +11,7 @@ NP2_PATH	= ../..
 
 CFLAGS	=	-O3 -fno-tree-vectorize -Wstrict-overflow=0 -Wstrict-aliasing=0 -Wno-narrowing -DNDEBUG \
 			-DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DSUPPORT_SOUND_SB16 -DUSE_MAME -DSUPPORT_FMGEN \
+			-DGIT_VERSION=\"0\" \
 			-I. -I.. \
 			-I$(NP2_PATH) \
 			-I$(NP2_PATH)/codecnv \
