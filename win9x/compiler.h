@@ -51,8 +51,10 @@ WINBASEAPI BOOL WINAPI SetFilePointerEx(HANDLE, LARGE_INTEGER, PLARGE_INTEGER, D
 #if !defined(__GNUC__) || defined(__MINGW32__)
 typedef	signed int			SINT;
 typedef	signed char			SINT8;
+typedef	signed char			INT8;
 typedef	unsigned char		UINT8;
 typedef	signed short		SINT16;
+typedef	signed short		INT16;
 typedef	unsigned short		UINT16;
 typedef	signed int			SINT32;
 typedef	unsigned int		UINT32;
