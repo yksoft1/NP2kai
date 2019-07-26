@@ -6,7 +6,7 @@
 #include "compiler.h"
 #include <stdarg.h>
 #include <string>
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined (NMAKE) 
 #include <atlbase.h>
 #endif
 #include "resource.h"
