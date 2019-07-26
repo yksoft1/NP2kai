@@ -191,7 +191,7 @@ const OEMCHAR np2version[] = OEMTEXT(NP2VER_CORE " " NP2VER_GIT);
 #endif	/* SUPPORT_FMGEN */
 
 #ifdef SUPPORT_ASYNC_CPU
-#if !defined(__LIBRETRO__) && !defined(NP2_SDL2) && !defined(NP2_X11)
+#if !defined(__LIBRETRO__) && !defined(NP2_SDL2) && !defined(NP2_X11) 
 LARGE_INTEGER asynccpu_lastclock = {0};
 LARGE_INTEGER asynccpu_clockpersec = {0};
 LARGE_INTEGER asynccpu_clockcount = {0};

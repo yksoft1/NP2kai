@@ -2148,7 +2148,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				if(!np2oscfg.mouse_nc){
 					SetClassLong(g_hWndMain, GCL_STYLE, GetClassLong(g_hWndMain, GCL_STYLE) | CS_DBLCLKS);
 				}else/* if (!scrnmng_isfullscreen())*/ {
-					SetClassLong(g_hWndMain, GCL_STYLE, GetClassLong(g_hWndMain, GCL_STYLE) & ‾CS_DBLCLKS);
+					SetClassLong(g_hWndMain, GCL_STYLE, GetClassLong(g_hWndMain, GCL_STYLE) & ~CS_DBLCLKS);
 					if (np2oscfg.wintype != 0) {
 						// XXX: メニューが出せなくなって詰むのを回避（暫定）
 						if (!scrnmng_isfullscreen()) {
