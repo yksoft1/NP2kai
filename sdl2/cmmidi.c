@@ -228,6 +228,23 @@ getmidiout(const UINT device, const char *midiout)
 #endif
 	char* devfile = NULL;
 
+#if !defined(__LIBRETRO__) && !defined (EMSCRIPTEN)
+#if defined(SUPPORT_SMPU98)
+	switch(device) {
+	case COMCREATE_MPU98II:
+		devfile = np2oscfg.MIDIDEV[0];
+		break;
+	case COMCREATE_SMPU98_A:
+		devfile = np2oscfg.MIDIDEVA[0];
+		break;
+	case COMCREATE_SMPU98_B:
+		devfile = np2oscfg.MIDIDEVB[0];
+		break;
+	}
+#else
+	devfile = np2oscfg.MIDIDEV[0];
+#endif
+
 	if (midiout && midiout[0] != '\0') {
 		if ((!milstr_cmp(midiout, cmmidi_midiout_device))
 		 && (devfile[0] != '\0')) {
