@@ -290,13 +290,319 @@ OBJS_IA32 =	$(NP2_PATH)\i386c\cpucore.obj \
 			$(NP2_PATH)\i386c\ia32\instructions\fpu\fpemul_dosbox.obj \
 			$(NP2_PATH)\i386c\ia32\instructions\fpu\fpemul_dosbox2.obj \
 			$(NP2_PATH)\i386c\ia32\instructions\fpu\fpemul_softfloat.obj \
-			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\softfloat.obj \
 			$(NP2_PATH)\i386c\ia32\instructions\mmx\mmx.obj \
 			$(NP2_PATH)\i386c\ia32\instructions\mmx\3dnow.obj \
 			$(NP2_PATH)\i386c\ia32\instructions\sse\sse.obj \
 			$(NP2_PATH)\i386c\ia32\instructions\sse2\sse2.obj \
 			$(NP2_PATH)\i386c\ia32\instructions\sse3\sse3.obj
 
+OBJS_SOFTFLOAT1 = $(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_add.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_div.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_eq.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_eq_signaling.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_isSignalingNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_le.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_le_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_lt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_lt_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_mul.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_rem.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_roundToInt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_sqrt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_sub.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_f128M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_f16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_f32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_f64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_i32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_i32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_i64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_i64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_ui32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_ui32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_ui64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80M_to_ui64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_add.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_div.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_eq.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_eq_signaling.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_isSignalingNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_le.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_le_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_lt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_lt_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_mul.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_rem.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_roundToInt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_sqrt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_sub.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_f128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_f16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_f32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_f64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_i32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_i32_r_minMag.obj
+
+OBJS_SOFTFLOAT2 = $(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_i64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_i64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_ui32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_ui32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_ui64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\extF80_to_ui64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_add.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_div.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_eq.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_eq_signaling.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_isSignalingNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_le.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_le_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_lt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_lt_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_mul.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_mulAdd.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_rem.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_roundToInt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_sqrt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_sub.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_extF80M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_f16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_f32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_f64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_i32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_i32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_i64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_i64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_ui32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_ui32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_ui64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128M_to_ui64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_add.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_div.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_eq.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_eq_signaling.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_isSignalingNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_le.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_le_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_lt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_lt_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_mul.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_mulAdd.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_rem.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_roundToInt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_sqrt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_sub.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_extF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_f16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_f32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_f64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_i32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_i32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_i64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_i64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_ui32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_ui32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_ui64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f128_to_ui64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_add.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_div.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_eq.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_eq_signaling.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_isSignalingNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_le.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_le_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_lt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_lt_quiet.obj
+
+OBJS_SOFTFLOAT3 = $(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_mul.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_mulAdd.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_rem.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_roundToInt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_sqrt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_sub.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_extF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_extF80M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_f128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_f128M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_f32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_f64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_i32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_i32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_i64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_i64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_ui32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_ui32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_ui64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f16_to_ui64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_add.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_div.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_eq.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_eq_signaling.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_isSignalingNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_le.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_le_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_lt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_lt_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_mul.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_mulAdd.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_rem.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_roundToInt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_sqrt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_sub.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_extF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_extF80M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_f128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_f128M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_f16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_f64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_i32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_i32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_i64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_i64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_ui32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_ui32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_ui64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f32_to_ui64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_add.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_div.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_eq.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_eq_signaling.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_isSignalingNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_le.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_le_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_lt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_lt_quiet.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_mul.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_mulAdd.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_rem.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_roundToInt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_sqrt.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_sub.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_extF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_extF80M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_f128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_f128M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_f16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_f32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_i32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_i32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_i64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_i64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_ui32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_ui32_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_ui64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\f64_to_ui64_r_minMag.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i32_to_extF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i32_to_extF80M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i32_to_f128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i32_to_f128M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i32_to_f16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i32_to_f32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i32_to_f64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i64_to_extF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i64_to_extF80M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i64_to_f128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i64_to_f128M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i64_to_f16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i64_to_f32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\i64_to_f64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\softfloat_raiseFlags.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\softfloat_state.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_add128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_add256M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_addMagsExtF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_addMagsF128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_addMagsF16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_addMagsF32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_addMagsF64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_approxRecip32_1.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_approxRecipSqrt32_1.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_approxRecipSqrt_1Ks.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_approxRecip_1Ks.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_commonNaNToExtF80UI.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_commonNaNToF128UI.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_commonNaNToF16UI.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_commonNaNToF32UI.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_commonNaNToF64UI.obj
+
+OBJS_SOFTFLOAT4 = $(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_countLeadingZeros16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_countLeadingZeros32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_countLeadingZeros64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_countLeadingZeros8.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_eq128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_extF80UIToCommonNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_f128UIToCommonNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_f16UIToCommonNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_f32UIToCommonNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_f64UIToCommonNaN.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_le128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_lt128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_mul128By32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_mul128To256M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_mul64ByShifted32To128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_mul64To128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_mulAddF128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_mulAddF16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_mulAddF32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_mulAddF64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_normRoundPackToExtF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_normRoundPackToF128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_normRoundPackToF16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_normRoundPackToF32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_normRoundPackToF64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_normSubnormalExtF80Sig.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_normSubnormalF128Sig.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_normSubnormalF16Sig.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_normSubnormalF32Sig.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_normSubnormalF64Sig.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_propagateNaNExtF80UI.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_propagateNaNF128UI.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_propagateNaNF16UI.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_propagateNaNF32UI.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_propagateNaNF64UI.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_roundPackToExtF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_roundPackToF128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_roundPackToF16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_roundPackToF32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_roundPackToF64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_roundToI32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_roundToI64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_roundToUI32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_roundToUI64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shiftRightJam128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shiftRightJam128Extra.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shiftRightJam256M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shiftRightJam32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shiftRightJam64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shiftRightJam64Extra.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shortShiftLeft128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shortShiftRight128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shortShiftRightJam128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shortShiftRightJam128Extra.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shortShiftRightJam64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_shortShiftRightJam64Extra.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_sub128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_sub256M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_subMagsExtF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_subMagsF128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_subMagsF16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_subMagsF32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\s_subMagsF64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui32_to_extF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui32_to_extF80M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui32_to_f128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui32_to_f128M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui32_to_f16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui32_to_f32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui32_to_f64.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui64_to_extF80.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui64_to_extF80M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui64_to_f128.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui64_to_f128M.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui64_to_f16.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui64_to_f32.obj \
+			$(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\ui64_to_f64.obj
+
+			
 OBJS_W9X =	$(NP2_PATH)\win9x\commng.obj \
 			$(NP2_PATH)\win9x\compiler.obj \
 			$(NP2_PATH)\win9x\dosio.obj \
@@ -409,8 +715,8 @@ LFLAGS = $(LFLAGS) -LTCG
 
 all: $(TARGET) $(SDLMAIN)
 
-$(TARGET):	$(OBJS) $(OBJS2) $(OBJS_IA32) $(OBJS_W9X) $(OBJS_Z)
-	$(LD) $(LFLAGS) -OUT:$@ $(OBJS) $(OBJS2) $(OBJS_IA32) $(OBJS_W9X) $(OBJS_Z) $(LIBS)
+$(TARGET):	$(OBJS) $(OBJS2) $(OBJS_IA32) $(OBJS_SOFTFLOAT1) $(OBJS_SOFTFLOAT2) $(OBJS_SOFTFLOAT3) $(OBJS_SOFTFLOAT4) $(OBJS_W9X) $(OBJS_Z)
+	$(LD) $(LFLAGS) -OUT:$@ $(OBJS) $(OBJS2) $(OBJS_IA32) $(OBJS_SOFTFLOAT1) $(OBJS_SOFTFLOAT2) $(OBJS_SOFTFLOAT3) $(OBJS_SOFTFLOAT4) $(OBJS_W9X) $(OBJS_Z) $(LIBS)
 	
 .c.obj:
 	$(CC) $(CFLAGS) -c -Fo$@ $<
@@ -425,6 +731,7 @@ clean:
 	del $(TARGET) $(OBJS) 
 	del $(OBJS2)
 	del $(OBJS_IA32)
+	del $(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\*.obj
 	del $(OBJS_W9X)
 	del $(OBJS_Z)
 	del *.manifest
