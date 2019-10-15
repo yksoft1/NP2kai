@@ -21,6 +21,9 @@
 #include "scsiio.h"
 #include "pc9861k.h"
 #include "mpu98ii.h"
+#if defined(SUPPORT_SMPU98)
+#include "smpu98.h"
+#endif
 #include "board14.h"
 #include "amd98.h"
 #include "bios/bios.h"
@@ -133,6 +136,9 @@ typedef struct {
 
 
 extern	COMMNG	cm_mpu98;
+#if defined(SUPPORT_SMPU98)
+extern	COMMNG	cm_smpu98[];
+#endif
 extern	COMMNG	cm_rs232c;
 
 typedef struct {
@@ -842,7 +848,10 @@ static UINT GetSoundFlags(SOUNDID nSoundID)
 			
 		case SOUNDID_PC_9801_86_ADPCM:
 			return FLAG_OPNA1 | FLAG_PCM86;
-
+			
+		case SOUNDID_WAVESTAR:
+			return FLAG_OPNA1 | FLAG_PCM86 | FLAG_CS4231;
+			
 		case SOUNDID_SPEAKBOARD:
 			return FLAG_OPNA1;
 
@@ -1049,7 +1058,7 @@ const OEMCHAR	*path;
 	ret = statflag_write(sfh, &sds, sizeof(sds));
 	for (i=0; i<NELEMENTS(sds.ide); i++) {
 		if (sds.ide[i] != SXSIDEV_NC) {
-#if defined(SUPPORT_IDEIO)||defined(SUPPORT_PHYSICAL_CDDRV)
+#if defined(SUPPORT_IDEIO)&&defined(SUPPORT_PHYSICAL_CDDRV)
 			if(sds.ide[i]==SXSIDEV_CDROM){ // CD-ROMの場合、np2cfgを優先
 				path = np2cfg.idecd[i];
 			}else
@@ -1146,6 +1155,16 @@ static int flagsave_com(STFLAGH sfh, const SFENTRY *tbl) {
 		case 1:
 			cm = cm_rs232c;
 			break;
+			
+#if defined(SUPPORT_SMPU98)
+		case 2:
+			cm = cm_smpu98[0];
+			break;
+			
+		case 3:
+			cm = cm_smpu98[1];
+			break;
+#endif
 
 		default:
 			cm = NULL;
@@ -1200,6 +1219,20 @@ static int flagload_com(STFLAGH sfh, const SFENTRY *tbl) {
 			cm = commng_create(COMCREATE_SERIAL);
 			cm_rs232c = cm;
 			break;
+			
+#if defined(SUPPORT_SMPU98)
+		case 2:
+			commng_destroy(cm_smpu98[0]);
+			cm = commng_create(COMCREATE_SMPU98_A);
+			cm_smpu98[0] = cm;
+			break;
+
+		case 3:
+			commng_destroy(cm_smpu98[1]);
+			cm = commng_create(COMCREATE_SMPU98_B);
+			cm_smpu98[1] = cm;
+			break;
+#endif
 
 		default:
 			cm = NULL;
@@ -1455,6 +1488,9 @@ const SFENTRY	*tblterm;
 	soundmng_stop();
 	rs232c_midipanic();
 	mpu98ii_midipanic();
+#if defined(SUPPORT_SMPU98)
+	smpu98_midipanic();
+#endif
 	pc9861k_midipanic();
 	sxsi_alltrash();
 

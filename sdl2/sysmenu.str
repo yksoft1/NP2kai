@@ -117,6 +117,7 @@ static const char str_sndorchestrav[] = "Sound Orchestra-V";
 static const char str_sb16[] = "Sound Blaster 16";
 #endif	/* SUPPORT_SOUND_SB16 */
 static const char str_amd98[] = "AMD-98";
+static const char str_wavestar[] = "WaveStar";
 #if defined(SUPPORT_PX)
 static const char str_px1[] = "Otomi-chanx2";
 static const char str_px2[] = "Otomi-chanx2 + 86";
@@ -402,6 +403,7 @@ static const MSYSITEM s_snd[] = {
 		{str_sb16,		NULL,		MID_SB16,		0},
 #endif	/* SUPPORT_SOUND_SB16 */
 		{str_amd98,			NULL,		MID_AMD98,			0},
+		{str_wavestar,		NULL,		MID_WAVESTAR,			0},
 #if defined(SUPPORT_PX)
 		{str_px1,			NULL,		MID_PX1,			0},
 		{str_px2,			NULL,		MID_PX2,			0},
@@ -418,11 +420,19 @@ static const MSYSITEM s_mem[] = {
 		{str_mem76,			NULL,		MID_MEM76,			0},
 		{str_mem96,			NULL,		MID_MEM96,			0},
 		{str_mem136,			NULL,		MID_MEM136,			0},
+#if defined(CPUCORE_IA32)
 		{str_mem166,			NULL,		MID_MEM166,			0},
 		{str_mem326,			NULL,		MID_MEM326,			0},
 		{str_mem646,			NULL,		MID_MEM646,			0},
 		{str_mem1206,			NULL,		MID_MEM1206,			0},
 		{str_mem2306,			NULL,		MID_MEM2306,			MENU_DELETED}};
+#else
+		{str_mem166,			NULL,		MID_MEM166,			MENU_GRAY},
+		{str_mem326,			NULL,		MID_MEM326,			MENU_GRAY},
+		{str_mem646,			NULL,		MID_MEM646,			MENU_GRAY},
+		{str_mem1206,			NULL,		MID_MEM1206,			MENU_GRAY},
+		{str_mem2306,			NULL,		MID_MEM2306,			MENU_GRAY | MENU_DELETED}};
+#endif
 
 static const MSYSITEM s_device[] = {
 #if !defined(__LIBRETRO__)

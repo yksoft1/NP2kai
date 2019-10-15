@@ -46,6 +46,49 @@ ifeq ($(platform), unix)
 ifeq ($(shell uname -s), Haiku)
 	LDFLAGS += -lroot
 endif
+else ifneq (,$(findstring embedded,$(platform)))
+	AR = ${CC_PREFIX}ar
+	CC = ${CC_PREFIX}gcc
+	CXX= ${CC_PREFIX}g++
+
+	TARGET := $(TARGET_NAME)_libretro.so
+    
+	#SHARED := -lpthread -lm -shared -Wl,--no-undefined -Wl,--version-script=link.T
+	LDFLAGS += -dynamiclib -ldl -lpthread -lm -shared -Wl,--no-undefined -Wl,--version-script=link.T
+	COMMONFLAGS += -DDISABLE_EXCEPTIONS -DHAVE_MKDIR
+
+	fpic = -fPIC
+   
+	# Raspberry Pi
+	ifneq (,$(findstring rpi,$(platform)))
+		CFLAGS += -fomit-frame-pointer -ffast-math -DARM -marm -mfloat-abi=hard
+
+	# Pi (original)
+	ifneq (,$(findstring rpi1,$(platform)))
+		CFLAGS += -mcpu=cortex-a6j
+	# Pi2
+	else ifneq (,$(findstring rpi2,$(platform)))
+		CFLAGS += -mcpu=cortex-a7
+	# Pi3
+	else ifneq (,$(findstring rpi3,$(platform)))
+		CFLAGS += -mcpu=cortex-a53 -mfpu=neon-vfpv4 -fdata-sections -ffunction-sections -Wl,--gc-sections -fmerge-all-constants
+	endif
+
+	# ODROIDs
+	else ifneq (,$(findstring odroid,$(platform)))
+		CFLAGS += -fomit-frame-pointer -ffast-math -DARM -marm -mfloat-abi=hard
+
+	# ODROID-C1
+	ifneq (,$(findstring odroidc,$(platform)))
+		CFLAGS += -mtune=cortex-a5
+	# ODROID-XU3 & ODROID-XU4
+	else ifneq (,$(findstring odroidxu,$(platform)))
+		CFLAGS += -march=armv7ve -mtune=cortex-a15.cortex-a7
+	# ODROID-U2, -U3, -X & -X2
+	else
+		CFLAGS += -mtune=cortex-a9
+	endif
+endif
 
 # OS X
 else ifeq ($(platform), osx)
@@ -71,9 +114,9 @@ else ifneq (,$(findstring ios,$(platform)))
 	ifeq ($(IOSSDK),)
 		IOSSDK := $(shell xcodebuild -version -sdk iphoneos Path)
 	endif
-	ifeq ($(platform),"ios-arm64")
+	ifeq ($(platform), ios-arm64)
 	  CC = cc -arch arm64 -isysroot $(IOSSDK)
-	  CCX = c++ -arch arm64 -isysroot $(IOSSDK) -stdlib=libc++
+	  CXX = c++ -arch arm64 -isysroot $(IOSSDK) -stdlib=libc++
 	  LDFLAGS = -stdlib=libc++
 	else
 	  CC = cc -arch armv7 -isysroot $(IOSSDK)
@@ -633,6 +676,7 @@ INCFLAGS += 	-I$(NP2_PATH)/sdl2/libretro \
 		-I$(NP2_PATH)/i386c/ia32/instructions/fpu
 
 SOURCES_C += $(NP2_PATH)/sdl2/libretro/libretro.c \
+	     	$(NP2_PATH)/sdl2/libretro/rsemaphore.c \
 		$(wildcard $(NP2_PATH)/i386c/*.c) \
 		$(wildcard $(NP2_PATH)/i386c/ia32/*.c) \
 		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/*.c) \
@@ -696,7 +740,6 @@ SOURCES_C += 	$(NP2_PATH)/sdl2/libretro/libretro-common/compat/compat_strcasestr
 		$(NP2_PATH)/sdl2/libretro/libretro-common/lists/string_list.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/lists/vector_list.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/rthreads/rthreads.c \
-		$(NP2_PATH)/sdl2/libretro/libretro-common/rthreads/rsemaphore.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/streams/chd_stream.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/streams/file_stream.c \
 		$(NP2_PATH)/sdl2/libretro/libretro-common/streams/file_stream_transforms.c \
@@ -758,7 +801,7 @@ endif
 	endif
 endif
 
-DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) $(GCC_FLAGS) $(GCC_WARNINGS) $(GCC_SECURITY_FLAGS) -DNST_NO_ZLIB $(INCFLAGS) $(INCFLAGS_PLATFORM) -DCPUCORE_IA32 -DSUPPORT_PC9821 -DUSE_FPU -DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DHOOK_SYSKEY -DALLOW_MULTIRUN -DSUPPORT_WAB -DSUPPORT_LARGE_MEMORY -DSUPPORT_CL_GD5430 -DUSE_MAME -DSUPPORT_FMGEN -DSUPPORT_SOUND_SB16 -DSUPPORT_FPU_DOSBOX -DSUPPORT_FPU_DOSBOX2 -DSUPPORT_FPU_SOFTFLOAT -DSUPPORT_FAST_MEMORYCHECK -DSUPPORT_GPIB -DSUPPORT_PEGC -DSUPPORT_ASYNC_CPU -DSUPPORT_PCI -DUSE_MMX -DUSE_3DNOW -DUSE_SSE -DUSE_SSE2 -DUSE_SSE3 -DUSE_TSC -DUSE_FASTPAGING -DUSE_VME -DBIOS_IO_EMULATION -DSUPPORT_NP2_THREAD -DNP2_THREAD_LR
+DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) $(GCC_FLAGS) $(GCC_WARNINGS) $(GCC_SECURITY_FLAGS) -DNST_NO_ZLIB $(INCFLAGS) $(INCFLAGS_PLATFORM) -DCPUCORE_IA32 -DSUPPORT_PC9821 -DUSE_FPU -DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DHOOK_SYSKEY -DALLOW_MULTIRUN -DSUPPORT_WAB -DSUPPORT_LARGE_MEMORY -DSUPPORT_CL_GD5430 -DUSE_MAME -DSUPPORT_FMGEN -DSUPPORT_SOUND_SB16 -DSUPPORT_FPU_DOSBOX -DSUPPORT_FPU_DOSBOX2 -DSUPPORT_FPU_SOFTFLOAT -DSUPPORT_FAST_MEMORYCHECK -DSUPPORT_ASYNC_CPU -DSUPPORT_GPIB -DSUPPORT_PEGC -DSUPPORT_PCI -DUSE_MMX -DUSE_3DNOW -DUSE_SSE -DUSE_SSE2 -DUSE_SSE3 -DUSE_TSC -DUSE_FASTPAGING -DUSE_VME -DBIOS_IO_EMULATION -DSUPPORT_NP2_THREAD -DNP2_THREAD_LR
 
 CFLAGS += $(fpic) $(DEFINES) $(C_VER)
 CXXFLAGS += $(fpic) $(DEFINES)

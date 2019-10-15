@@ -124,11 +124,13 @@ struct retro_core_option_definition option_defs_us[] = {
          { "7", NULL },
          { "11", NULL },
          { "13", NULL },
+#if defined(CPUCORE_IA32)
          { "16", NULL },
          { "32", NULL },
          { "64", NULL },
          { "120", NULL },
          { "230", NULL },
+#endif
          { NULL, NULL},
       },
       "3"
@@ -211,6 +213,7 @@ struct retro_core_option_definition option_defs_us[] = {
          { "Sound Orchestra-V", NULL },
          { "Sound Blaster 16", NULL },
          { "AMD-98", NULL },
+         { "WaveStar", NULL },
          { "Otomi-chanx2", NULL },
          { "Otomi-chanx2 + 86", NULL },
          { "None", NULL },
@@ -879,11 +882,13 @@ struct retro_core_option_definition option_defs_ja[] = {
          { "7", NULL },
          { "11", NULL },
          { "13", NULL },
+#if defined(CPUCORE_IA32)
          { "16", NULL },
          { "32", NULL },
          { "64", NULL },
          { "120", NULL },
          { "230", NULL },
+#endif
          { NULL, NULL},
       },
       "3"
@@ -966,6 +971,7 @@ struct retro_core_option_definition option_defs_ja[] = {
          { "Sound Orchestra-V", NULL },
          { "Sound Blaster 16", NULL },
          { "AMD-98", NULL },
+         { "WaveStar", NULL },
          { "Otomi-chanx2", NULL },
          { "Otomi-chanx2 + 86", NULL },
          { "None", NULL },

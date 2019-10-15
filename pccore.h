@@ -33,7 +33,8 @@ enum {
 	PCROM_BIOS9821		= 0x10,
 
 	PCCBUS_PC9861K		= 0x0001,
-	PCCBUS_MPU98		= 0x0002
+	PCCBUS_MPU98		= 0x0002,
+	PCCBUS_SMPU98		= 0x0004
 };
 
 /**
@@ -55,6 +56,7 @@ enum tagSoundId
 	SOUNDID_MATE_X_PCM			= 0x60,		/*!< Mate-X PCM */
 	SOUNDID_PC_9801_86_WSS		= 0x64,		/*!< PC-9801-86 + Mate-X PCM(B460) */
 	SOUNDID_PC_9801_86_118		= 0x68,		/*!< PC-9801-86 + PC-9801-118(B460) */
+	SOUNDID_WAVESTAR			= 0x70,		/*!< Wave Star */
 	SOUNDID_AMD98				= 0x80,		/*!< AMD-98 */
 	SOUNDID_SOUNDORCHESTRA		= 0x32,		/*!< SOUND ORCHESTRA */
 	SOUNDID_SOUNDORCHESTRAV		= 0x82,		/*!< SOUND ORCHESTRA-V */
@@ -105,6 +107,9 @@ struct tagNP2Config
 	
 #if defined(SUPPORT_ASYNC_CPU)
 	UINT8	asynccpu; // 非同期CPUモード有効
+#endif
+#if defined(SUPPORT_IDEIO)
+	UINT8	idebaddr; // IDE BIOD アドレス（デフォルト：D8h(D8000h)）
 #endif
 	
 	// リセット時とかあんまり参照されない奴
@@ -170,6 +175,12 @@ struct tagNP2Config
 	UINT8	mpuenable;
 	UINT8	mpuopt;
 	UINT8	mpu_at;
+	
+#if defined(SUPPORT_SMPU98)
+	UINT8	smpuenable;
+	UINT8	smpuopt;
+	UINT8	smpumuteB;
+#endif	/* SUPPORT_SMPU98 */
 
 	UINT8	pc9861enable;
 	UINT8	pc9861sw[3];
@@ -351,8 +362,9 @@ void pccore_exec(BOOL draw);
 void pccore_postevent(UINT32 event);
 
 #ifdef SUPPORT_ASYNC_CPU
-#if !defined(__LIBRETRO__) && !defined(NP2_SDL2) && !defined(NP2_X11) 
-#if !defined (_WINDOWS) 
+extern int asynccpu_lateflag;
+extern int asynccpu_fastflag;
+#if !defined(__LIBRETRO__) && !defined(NP2_SDL2) && !defined(NP2_X11)
 typedef union {
     struct {
         UINT32 LowPart;

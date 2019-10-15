@@ -39,10 +39,6 @@
 #include "xnp2.h"
 #endif
 
-#if !defined(_countof)
-#define _countof(a)	(sizeof(a)/sizeof(a[0]))
-#endif
-
 NP2WAB		np2wab = {0};
 NP2WABWND	np2wabwnd = {0};
 NP2WABCFG	np2wabcfg;
@@ -73,6 +69,49 @@ static int		ga_lastscalemode = 0;
 static int		ga_lastrealwidth = 0;
 static int		ga_lastrealheight = 0;
 static int		ga_screenupdated = 0;
+
+#if defined(_WIN32)
+static int wab_cs_initialized = 0;
+static CRITICAL_SECTION wab_cs;
+#endif
+
+static BOOL wab_tryenter_criticalsection(void){
+#if defined(_WIN32)
+	if(!wab_cs_initialized) return TRUE;
+	return TryEnterCriticalSection(&wab_cs);
+#else
+	return TRUE;
+#endif
+}
+static void wab_enter_criticalsection(void){
+#if defined(_WIN32)
+	if(!wab_cs_initialized) return;
+	EnterCriticalSection(&wab_cs);
+#endif
+}
+static void wab_leave_criticalsection(void){
+#if defined(_WIN32)
+	if(!wab_cs_initialized) return;
+	LeaveCriticalSection(&wab_cs);
+#endif
+}
+static void wab_init_criticalsection(void){
+#if defined(_WIN32)
+	if(!wab_cs_initialized){
+		memset(&wab_cs, 0, sizeof(wab_cs));
+		InitializeCriticalSection(&wab_cs);
+		wab_cs_initialized = 1;
+	}
+#endif
+}
+static void wab_delete_criticalsection(void){
+#if defined(_WIN32)
+	if(wab_cs_initialized){
+		DeleteCriticalSection(&wab_cs);
+		wab_cs_initialized = 0;
+	}
+#endif
+}
 
 /**
  * 設定
@@ -121,9 +160,9 @@ void wabwin_readini()
 #if defined(NP2_X11) || defined(NP2_SDL2) || defined(__LIBRETRO__)
 	milstr_ncpy(szPath, modulefile, sizeof(szPath));
 #else
-	initgetfile(szPath, _countof(szPath));
+	initgetfile(szPath, NELEMENTS(szPath));
 #endif
-	ini_read(szPath, g_Name, s_wabwndini, _countof(s_wabwndini));
+	ini_read(szPath, g_Name, s_wabwndini, NELEMENTS(s_wabwndini));
 }
 
 /**
@@ -135,13 +174,13 @@ void wabwin_writeini()
 		TCHAR szPath[MAX_PATH];
 #if defined(NP2_SDL2) || defined(__LIBRETRO__)
 		milstr_ncpy(szPath, modulefile, sizeof(szPath));
-		ini_write(szPath, g_Name, s_wabwndini, _countof(s_wabwndini));
+		ini_write(szPath, g_Name, s_wabwndini, NELEMENTS(s_wabwndini));
 #elif defined(NP2_X11)
 		milstr_ncpy(szPath, modulefile, sizeof(szPath));
-		ini_write(szPath, g_Name, s_wabwndini, _countof(s_wabwndini), FALSE);
+		ini_write(szPath, g_Name, s_wabwndini, NELEMENTS(s_wabwndini), FALSE);
 #else
-		initgetfile(szPath, _countof(szPath));
-		ini_write(szPath, g_Name, s_wabwndini, _countof(s_wabwndini));
+		initgetfile(szPath, NELEMENTS(szPath));
+		ini_write(szPath, g_Name, s_wabwndini, NELEMENTS(s_wabwndini));
 #endif
 	}
 }
@@ -259,11 +298,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			mii.cbSize = sizeof(mii);
 			mii.fMask = MIIM_TYPE | MIIM_STATE | MIIM_ID | MIIM_SUBMENU | MIIM_DATA;
 			mii.dwTypeData = szString;
-			mii.cch = _countof(szString);
+			mii.cch = NELEMENTS(szString);
 			GetMenuItemInfo(hWabMenu, 0, TRUE, &mii);
 			InsertMenuItem(hSysMenu, 0, TRUE, &mii);
 			mii.dwTypeData = szString;
-			mii.cch = _countof(szString);
+			mii.cch = NELEMENTS(szString);
 			GetMenuItemInfo(hWabMenu, 1, TRUE, &mii);
 			InsertMenuItem(hSysMenu, 0, TRUE, &mii);
 			CheckMenuItem(hSysMenu, IDM_WABSYSMENU_HALFTONE, MF_BYCOMMAND | (np2wabcfg.halftone ? MF_CHECKED : MF_UNCHECKED));
@@ -485,8 +524,10 @@ void np2wab_drawframe()
 #else
 			np2wab_drawWABWindow(np2wabwnd.hDCBuf);
 #endif
-			if(!np2wabwnd.multiwindow)
+			if(!np2wabwnd.multiwindow){
 				scrnmng_bltwab();
+				scrnmng_update();
+			}
 #if !defined(NP2_X11) && !defined(NP2_SDL2) && !defined(__LIBRETRO__)
 		}
 	}else{
@@ -501,12 +542,34 @@ void np2wab_drawframe()
 			}
 			if(np2wabwnd.ready && (np2wab.relay&0x3)!=0){
 				if(ga_screenupdated){
+					wab_enter_criticalsection();
+					//int suspendcounter = 0;
+					//if(ga_hThread) suspendcounter = SuspendThread(ga_hThread);
 					if(!np2wabwnd.multiwindow){
 						//np2wab_drawWABWindow(np2wabwnd.hDCBuf); // ga_ThreadFuncでやる
 						scrnmng_bltwab();
 					}
 					ga_screenupdated = 0;
-					if(ga_hThread) ResumeThread(ga_hThread);
+					if(!np2wabwnd.multiwindow){
+						// XXX: ウィンドウアクセラレータ動作中は内蔵グラフィックを描画しない
+						scrnmng_update();
+					}
+					wab_leave_criticalsection();
+					//if(ga_hThread){
+					//	int i;
+					//	for(i=0;i<suspendcounter+1;i++){
+					//		ResumeThread(ga_hThread);
+					//	}
+					//}
+				//}else{
+				//	int suspendcounter = 0;
+				//	//if(ga_hThread){
+				//	//	int i;
+				//	//	suspendcounter = SuspendThread(ga_hThread);
+				//	//	for(i=0;i<suspendcounter+1;i++){
+				//	//		ResumeThread(ga_hThread);
+				//	//	}
+				//	//}
 				}
 			}
 		}
@@ -522,16 +585,22 @@ unsigned int __stdcall ga_ThreadFunc(LPVOID vdParam) {
 	DWORD time = GetTickCount();
 	int timeleft = 0;
 	while (!ga_exitThread && ga_threadmode) {
-		if(np2wabwnd.ready && np2wabwnd.hWndWAB!=NULL && np2wabwnd.drawframe!=NULL && (np2wab.relay&0x3)!=0){
-			np2wabwnd.drawframe();
-			np2wab_drawWABWindow(np2wabwnd.hDCBuf); 
-			// 画面転送待ち
-			ga_screenupdated = 1;
-			if(!ga_exitThread) SuspendThread(ga_hThread);
+		if(!ga_screenupdated){
+			wab_enter_criticalsection();
+			wab_leave_criticalsection();
+			if(np2wabwnd.ready && np2wabwnd.hWndWAB!=NULL && np2wabwnd.drawframe!=NULL && (np2wab.relay&0x3)!=0){
+				np2wabwnd.drawframe();
+				np2wab_drawWABWindow(np2wabwnd.hDCBuf); 
+				// 画面転送待ち
+				ga_screenupdated = 1;
+				//if(!ga_exitThread) SuspendThread(ga_hThread);
+			}else{
+				// 描画しないのに高速でぐるぐる回しても仕方ないのでスリープ
+				ga_screenupdated = 1;
+				//if(!ga_exitThread) SuspendThread(ga_hThread);
+			}
 		}else{
-			// 描画しないのに高速でぐるぐる回しても仕方ないのでスリープ
-			ga_screenupdated = 1;
-			if(!ga_exitThread) SuspendThread(ga_hThread);
+			Sleep(8);
 		}
 	}
 	ga_threadmode = 0;
@@ -568,6 +637,9 @@ void np2wab_init(HINSTANCE hInstance, HWND hWndMain)
 	WNDCLASSEX wcex = {0};
 	HDC hdc;
 #endif
+
+	// クリティカルセクション初期化
+	wab_init_criticalsection();
 
 	//// 専用INIセクション読み取り
 	//wabwin_readini();
@@ -618,9 +690,12 @@ void np2wab_reset(const NP2CFG *pConfig)
 	// マルチスレッドモードなら先にスレッド処理を終了させる
 	if(ga_threadmode && ga_hThread){
 		ga_exitThread = 1;
-		while(((int)ResumeThread(ga_hThread))>0);
-		while(WaitForSingleObject(ga_hThread, 200)==WAIT_TIMEOUT){
-			ResumeThread(ga_hThread);
+		//while(((int)ResumeThread(ga_hThread))>0);
+		//while(WaitForSingleObject(ga_hThread, 200)==WAIT_TIMEOUT){
+		//	ResumeThread(ga_hThread);
+		//}
+		if(WaitForSingleObject(ga_hThread, 4000)==WAIT_TIMEOUT){
+			TerminateThread(ga_hThread, 0);
 		}
 		CloseHandle(ga_hThread);
 		ga_hThread = NULL;
@@ -661,9 +736,12 @@ void np2wab_bind(void)
 	// マルチスレッドモードなら先にスレッド処理を終了させる
 	if(ga_threadmode && ga_hThread){
 		ga_exitThread = 1;
-		while(((int)ResumeThread(ga_hThread))>0);
-		while(WaitForSingleObject(ga_hThread, 200)==WAIT_TIMEOUT){
-			ResumeThread(ga_hThread);
+		//while(((int)ResumeThread(ga_hThread))>0);
+		//while(WaitForSingleObject(ga_hThread, 200)==WAIT_TIMEOUT){
+		//	ResumeThread(ga_hThread);
+		//}
+		if(WaitForSingleObject(ga_hThread, 4000)==WAIT_TIMEOUT){
+			TerminateThread(ga_hThread, 0);
 		}
 		CloseHandle(ga_hThread);
 		ga_hThread = NULL;
@@ -712,10 +790,10 @@ void np2wab_shutdown()
 #else
 	// マルチスレッドモードなら先にスレッド処理を終了させる
 	ga_exitThread = 1;
-	while(((int)ResumeThread(ga_hThread))>0);
-	if(WaitForSingleObject(ga_hThread, 1000)==WAIT_TIMEOUT){
-		ResumeThread(ga_hThread);
-	}
+	//while(((int)ResumeThread(ga_hThread))>0);
+	//if(WaitForSingleObject(ga_hThread, 1000)==WAIT_TIMEOUT){
+	//	ResumeThread(ga_hThread);
+	//}
 	if(WaitForSingleObject(ga_hThread, 4000)==WAIT_TIMEOUT){
 		TerminateThread(ga_hThread, 0); // 諦めて強制終了
 	}
@@ -730,6 +808,9 @@ void np2wab_shutdown()
 	DestroyWindow(np2wabwnd.hWndWAB);
 	np2wabwnd.hWndWAB = NULL;
 #endif
+	
+	// クリティカルセクション破棄
+	wab_delete_criticalsection();
 
 	//// 専用INIセクション書き込み
 	//wabwin_writeini();

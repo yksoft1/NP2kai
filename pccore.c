@@ -19,6 +19,9 @@
 #include	"cbuscore.h"
 #include	"pc9861k.h"
 #include	"mpu98ii.h"
+#if defined(SUPPORT_SMPU98)
+#include	"smpu98.h"
+#endif
 #include	"amd98.h"
 #include "bios/bios.h"
 #include "bios/biosmem.h"
@@ -100,6 +103,9 @@ const OEMCHAR np2version[] = OEMTEXT(NP2VER_CORE " " NP2VER_GIT);
 #if defined(SUPPORT_ASYNC_CPU)
 				0,
 #endif
+#if defined(SUPPORT_IDEIO)
+				0xD8,
+#endif
 
 				OEMTEXT("VX"), PCBASECLOCK25, PCBASEMULTIPLE, 1,
 				{0x48, 0x05, 0x04, 0x08, 0x01, 0x00, 0x00, 0x6e},
@@ -107,7 +113,7 @@ const OEMCHAR np2version[] = OEMTEXT(NP2VER_CORE " " NP2VER_GIT);
 				44100, 150, 4, 0,
 				{0, 0, 0}, 0xd1, 0x7f, 0xd1, 0, 0, 1, 
 				
-				0x0188, 0x80, 3, 12, 12, 0xff, 1, // 118
+				0x0188, 0x80, 3, 12, 12, 0xff, 0, // 118
 
 				0x70, 1, 3, // Mate-X PCM
 
@@ -117,6 +123,9 @@ const OEMCHAR np2version[] = OEMTEXT(NP2VER_CORE " " NP2VER_GIT);
 
 				3, {0x0c, 0x0c, 0x08, 0x06, 0x03, 0x0c}, 100, 64, 64, 64, 64, 64,
 				1, 0x82, 0,
+#if defined(SUPPORT_SMPU98)
+				0, 0x82, 0,
+#endif	/* SUPPORT_SMPU98 */
 				0, {0x17, 0x04, 0x17}, {0x0c, 0x0c, 0x02, 0x10, 0x3f, 0x3f},
 #if defined(SUPPORT_FMGEN)
 				1,
@@ -175,7 +184,7 @@ const OEMCHAR np2version[] = OEMTEXT(NP2VER_CORE " " NP2VER_GIT);
 	};
 
 	PCCORE	pccore = {	PCBASECLOCK25, PCBASEMULTIPLE,
-						0, PCMODEL_VX, 0, 0, {0x3e, 0x73, 0x7b}, 0,
+						0, PCMODEL_VX, 0, 0, {0x3e, 0xe3, 0x7b}, 0,
 						SOUNDID_NONE, 0,
 						PCBASECLOCK25 * PCBASEMULTIPLE};
 	PCSTAT	pcstat = {3, TRUE, FALSE, FALSE};
@@ -191,7 +200,9 @@ const OEMCHAR np2version[] = OEMTEXT(NP2VER_CORE " " NP2VER_GIT);
 #endif	/* SUPPORT_FMGEN */
 
 #ifdef SUPPORT_ASYNC_CPU
-#if !defined(__LIBRETRO__) && !defined(NP2_SDL2) && !defined(NP2_X11) 
+int asynccpu_lateflag = 0;
+int asynccpu_fastflag = 0;
+#if !defined(__LIBRETRO__) && !defined(NP2_SDL2) && !defined(NP2_X11)
 LARGE_INTEGER asynccpu_lastclock = {0};
 LARGE_INTEGER asynccpu_clockpersec = {0};
 LARGE_INTEGER asynccpu_clockcount = {0};
@@ -226,7 +237,11 @@ static void pccore_set(const NP2CFG *pConfig)
 {
 	UINT8	model;
 	UINT32	multiple;
+#if defined(SUPPORT_LARGE_MEMORY)
 	UINT16	extsize;
+#else
+	UINT8	extsize;
+#endif
 
 	ZeroMemory(&pccore, sizeof(pccore));
 	model = PCMODEL_VX;
@@ -300,6 +315,13 @@ static void pccore_set(const NP2CFG *pConfig)
 	{
 		pccore.device |= PCCBUS_PC9861K;
 	}
+#if defined(SUPPORT_SMPU98)
+	if (pConfig->smpuenable)
+	{
+		pccore.device |= PCCBUS_SMPU98;
+	}
+	else 
+#endif
 	if (pConfig->mpuenable)
 	{
 		pccore.device |= PCCBUS_MPU98;
@@ -388,6 +410,9 @@ void pccore_init(void) {
 
 	rs232c_construct();
 	mpu98ii_construct();
+#if defined(SUPPORT_SMPU98)
+	smpu98_construct();
+#endif
 	pc9861k_initialize();
 
 	iocore_create();
@@ -440,6 +465,9 @@ void pccore_term(void) {
 	iocore_destroy();
 
 	pc9861k_deinitialize();
+#if defined(SUPPORT_SMPU98)
+	smpu98_destruct();
+#endif
 	mpu98ii_destruct();
 	rs232c_destruct();
 
@@ -1011,8 +1039,15 @@ void pccore_exec(BOOL draw) {
 #endif	/* SUPPORT_HRTIMER */
 		nevent_progress();
 	}
+#if defined(SUPPORT_ASYNC_CPU)
+	asynccpu_lateflag = 0;
+	asynccpu_fastflag = 0;
+#endif
 	artic_callback();
 	mpu98ii_callback();
+#if defined(SUPPORT_SMPU98)
+	smpu98_callback();
+#endif
 	diskdrv_callback();
 	calendar_inc();
 	S98_sync();

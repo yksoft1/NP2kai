@@ -53,6 +53,10 @@
 #include "scrnmng.h"
 #include "sysmng.h"
 
+#if defined(SUPPORT_SMPU98)
+#include "smpu98.h"
+#endif
+
 #include "gtk2/xnp2.h"
 #include "gtk2/gtk_menu.h"
 #include "gtk2/gtk_keyboard.h"
@@ -339,6 +343,7 @@ static GtkRadioActionEntry soundboard_entries[] = {
 { "sb16",	    NULL, "Sound Blaster 16",        NULL, NULL, 0x41 },
 #endif	/* SUPPORT_SOUND_SB16 */
 { "amd98",          NULL, "_AMD98",                  NULL, NULL, 0x80 },
+{ "wavestar",       NULL, "_WaveStar",               NULL, NULL, 0x70 },
 #if defined(SUPPORT_PX)
 { "px1",            NULL, "Otomi-chanx2",            NULL, NULL, 0x30 },
 { "px2",            NULL, "Otomi-chanx2 + 86",       NULL, NULL, 0x50 },
@@ -559,6 +564,7 @@ static const gchar *ui_info =
 "    <menuitem action='sb16'/>\n"
 #endif	/* SUPPORT_SOUND_SB16 */
 "    <menuitem action='amd98'/>\n"
+"    <menuitem action='wavestar'/>\n"
 #if defined(SUPPORT_PX)
 "    <menuitem action='px1'/>\n"
 "    <menuitem action='px2'/>\n"
@@ -580,11 +586,13 @@ static const gchar *ui_info =
 "    <menuitem action='7.6mb'/>\n"
 "    <menuitem action='9.6mb'/>\n"
 "    <menuitem action='13.6mb'/>\n"
+#if defined(CPUCORE_IA32)
 "    <menuitem action='16.6mb'/>\n"
 "    <menuitem action='32.6mb'/>\n"
 "    <menuitem action='64.6mb'/>\n"
 "    <menuitem action='120.6mb'/>\n"
 "    <menuitem action='230.6mb'/>\n"
+#endif
 "   </menu>\n"
 "   <menu name='FPU' action='FPUMenu'>\n"
 "    <menuitem action='fpu80'/>\n"
@@ -1219,6 +1227,9 @@ cb_midipanic(GtkAction *action, gpointer user_data)
 
 	rs232c_midipanic();
 	mpu98ii_midipanic();
+#if defined(SUPPORT_SMPU98)
+	smpu98_midipanic();
+#endif
 	pc9861k_midipanic();
 }
 
