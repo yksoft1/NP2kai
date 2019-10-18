@@ -10,8 +10,9 @@ CFLAGS =  	-utf-8 -nologo -O2 -MT -EHsc -DNDEBUG -DWIN32 -D__WIN32__ -DNMAKE -D_
 			-DSUPPORT_PC9821 -DSUPPORT_PEGC -DUSE_FPU -DSUPPORT_FPU_DOSBOX -DSUPPORT_FPU_DOSBOX2 -DSUPPORT_FPU_SOFTFLOAT \
 			-DSUPPORT_GPIB -DUSE_MMX -DUSE_3DNOW -DUSE_SSE -DUSE_SSE2 -DUSE_SSE3 -DUSE_TSC \
 			-DSUPPORT_PCI -DSUPPORT_WAB -DSUPPORT_CL_GD5430 -DSUPPORT_NET -DSUPPORT_LGY98 \
-			-DUSE_MAME -DSUPPORT_FMGEN -DSUPPORT_SOUND_SB16 \
+			-DUSE_MAME -DSUPPORT_FMGEN -DSUPPORT_SOUND_SB16 -DSUPPORT_SMPU98 -DSUPPORT_WACOM_TABLET \
 			-D_WINDOWS -DUSE_FASTPAGING -DUSE_VME -DBIOS_IO_EMULATION \
+			-DSUPPORT_RS232C_FIFO -DHOOK_SYSKEY -DALLOW_MULTIRUN -DSUPPORT_HRTIMER \
 			-DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DSUPPORT_IDEIO \
 			-DSUPPORT_SCRN_DIRECT3D -DSUPPORT_FAST_MEMORYCHECK -DSUPPORT_ASYNC_CPU \
 			-DSUPPORT_NP2_THREAD -DNP2_THREAD_WIN -DGIT_VERSION=\"\" \
@@ -93,6 +94,7 @@ OBJS	=	$(NP2_PATH)\calendar.obj \
 			$(NP2_PATH)\cbus\sasiio.obj \
 			$(NP2_PATH)\cbus\scsicmd.obj \
 			$(NP2_PATH)\cbus\scsiio.obj \
+			$(NP2_PATH)\cbus\smpu98.obj \
 			$(NP2_PATH)\codecnv\tcswap16.obj \
 			$(NP2_PATH)\codecnv\ucs2utf8.obj \
 			$(NP2_PATH)\codecnv\utf8ucs2.obj \
@@ -667,6 +669,8 @@ OBJS_W9X =	$(NP2_PATH)\win9x\commng.obj \
 			$(NP2_PATH)\win9x\commng\cmnull.obj \
 			$(NP2_PATH)\win9x\commng\cmpara.obj \
 			$(NP2_PATH)\win9x\commng\cmserial.obj \
+			$(NP2_PATH)\win9x\commng\cmwacom.obj \
+			$(NP2_PATH)\win9x\commng\wintab\Utils.obj \
 			$(NP2_PATH)\win9x\debuguty\view1mb.obj \
 			$(NP2_PATH)\win9x\debuguty\viewasm.obj \
 			$(NP2_PATH)\win9x\debuguty\viewer.obj \

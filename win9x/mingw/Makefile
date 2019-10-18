@@ -9,9 +9,13 @@ RM		=	rm -f
 
 NP2_PATH	= ../..
 
-CFLAGS	=	-O3 -fno-tree-vectorize -Wstrict-overflow=0 -Wstrict-aliasing=0 -Wno-narrowing -DNDEBUG \
+CFLAGS	=	-O3 -fno-tree-vectorize -Wstrict-overflow=0 -Wstrict-aliasing=0 -Wno-narrowing -D_WINDOWS -DNDEBUG \
 			-DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DSUPPORT_SOUND_SB16 -DUSE_MAME -DSUPPORT_FMGEN \
-			-DGIT_VERSION=\"0\" \
+			-DALLOW_MULTIRUN -DSUPPORT_SMPU98 -DSUPPORT_FAST_MEMORYCHECK \
+			-DSUPPORT_ASYNC_CPU -DSUPPORT_WACOM_TABLET -DSUPPORT_RS232C_FIFO \
+			-DSUPPORT_NAMED_PIPE -DSUPPORT_WAB -DSUPPORT_CL_GD5430 -DSUPPORT_GPIB \
+			-DHOOK_SYSKEY \
+			-DGIT_VERSION=\"\" \
 			-I. -I.. \
 			-I$(NP2_PATH) \
 			-I$(NP2_PATH)/codecnv \
@@ -23,6 +27,7 @@ CFLAGS	=	-O3 -fno-tree-vectorize -Wstrict-overflow=0 -Wstrict-aliasing=0 -Wno-na
 			-I$(NP2_PATH)/cbus \
 			-I$(NP2_PATH)/sound \
 			-I$(NP2_PATH)/vram \
+			-I$(NP2_PATH)/wab \
 			-I$(NP2_PATH)/generic \
 			-I$(NP2_PATH)/zlib \
 			-I$(NP2_PATH)/win9x/dialog \
@@ -91,6 +96,7 @@ CPPSRCS	=	$(NP2_PATH)/calendar.c \
 			$(wildcard $(NP2_PATH)/sound/fmgen/*.cpp) \
 			$(wildcard $(NP2_PATH)/trap/*.c) \
 			$(wildcard $(NP2_PATH)/vram/*.c) \
+			$(wildcard $(NP2_PATH)/wab/*.c) \
 			$(wildcard $(NP2_PATH)/i286c/*.c) \
 			$(NP2_PATH)/common/_memory.c \
 			$(NP2_PATH)/common/arc.c \
@@ -104,12 +110,12 @@ CPPSRCS	=	$(NP2_PATH)/calendar.c \
 			$(NP2_PATH)/common/strres.c \
 			$(NP2_PATH)/common/textfile.c \
 			$(NP2_PATH)/common/wavefile.c \
-			$(wildcard $(NP2_PATH)/wab/*.c) \
 			$(wildcard $(NP2_PATH)/win9x/*.cpp)\
 			$(wildcard $(NP2_PATH)/win9x/dialog/*.cpp)\
 			$(wildcard $(NP2_PATH)/win9x/misc/*.cpp)\
 			$(NP2_PATH)/win9x/soundmng/sddsound3.cpp \
 			$(wildcard $(NP2_PATH)/win9x/commng/*.cpp)\
+			$(wildcard $(NP2_PATH)/win9x/commng/wintab/*.cpp)\
 			$(wildcard $(NP2_PATH)/win9x/debuguty/*.cpp)\
 			$(wildcard $(NP2_PATH)/win9x/subwnd/*.cpp)\
 			$(wildcard $(NP2_PATH)/win9x/ext/*.cpp)\

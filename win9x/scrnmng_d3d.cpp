@@ -227,7 +227,7 @@ static void renewalclientsize(BOOL winloc) {
 		d3d.rect.bottom = height;
 		getscreensize(&scrnwidth, &scrnheight, d3d.scrnmode);
 		if ((np2oscfg.paddingx)/* && (multiple == 8)*/) {
-			extend = min(scrnstat.extend, d3d.extend);
+			extend = np2min(scrnstat.extend, d3d.extend);
 		}
 		fscrnmod = FSCRNCFG_fscrnmod & FSCRNMOD_ASPECTMASK;
 		if(fscrnmod==FSCRNMOD_ASPECTFIX8) {
@@ -281,7 +281,7 @@ static void renewalclientsize(BOOL winloc) {
 		getscreensize(&scrnwidth, &scrnheight, d3d.scrnmode);
 		if (!(d3d.scrnmode & SCRNMODE_ROTATE)) {
 			if ((np2oscfg.paddingx)/* && (multiple == 8)*/) {
-				extend = min(scrnstat.extend, d3d.extend);
+				extend = np2min(scrnstat.extend, d3d.extend);
 			}
 			d3d.rect.right = width + extend;
 			d3d.rect.left = (multiple != 8 ? extend : 0);
@@ -291,7 +291,7 @@ static void renewalclientsize(BOOL winloc) {
 		}
 		else {
 			if ((np2oscfg.paddingy)/* && (multiple == 8)*/) {
-				extend = min(scrnstat.extend, d3d.extend);
+				extend = np2min(scrnstat.extend, d3d.extend);
 			}
 			d3d.rect.right = height;
 			d3d.rect.bottom = width + (multiple == 8 ? extend : 0);
