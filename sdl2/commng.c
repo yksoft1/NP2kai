@@ -113,7 +113,9 @@ commng_create(UINT device)
 			ret = cmserial_create(cfg->port - COMPORT_COM1 + 1, cfg->param, cfg->speed);
 #endif	/* __LIBRETRO__ */
 		} else if (cfg->port == COMPORT_MIDI) {
+#if !defined (EMSCRIPTEN)
 			ret = cmmidi_create(device, cfg->mout, cfg->min, cfg->mdl);
+#endif
 			if (ret) {
 				(*ret->msg)(ret, COMMSG_MIMPIDEFFILE, (INTPTR)cfg->def);
 				(*ret->msg)(ret, COMMSG_MIMPIDEFEN, (INTPTR)cfg->def_en);
