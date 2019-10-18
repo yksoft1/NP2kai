@@ -226,6 +226,9 @@ static void renewalclientsize(BOOL winloc) {
 		d3d.rect.right = width;
 		d3d.rect.bottom = height;
 		getscreensize(&scrnwidth, &scrnheight, d3d.scrnmode);
+		if ((np2oscfg.paddingx)/* && (multiple == 8)*/) {
+			extend = min(scrnstat.extend, d3d.extend);
+		}
 		fscrnmod = FSCRNCFG_fscrnmod & FSCRNMOD_ASPECTMASK;
 		if(fscrnmod==FSCRNMOD_ASPECTFIX8) {
 			multiple = np2min(width, height);
@@ -277,22 +280,23 @@ static void renewalclientsize(BOOL winloc) {
 		multiple = scrnstat.multiple;
 		getscreensize(&scrnwidth, &scrnheight, d3d.scrnmode);
 		if (!(d3d.scrnmode & SCRNMODE_ROTATE)) {
-			if ((np2oscfg.paddingx) && (multiple == 8)) {
-				extend = np2min(scrnstat.extend, d3d.extend);
+			if ((np2oscfg.paddingx)/* && (multiple == 8)*/) {
+				extend = min(scrnstat.extend, d3d.extend);
 			}
 			d3d.rect.right = width + extend;
+			d3d.rect.left = (multiple != 8 ? extend : 0);
 			d3d.rect.bottom = height;
-			d3d.scrn.left = np2oscfg.paddingx - extend;
+			d3d.scrn.left = np2oscfg.paddingx - (multiple == 8 ? extend : 0);
 			d3d.scrn.top = np2oscfg.paddingy;
 		}
 		else {
-			if ((np2oscfg.paddingy) && (multiple == 8)) {
-				extend = np2min(scrnstat.extend, d3d.extend);
+			if ((np2oscfg.paddingy)/* && (multiple == 8)*/) {
+				extend = min(scrnstat.extend, d3d.extend);
 			}
 			d3d.rect.right = height;
-			d3d.rect.bottom = width + extend;
+			d3d.rect.bottom = width + (multiple == 8 ? extend : 0);
 			d3d.scrn.left = np2oscfg.paddingx;
-			d3d.scrn.top = np2oscfg.paddingy - extend;
+			d3d.scrn.top = np2oscfg.paddingy - (multiple == 8 ? extend : 0);
 		}
 		d3d.scrn.right = np2oscfg.paddingx + scrnwidth;
 		d3d.scrn.bottom = np2oscfg.paddingy + scrnheight;
@@ -305,15 +309,6 @@ static void renewalclientsize(BOOL winloc) {
 		scrnmng_setwindowsize(g_hWndMain, scrnwidth, scrnheight);
 		winlocex_move(wlex);
 		winlocex_destroy(wlex);
-
-		//if(d3d.d3dparam.BackBufferWidth != scrnwidth+2 || d3d.d3dparam.BackBufferHeight != scrnheight+2){
-		//	d3d.d3dparam.BackBufferWidth = scrnwidth+2;
-		//	d3d.d3dparam.BackBufferHeight = scrnheight+2;
-		//	if(d3d.d3ddev!=NULL){
-		//		scrnmngD3D_destroy();
-		//		scrnmngD3D_create(g_scrnmode);
-		//	}
-		//}
 	}
 	scrnsurf.width = width;
 	scrnsurf.height = height;
@@ -609,6 +604,51 @@ static int checkResolution(int width, int height) {
 	return(FAILURE);
 }
 
+typedef struct tagMONITORINFOENUMDATA{
+	int found;
+	int areasize;
+    RECT np2windowrect;
+    RECT monitorrect;
+} MONITORINFOENUMDATA;
+
+#define MAX(a, b)	((a>b) ? (a) :(b))
+#define MIN(a, b)	((a>b) ? (b) :(a))
+
+static BOOL CALLBACK monitorInfoEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData){
+	MONITORINFOENUMDATA* mondata = (MONITORINFOENUMDATA*)dwData;
+	int cx1, cx2, cy1, cy2;
+	int w1, w2, h1, h2;
+	int distx, disty;
+	int sx1, sx2, ex1, ex2, sy1, sy2, ey1, ey2;
+	sx1 = mondata->np2windowrect.left;
+	ex1 = mondata->np2windowrect.right;
+	sy1 = mondata->np2windowrect.top;
+	ey1 = mondata->np2windowrect.bottom;
+	sx2 = lprcMonitor->left;
+	ex2 = lprcMonitor->right;
+	sy2 = lprcMonitor->top;
+	ey2 = lprcMonitor->bottom;
+	cx1 = (sx1 + ex1)/2;
+	cy1 = (sy1 + ey1)/2;
+	w1 = ex1 - sx1;
+	h1 = ey1 - sy1;
+	cx2 = (sx2 + ex2)/2;
+	cy2 = (sy2 + ey2)/2;
+	w2 = ex2 - sx2;
+	h2 = ey2 - sy2;
+	distx = (cx2 > cx1 ? cx2 - cx1 : cx1 - cx2);
+	disty = (cy2 > cy1 ? cy2 - cy1 : cy1 - cy2);
+	if(distx < (w1 + w2)/2 && disty < (h1 + h2)/2){
+		int areasize = (MIN(ex1, ex2) - MAX(sx1, sx2)) * (MIN(ey1, ey2) - MAX(sy1, sy2));
+		if(areasize > mondata->areasize){
+			mondata->areasize = areasize;
+			mondata->monitorrect = *lprcMonitor;
+			mondata->found = 1;
+		}
+	}
+    return TRUE;
+}
+
 // ----
 
 typedef IDirect3D9 * (WINAPI *TEST_DIRECT3DCREATE9)(UINT SDKVersion);
@@ -760,7 +800,7 @@ BRESULT scrnmngD3D_create(UINT8 scrnmode) {
 		}else{
 			SetWindowLong(g_hWndMain, GWL_STYLE, winstyle);
 			SetWindowLong(g_hWndMain, GWL_EXSTYLE, winstyleex);
-			SetWindowPos(g_hWndMain, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_FRAMECHANGED);
+			SetWindowPos(g_hWndMain, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_FRAMECHANGED|SWP_NOACTIVATE);
 			GetWindowPlacement(g_hWndMain, &wp);
 		}
 	}
@@ -777,7 +817,7 @@ BRESULT scrnmngD3D_create(UINT8 scrnmode) {
 	d3d.d3dparam.MultiSampleQuality = 0;
 	d3d.d3dparam.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	d3d.d3dparam.hDeviceWindow = g_hWndMain;
-	d3d.d3dparam.Windowed = (scrnmode & SCRNMODE_FULLSCREEN) ? FALSE : TRUE;
+	d3d.d3dparam.Windowed = ((scrnmode & SCRNMODE_FULLSCREEN) && np2oscfg.d3d_exclusive) ? FALSE : TRUE;
 	d3d.d3dparam.EnableAutoDepthStencil = FALSE;
 	d3d.d3dparam.AutoDepthStencilFormat = D3DFMT_D16;
 	d3d.d3dparam.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
@@ -808,6 +848,23 @@ BRESULT scrnmngD3D_create(UINT8 scrnmode) {
 #endif
 
 		fscrnmod = FSCRNCFG_fscrnmod;
+
+		// 排他モードを使わないとき
+		if(!np2oscfg.d3d_exclusive){
+			MONITORINFOENUMDATA mondata = {0};
+			fscrnmod |= FSCRNMOD_SAMERES | FSCRNMOD_SAMEBPP; // 排他モードを使わないとき、解像度変更しないことにする（できなくはないが面倒なことこの上ない）
+			GetWindowRect(g_hWndMain, &mondata.np2windowrect); // 猫ウィンドウの位置とサイズを取得
+			EnumDisplayMonitors(NULL, NULL, (MONITORENUMPROC)monitorInfoEnumProc, (LPARAM)&mondata); // 猫のいるモニターを探す
+			if(!mondata.found){
+				// 猫どこにもいない時にはプライマリモニタで
+				mondata.monitorrect.left = mondata.monitorrect.top = 0;
+				mondata.monitorrect.right = GetSystemMetrics(SM_CXSCREEN);
+				mondata.monitorrect.bottom = GetSystemMetrics(SM_CYSCREEN);
+			}
+			MoveWindow(g_hWndMain, mondata.monitorrect.left, mondata.monitorrect.top, 
+				mondata.monitorrect.right - mondata.monitorrect.left, mondata.monitorrect.bottom - mondata.monitorrect.top, TRUE); // ウィンドウサイズを全画面に変える
+		}
+
 		if(!(fscrnmod & FSCRNMOD_SAMERES)){
 			current_d3d_imode = D3D_IMODE_NEAREST_NEIGHBOR;
 		}
@@ -872,6 +929,8 @@ BRESULT scrnmngD3D_create(UINT8 scrnmode) {
 		DispClock::GetInstance()->SetPalettes(bitcolor);
 		DispClock::GetInstance()->Reset();
 #endif
+
+		d3d.extend = 1;
 	}
 	else {
 		int	wabwidth;
@@ -967,9 +1026,9 @@ BRESULT scrnmngD3D_create(UINT8 scrnmode) {
 	d3d.width = width;
 	d3d.height = height;
 	d3d.cliping = 0;
-	if (scrnmode & SCRNMODE_FULLSCREEN) {
+	//if (scrnmode & SCRNMODE_FULLSCREEN) {
 		renewalclientsize(TRUE); // XXX: スナップ解除等が起こるので暫定TRUE
-	}
+	//}
 	lastscrnmode = scrnmode;
 //	screenupdate = 3;					// update!
 #if defined(SUPPORT_WAB)
@@ -1068,13 +1127,13 @@ void scrnmngD3D_fullscrnmenu(int y) {
 			d3d.menudisp = menudisp;
 			if (menudisp == 1) {
 				np2class_enablemenu(g_hWndMain, TRUE);
-				d3d.d3ddev->SetDialogBoxMode(TRUE);
+				if(np2oscfg.d3d_exclusive) d3d.d3ddev->SetDialogBoxMode(TRUE);
 				//d3d.d3ddev->Present(NULL, NULL, NULL, NULL);
 				//InvalidateRect(g_hWndMain, NULL, TRUE);
 				//DrawMenuBar(g_hWndMain);
 			}
 			else {
-				d3d.d3ddev->SetDialogBoxMode(FALSE);
+				if(np2oscfg.d3d_exclusive) d3d.d3ddev->SetDialogBoxMode(FALSE);
 				np2class_enablemenu(g_hWndMain, FALSE);
 				clearoutfullscreen();
 			}
@@ -1091,7 +1150,7 @@ void scrnmngD3D_topwinui(void) {
 	mousemng_disable(MOUSEPROC_WINUI);
 	d3d_enter_criticalsection();
 	if (!d3d.cliping++) {
-		d3d.d3ddev->SetDialogBoxMode(TRUE);
+		if(np2oscfg.d3d_exclusive) d3d.d3ddev->SetDialogBoxMode(TRUE);
 #ifndef __GNUC__
 		WINNLSEnableIME(g_hWndMain, TRUE);
 #endif
@@ -1109,7 +1168,7 @@ void scrnmngD3D_clearwinui(void) {
 #ifndef __GNUC__
 		WINNLSEnableIME(g_hWndMain, FALSE);
 #endif
-		d3d.d3ddev->SetDialogBoxMode(FALSE);
+		if(np2oscfg.d3d_exclusive) d3d.d3ddev->SetDialogBoxMode(FALSE);
 	}
 	if (scrnmng.flag & SCRNFLAG_FULLSCREEN) {
 		np2class_enablemenu(g_hWndMain, FALSE);
@@ -1142,6 +1201,7 @@ void scrnmngD3D_clearwinui(void) {
 
 void scrnmngD3D_setwidth(int posx, int width) {
 	
+	if(scrnstat.multiple < 1) scrnstat.multiple = 8;
 #if defined(SUPPORT_WAB)
 	if(width > WAB_MAX_WIDTH) width = WAB_MAX_WIDTH;
 #else
@@ -1166,6 +1226,7 @@ void scrnmngD3D_setwidth(int posx, int width) {
 				scrnmngD3D_destroy();
 				scrnmngD3D_create(g_scrnmode);
 				d3d_leave_criticalsection();
+				renewalclientsize(TRUE);
 			}
 		}
 	}
@@ -1186,6 +1247,7 @@ void scrnmngD3D_setextend(int extend) {
 				scrnmngD3D_destroy();
 				scrnmngD3D_create(g_scrnmode);
 				d3d_leave_criticalsection();
+				renewalclientsize(TRUE);
 			}
 		}
 	}
@@ -1193,6 +1255,7 @@ void scrnmngD3D_setextend(int extend) {
 
 void scrnmngD3D_setheight(int posy, int height) {
 	
+	if(scrnstat.multiple < 1) scrnstat.multiple = 8;
 #if defined(SUPPORT_WAB)
 	if(height > WAB_MAX_HEIGHT) height = WAB_MAX_HEIGHT;
 #else
@@ -1217,6 +1280,7 @@ void scrnmngD3D_setheight(int posy, int height) {
 				scrnmngD3D_destroy();
 				scrnmngD3D_create(g_scrnmode);
 				d3d_leave_criticalsection();
+				renewalclientsize(TRUE);
 			}
 		}
 	}
@@ -1224,6 +1288,7 @@ void scrnmngD3D_setheight(int posy, int height) {
 
 void scrnmngD3D_setsize(int posx, int posy, int width, int height) {
 	
+	if(scrnstat.multiple < 1) scrnstat.multiple = 8;
 #if defined(SUPPORT_WAB)
 	if(width > WAB_MAX_WIDTH) width = WAB_MAX_WIDTH;
 	if(height > WAB_MAX_HEIGHT) height = WAB_MAX_HEIGHT;
@@ -1251,6 +1316,7 @@ void scrnmngD3D_setsize(int posx, int posy, int width, int height) {
 				scrnmngD3D_destroy();
 				scrnmngD3D_create(g_scrnmode);
 				d3d_leave_criticalsection();
+				renewalclientsize(TRUE);
 			}
 		}
 	}
@@ -1506,6 +1572,7 @@ void scrnmngD3D_setmultiple(int multiple)
 				scrnmngD3D_destroy();
 				scrnmngD3D_create(g_scrnmode);
 				d3d_leave_criticalsection();
+				renewalclientsize(TRUE);
 			}
 		}
 	}
@@ -1840,7 +1907,7 @@ void scrnmngD3D_bltwab() {
 			dst = &d3d.rect;
 		}else{
 			dst = &d3d.rect;
-			exmgn = scrnstat.extend;
+			exmgn = (scrnstat.multiple == 8 ? scrnstat.extend : 0);
 		}
 		src.left = src.top = 0;
 		
@@ -1848,13 +1915,13 @@ void scrnmngD3D_bltwab() {
 			src.right = scrnstat.width;
 			src.bottom = scrnstat.height;
 			dstmp = *dst;
-			//dstmp.left += exmgn;
+			dstmp.left += exmgn;
 			dstmp.right = dstmp.left + scrnstat.width;
 		}else{
 			src.right = scrnstat.height;
 			src.bottom = scrnstat.width;
 			dstmp = *dst;
-			//dstmp.left += exmgn;
+			dstmp.left += exmgn;
 			dstmp.right = dstmp.left + scrnstat.height;
 		}
 		d3d_enter_criticalsection();
@@ -1862,6 +1929,21 @@ void scrnmngD3D_bltwab() {
 		d3d_leave_criticalsection();
 	}
 #endif
+}
+
+// 描画領域の範囲をクライアント座標で取得
+void scrnmngD3D_getrect(RECT *lpRect) {
+	if (d3d.scrnmode & SCRNMODE_FULLSCREEN) {
+		if (GetWindowLongPtr(g_hWndMain, NP2GWLP_HMENU)) {
+			*lpRect = d3d.scrn;
+		}
+		else {
+			*lpRect = d3d.scrnclip;
+		}
+	}
+	else {
+		*lpRect = d3d.scrn;
+	}
 }
 
 #else
@@ -1927,6 +2009,8 @@ void scrnmngD3D_exitsizing(void){}
 void scrnmngD3D_updatefsres(void){}
 void scrnmngD3D_blthdc(HDC hdc){}
 void scrnmngD3D_bltwab(void){}
+
+void scrnmngD3D_getrect(RECT &lpRect) {}
 
 #if defined(SUPPORT_DCLOCK)
 BOOL scrnmngD3D_isdispclockclick(const POINT *pt){return FALSE;}
