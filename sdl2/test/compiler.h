@@ -10,6 +10,7 @@
 //#include	<pthread.h>
 
 #ifdef WIN32
+#define _WINDOWS
 #include <windows.h>
 #endif
 
@@ -134,12 +135,14 @@ typedef	unsigned short	WORD;
 // for ARM optimize
 #define	REG8		UINT8
 #define REG16		UINT16
+
+#if defined (_M_ARM) || defined (__arm__)
 #define	LOW12(a)	((((UINT32)(a)) << 20) >> 20)
 #define	LOW14(a)	((((UINT32)(a)) << 18) >> 18)
 #define	LOW15(a)	((((UINT32)(a)) << 17) >> 17)
 #define	LOW16(a)	((UINT16)(a))
 #define	HIGH16(a)	(((UINT32)(a)) >> 16)
-
+#endif
 
 #define	BRESULT				UINT
 #define	OEMCHAR				char
@@ -216,20 +219,20 @@ typedef SINT32	FILELEN;
 #define	SUPPORT_SWWABRLYSND
 #endif
 #undef	SUPPORT_SASI
-#define SUPPORT_IDEIO
 #undef	SUPPORT_SCSI
+#define SUPPORT_IDEIO
 #define	SUPPORT_HRTIMER
 
-#define	SUPPORT_JOYSTICK
-#define	USE_SDL_JOYSTICK
+#undef SUPPORT_EXTERNALCHIP
 
-#define	SUPPORT_KEYDISP
+//#define	SUPPORT_JOYSTICK
+//#define	USE_SDL_JOYSTICK
+
+//#define	SUPPORT_KEYDISP
 //#define	SUPPORT_STATSAVE
 
 #define SUPPORT_ARC
 #define SUPPORT_ZLIB
-
-#define	SUPPORT_FMGEN
 
 #define SUPPORT_PX
 #define SUPPORT_V30ORIGINAL

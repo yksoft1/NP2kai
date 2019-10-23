@@ -681,6 +681,11 @@ static const INITBL iniitem[] = {
 	{"GDMELOFS", INITYPE_UINT8,	&np2cfg.gd5430melofs,	0},
 	{"GANBBSEX", INITYPE_BOOL,	&np2cfg.ga98nb_bigscrn_ex,	0},
 #endif
+#if defined(SUPPORT_PCI)
+	{"USE98PCI", INITYPE_BOOL,	&np2cfg.usepci,	0},
+	{"PCI_PCMC", INITYPE_UINT8,	&np2cfg.pci_pcmc,	0},
+	{"P_BIOS32", INITYPE_BOOL,	&np2cfg.pci_bios32,	0},
+#endif
 	{"TIMERFIX", INITYPE_BOOL,	&np2cfg.timerfix,	0},
 
 	{"WINNTFIX", INITYPE_BOOL,	&np2cfg.winntfix,	0},
