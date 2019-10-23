@@ -9,9 +9,12 @@
 #include	<assert.h>
 //#include	<pthread.h>
 
-#ifdef WIN32
+#if defined (__MINGW32__) || defined(_MSC_VER)
 #define _WINDOWS
 #include <windows.h>
+#define	OSLINEBREAK_CRLF
+#else
+#define	OSLINEBREAK_LF
 #endif
 
 #if defined(USE_SDL_CONFIG)
@@ -24,7 +27,6 @@
 
 #define BYTESEX_LITTLE
 #define	OSLANG_UTF8
-#define	OSLINEBREAK_LF
 #define RESOURCE_US
 //#define USE_TTF
 
@@ -62,13 +64,13 @@ typedef signed long int   INT64;
 typedef unsigned long int   UINT64;
 #else
 __extension__
-typedef signed long int   SINT64;
+typedef signed long long SINT64;
 #ifndef WIN32
 __extension__
-typedef signed long int   INT64;
+typedef signed long long INT64;
 #endif
 __extension__
-typedef unsigned long long int  UINT64;
+typedef unsigned long long UINT64;
 #endif
 
 #ifndef WIN32
@@ -142,6 +144,7 @@ typedef	unsigned short	WORD;
 #define	LOW15(a)	((((UINT32)(a)) << 17) >> 17)
 #define	LOW16(a)	((UINT16)(a))
 #define	HIGH16(a)	(((UINT32)(a)) >> 16)
+#define	OPNGENARM
 #endif
 
 #define	BRESULT				UINT
@@ -191,15 +194,15 @@ typedef SINT32	FILELEN;
 #define	SOUNDCALL
 
 #define	VERMOUTH_LIB
-#define	SOUND_CRITICAL
 
 #define	SUPPORT_UTF8
 
 #define	SUPPORT_16BPP
 #define	SUPPORT_32BPP
+#define	MEMOPTIMIZE		2
 
+#define	SOUND_CRITICAL
 #define	SOUNDRESERVE	100
-#define	OPNGENARM
 
 //#define	CPUSTRUC_MEMWAIT
 
@@ -225,10 +228,10 @@ typedef SINT32	FILELEN;
 
 #undef SUPPORT_EXTERNALCHIP
 
-//#define	SUPPORT_JOYSTICK
-//#define	USE_SDL_JOYSTICK
+#define	SUPPORT_JOYSTICK
+#define	USE_SDL_JOYSTICK
 
-//#define	SUPPORT_KEYDISP
+#define	SUPPORT_KEYDISP
 //#define	SUPPORT_STATSAVE
 
 #define SUPPORT_ARC
