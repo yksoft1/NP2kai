@@ -72,8 +72,7 @@ FILEH file_create(const OEMCHAR *path) {
 #else
 	return(fopen(path, "wb+"));
 #endif
-}
-
+	
 FILEPOS file_seek(FILEH handle, FILEPOS pointer, int method) {
 #if defined(SUPPORT_LARGE_HDD)
 #if defined (__MINGW32__) 
@@ -119,9 +118,9 @@ FILELEN file_getsize(FILEH handle) {
 		return (FILELEN)sb.st_size;
 	}
 #else
-	struct stat64 sb;
+	struct stat sb;
 
-	if (fstat64(fileno(handle), &sb) == 0)
+	if (fstat(fileno(handle), &sb) == 0)
 	{
 		return (FILELEN)sb.st_size;
 	}
