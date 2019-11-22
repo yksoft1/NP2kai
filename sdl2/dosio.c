@@ -72,7 +72,8 @@ FILEH file_create(const OEMCHAR *path) {
 #else
 	return(fopen(path, "wb+"));
 #endif
-	
+}
+
 FILEPOS file_seek(FILEH handle, FILEPOS pointer, int method) {
 #if defined(SUPPORT_LARGE_HDD)
 #if defined (__MINGW32__) 
