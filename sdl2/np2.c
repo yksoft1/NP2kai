@@ -105,6 +105,7 @@ NP2OSCFG np2oscfg = {
 static	UINT		framecnt;
 static	UINT		waitcnt;
 static	UINT		framemax = 1;
+static  UINT		lateframecount; // フレーム遅れ数
 #if defined (EMSCRIPTEN) && defined(USE_EMULARITY_NP2DIR)
 static	char		datadir[256] = EMSCRIPTEN_DIR;
 #else
