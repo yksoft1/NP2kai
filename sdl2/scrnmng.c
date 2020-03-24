@@ -103,7 +103,11 @@ BRESULT scrnmng_create(UINT8 mode) {
    if(draw32bit) {
       scrnmng.bpp = 32;
    } else {
+#if defined(EMSCRIPTEN) && SDL_MAJOR_VERSION == 1
+      scrnmng.bpp = 32;
+#else
       scrnmng.bpp = 16;
+#endif
    }
 
 #if defined(__LIBRETRO__)

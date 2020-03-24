@@ -69,8 +69,23 @@ __extension__
 typedef unsigned long long int  UINT64;
 #endif
 
+#ifndef LARGE_INTEGER_INCLUDED
+#define LARGE_INTEGER_INCLUDED
+typedef union {
+    struct {
+        UINT32 LowPart;
+        SINT32 HighPart;
+    } u;
+    SINT64 QuadPart;
+} LARGE_INTEGER;
+#endif
+
+#define NP2_64_COPY(pd, ps) *(UINT64*)pd = *(UINT64*)ps;
+
 typedef	int				BOOL;
+#ifndef __cplusplus
 #define bool BOOL
+#endif
 typedef	 char		CHAR;
 typedef	 char		TCHAR;
 typedef	unsigned char	BYTE;

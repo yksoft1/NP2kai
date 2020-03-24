@@ -180,17 +180,14 @@ void taskmng_rol(void) {
 #endif
 #endif //GCW0
 
-			if (e.key.keysym.scancode == SDL_SCANCODE_F11) {
-#ifdef EMSCRIPTEN //in web browsers, F11 is commonly occupied. Use CTRL+F11
-			if ((e.key.keysym.mod == KMOD_LCTRL) || (e.key.keysym.mod == KMOD_RCTRL)) {
-#endif 
-=======
 #if SDL_MAJOR_VERSION == 1
 			if (e.key.keysym.sym == SDLK_F11) {
 #else
 			if (e.key.keysym.scancode == SDL_SCANCODE_F11) {
 #endif
->>>>>>> upstream/master
+#ifdef EMSCRIPTEN //in web browsers, F11 is commonly occupied. Use CTRL+F11
+			if ((e.key.keysym.mod == KMOD_LCTRL) || (e.key.keysym.mod == KMOD_RCTRL)) {
+#endif 
 				if (menuvram == NULL) {
 					sysmenu_menuopen(0, 0, 0);
 				}
@@ -200,7 +197,11 @@ void taskmng_rol(void) {
 			}
 #ifdef EMSCRIPTEN
 			}
+#if SDL_MAJOR_VERSION == 1
+			if (e.key.keysym.sym == SDLK_F12) {
+#else
 			else if (e.key.keysym.scancode == SDL_SCANCODE_F12) {
+#endif
 				if ((e.key.keysym.mod == KMOD_LCTRL) || (e.key.keysym.mod == KMOD_RCTRL)) {
 					//use CTRL+F12 to lock mouse like win32 builds do
 					mousemng_toggle(MOUSEPROC_SYSTEM);

@@ -58,25 +58,29 @@ void opnalist_clear()
 }
 void opna_fmgen_setallvolumeFM_linear(int lvol)
 {
-	for(int i=0;i<opnalistconunt;i++){
+	int i;
+	for(i=0;i<opnalistconunt;i++){
 		OPNA_SetVolumeFM(opnalist[i]->fmgen, (int)LINEAR2DB((double)lvol / 128));
 	}
 }
 void opna_fmgen_setallvolumePSG_linear(int lvol)
 {
-	for(int i=0;i<opnalistconunt;i++){
+	int i;
+	for(i=0;i<opnalistconunt;i++){
 		OPNA_SetVolumePSG(opnalist[i]->fmgen, (int)LINEAR2DB((double)lvol / 128));
 	}
 }
 void opna_fmgen_setallvolumeADPCM_linear(int lvol)
 {
-	for(int i=0;i<opnalistconunt;i++){
+	int i;
+	for(i=0;i<opnalistconunt;i++){
 		OPNA_SetVolumeADPCM(opnalist[i]->fmgen, (int)LINEAR2DB((double)lvol / 128));
 	}
 }
 void opna_fmgen_setallvolumeRhythmTotal_linear(int lvol)
 {
-	for(int i=0;i<opnalistconunt;i++){
+	int i;
+	for(i=0;i<opnalistconunt;i++){
 		OPNA_SetVolumeRhythmTotal(opnalist[i]->fmgen, (int)LINEAR2DB((double)lvol / 128));
 	}
 }
@@ -183,7 +187,7 @@ void opna_reset(POPNA opna, REG8 cCaps)
 		opna_fmgen_setallvolumeRhythmTotal_linear(np2cfg.vol_rhythm);
 	}
 #endif	/* SUPPORT_FMGEN */
-	for (UINT i = 0; i < NELEMENTS(g_opna); i++)
+	for (i = 0; i < NELEMENTS(g_opna); i++)
 	{
 		rhythm_update(&g_opna[i].rhythm);
 	}

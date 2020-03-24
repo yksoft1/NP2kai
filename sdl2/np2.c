@@ -127,6 +127,11 @@ char modulefile[MAX_PATH];
 char draw32bit;
 
 static void np2exec();
+unsigned int np2_main_disk_images_count = 0;
+static unsigned int np2_main_cd_images_count = 0;
+char np2_main_disk_images_paths[50][MAX_PATH] = {0};
+static char np2_main_cd_images_paths[5][MAX_PATH] = {0};
+static unsigned int np2_main_cd_drv = sizeof(np2_main_cd_images_paths) / MAX_PATH;
 UINT8 scrnmode = 0;
 UINT8 changescreeninit = 0;
 

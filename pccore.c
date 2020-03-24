@@ -1583,6 +1583,7 @@ int SetCpuTypeIndex(UINT index){
 #endif
 
 #if !defined(_WINDOWS) && !defined(__MINGW32__) && !defined(__CYGWIN__)
+#if !defined(EMSCRIPTEN)
 BOOL QueryPerformanceCounter(LARGE_INTEGER* count) {
   int64_t icount = NP2_TickCount_GetCount();
   NP2_64_COPY(count, &icount);
@@ -1593,4 +1594,5 @@ BOOL QueryPerformanceFrequency(LARGE_INTEGER* freq) {
   NP2_64_COPY(freq, &ifreq);
   return TRUE;
 }
+#endif
 #endif

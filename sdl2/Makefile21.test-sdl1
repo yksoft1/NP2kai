@@ -1,0 +1,91 @@
+DEBUG=0
+SUPPORT_NET?=1
+
+CC=gcc
+CXX=g++
+AR=ar
+
+SDL_CONFIG ?= sdl-config
+SDL_CFLAGS := $(shell $(SDL_CONFIG) --cflags) -DUSE_SDL_CONFIG
+SDL_LIBS := $(shell $(SDL_CONFIG) --libs)
+
+TARGET_NAME := np21kai
+
+TARGET := $(TARGET_NAME)
+LDFLAGS :=
+fpic = -fPIC
+
+ifeq ($(DEBUG), 1)
+COMMONFLAGS += -O0 -g
+else
+COMMONFLAGS += -O3 -DNDEBUG -DGIT_VERSION=\"\"
+endif
+
+CORE_DIR    := ..
+SOURCES_C   :=
+SOURCES_CXX :=
+
+include Makefile.common
+
+INCFLAGS := $(SDL_CFLAGS) $(INCFLAGS)
+
+INCFLAGS += 	-I$(NP2_PATH)/i386c \
+		-I$(NP2_PATH)/i386c/ia32 \
+		-I$(NP2_PATH)/i386c/ia32/instructions \
+		-I$(NP2_PATH)/i386c/ia32/instructions/fpu \
+		-I$(NP2_PATH)/i386c/ia32/instructions/fpu/softfloat \
+		-I$(NP2_PATH)/i386c/ia32/instructions/mmx \
+		-I$(NP2_PATH)/i386c/ia32/instructions/sse \
+		-I$(NP2_PATH)/sdl2/test
+SOURCES_C += 	$(wildcard $(NP2_PATH)/i386c/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/*.c) \
+		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpdummy.c \
+		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpemul_dosbox.c \
+		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpemul_dosbox2.c \
+		$(NP2_PATH)/i386c/ia32/instructions/fpu/fpemul_softfloat.c \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/fpu/softfloat/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/mmx/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/sse/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/sse2/*.c) \
+		$(wildcard $(NP2_PATH)/i386c/ia32/instructions/sse3/*.c) \
+		$(NP2_PATH)/sdl2/test/main.c
+
+OBJECTS  = $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
+CXXFLAGS += $(fpic) $(INCFLAGS) $(COMMONFLAGS) -DNP2_SDL2 -DUSE_SDLAUDIO -DCPUCORE_IA32 -DSUPPORT_PC9821 -DUSE_FPU -DSUPPORT_LARGE_HDD -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DHOOK_SYSKEY -DALLOW_MULTIRUN -DSUPPORT_WAB -DSUPPORT_LARGE_MEMORY -DSUPPORT_CL_GD5430 -DUSE_MAME -DSUPPORT_FMGEN -DSUPPORT_SOUND_SB16 -DSUPPORT_FPU_DOSBOX -DSUPPORT_FPU_DOSBOX2 -DSUPPORT_FPU_SOFTFLOAT -DSUPPORT_FAST_MEMORYCHECK -DSUPPORT_SMPU98 -DSUPPORT_PEGC -DSUPPORT_GPIB -DSUPPORT_PCI -DUSE_MMX -DUSE_3DNOW -DUSE_SSE -DUSE_SSE2 -DUSE_SSE3 -DUSE_TSC -DSUPPORT_NVL_IMAGES -DUSE_FASTPAGING -DUSE_VME -DBIOS_IO_EMULATION -DSUPPORT_NP2_THREAD -DNP2_THREAD_SDL2
+CFLAGS   += $(fpic) $(INCFLAGS) $(COMMONFLAGS) -DNP2_SDL2 -DUSE_SDLAUDIO -DCPUCORE_IA32 -DSUPPORT_PC9821 -DUSE_FPU -DSUPPORT_LARGE_HDD -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DHOOK_SYSKEY -DALLOW_MULTIRUN -DSUPPORT_WAB -DSUPPORT_LARGE_MEMORY -DSUPPORT_CL_GD5430 -DUSE_MAME -DSUPPORT_FMGEN -DSUPPORT_SOUND_SB16 -DSUPPORT_FPU_DOSBOX -DSUPPORT_FPU_DOSBOX2 -DSUPPORT_FPU_SOFTFLOAT -DSUPPORT_FAST_MEMORYCHECK -DSUPPORT_SMPU98 -DSUPPORT_PEGC -DSUPPORT_GPIB -DSUPPORT_PCI -DUSE_MMX -DUSE_3DNOW -DUSE_SSE -DUSE_SSE2 -DUSE_SSE3 -DUSE_TSC -DSUPPORT_NVL_IMAGES -DUSE_FASTPAGING -DUSE_VME -DBIOS_IO_EMULATION -DSUPPORT_NP2_THREAD -DNP2_THREAD_SDL2
+LDFLAGS  += $(fpic) -static -lm  $(SDL_LIBS)  -ldl
+
+ifeq ($(SUPPORT_NET), 1)
+CXXFLAGS += -DSUPPORT_NET -DSUPPORT_LGY98
+CFLAGS   += -DSUPPORT_NET -DSUPPORT_LGY98
+endif
+
+
+all: $(TARGET)
+$(TARGET): $(OBJECTS)
+ifeq ($(STATIC_LINKING), 1)
+	$(AR) rcs $@ $(OBJECTS)
+else
+	$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
+endif
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $^ -o $@
+
+
+clean:
+	rm -f $(OBJECTS) $(TARGET)
+
+
+install:
+	strip $(TARGET)
+	cp $(TARGET) /usr/local/bin/
+
+
+uninstall:
+	rm /usr/local/bin/$(TARGET)
+

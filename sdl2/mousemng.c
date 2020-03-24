@@ -21,13 +21,21 @@ static void mousecapture(BOOL capture) {
 	captured = capture;
 	if(captured)
 	{
+#if SDL_MAJOR_VERSION == 1
+		SDL_WM_GrabInput(SDL_GRAB_ON);
+#else
 		SDL_CaptureMouse(TRUE);
+#endif
 		mousemng_hidecursor();
 	}	
 	else
 	{
 		mousemng_showcursor();
+#if SDL_MAJOR_VERSION == 1
+		SDL_WM_GrabInput(SDL_GRAB_OFF);
+#else
 		SDL_CaptureMouse(FALSE);
+#endif
 	}
 #endif
 }
@@ -143,7 +151,11 @@ void mousemng_hidecursor() {
 #ifdef EMSCRIPTEN
 	if(captured) {
 		SDL_ShowCursor(SDL_DISABLE);
+#if SDL_MAJOR_VERSION > 1
 		SDL_SetRelativeMouseMode(SDL_TRUE);
+#else
+		SDL_WM_GrabInput(SDL_GRAB_ON);
+#endif
 	}
 #else
 	if (!--mousemng.showcount) {
@@ -160,7 +172,11 @@ void mousemng_hidecursor() {
 void mousemng_showcursor() {
 #ifdef EMSCRIPTEN
 	SDL_ShowCursor(SDL_ENABLE);
+#if SDL_MAJOR_VERSION == 1
+	SDL_WM_GrabInput(SDL_GRAB_OFF);
+#else
 	SDL_SetRelativeMouseMode(SDL_FALSE);
+#endif
 #else
 	if (!mousemng.showcount++) {
 		SDL_ShowCursor(SDL_ENABLE);
