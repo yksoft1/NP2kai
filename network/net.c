@@ -23,7 +23,6 @@
 #ifdef SUPPORT_LGY98
 #include	"lgy98.h"
 #endif
-#include	"sxsi.h"
 
 #if defined(_WINDOWS)
 #include <winioctl.h>
@@ -418,7 +417,8 @@ static int np2net_openTAP(const OEMCHAR* tapname){
 		FILE_ATTRIBUTE_SYSTEM | FILE_FLAG_OVERLAPPED, 0);
  
 	if (np2net_hTap == INVALID_HANDLE_VALUE) {
-		TRACEOUT(("LGY-98: Failed to open [%s]", szDevicePath));
+		DWORD err = GetLastError();
+		TRACEOUT(("LGY-98: Failed to open [%s] error:%d", szDevicePath, err));
 		return 2;
 	}
 

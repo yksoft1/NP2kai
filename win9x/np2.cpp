@@ -1342,6 +1342,31 @@ static void OnCommand(HWND hWnd, WPARAM wParam)
 			np2cfg.SOUND_SW = SOUNDID_SB16;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
+			
+		case IDM_PC9801_86_SB16:
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_86_SB16;
+			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
+			break;
+			
+		case IDM_WSS_SB16:
+			np2cfg.SOUND_SW = SOUNDID_WSS_SB16;
+			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
+			break;
+			
+		case IDM_PC9801_86_WSS_SB16:
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_86_WSS_SB16;
+			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
+			break;
+			
+		case IDM_PC9801_118_SB16:
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_118_SB16;
+			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
+			break;
+			
+		case IDM_PC9801_86_118_SB16:
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_86_118_SB16;
+			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
+			break;
 #endif	// defined(SUPPORT_SOUND_SB16)
 
 #if defined(SUPPORT_PX)
@@ -1438,6 +1463,16 @@ static void OnCommand(HWND hWnd, WPARAM wParam)
 			
 		case IDM_MEM2306:
 			np2cfg.EXTMEM = 230;
+			update |= SYS_UPDATECFG | SYS_UPDATEMEMORY;
+			break;
+			
+		case IDM_MEM5126:
+			np2cfg.EXTMEM = 512;
+			update |= SYS_UPDATECFG | SYS_UPDATEMEMORY;
+			break;
+			
+		case IDM_MEM10246:
+			np2cfg.EXTMEM = 1024;
 			update |= SYS_UPDATECFG | SYS_UPDATEMEMORY;
 			break;
 			
@@ -2681,11 +2716,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 											_tcscpy(fnamebuf, np2cfg.idecd[i]);
 											if(wParam == DBT_DEVICEARRIVAL){
 												// CD挿入
-												diskdrv_setsxsi(0x02, fnamebuf);
+												diskdrv_setsxsi(i, fnamebuf);
 											}else{
 												// CD取出 XXX: 中身が空でもマウントは継続
-												diskdrv_setsxsi(0x02, fnamebuf);
+												diskdrv_setsxsi(i, NULL);
+												_tcscpy(np2cfg.idecd[i], fnamebuf);
 											}
+											sysmng_updatecaption(SYS_UPDATECAPTION_FDD);
 										}
 									}
 								}

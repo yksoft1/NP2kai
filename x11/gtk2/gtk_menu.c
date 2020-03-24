@@ -148,7 +148,7 @@ static GtkActionEntry menu_entries[] = {
 { "disk4eject",  NULL, "_Eject",            NULL, NULL, G_CALLBACK(cb_diskeject), },
 { "disk4open",   NULL, "_Open...",          NULL, NULL, G_CALLBACK(cb_diskopen), },
 { "exit",        NULL, "E_xit",             NULL, NULL, G_CALLBACK(gtk_main_quit) },
-{ "font",        NULL, "_Font...",          NULL, NULL, G_CALLBACK(cb_change_font), },
+//{ "font",        NULL, "_Font...",          NULL, NULL, G_CALLBACK(cb_change_font), },
 { "newfdisk",    NULL, "_Floppy disk image...", NULL, NULL, G_CALLBACK(cb_newfdisk) },
 { "newhdisk",    NULL, "_Hard disk image...",   NULL, NULL, G_CALLBACK(cb_newhdisk) },
 #if defined(SUPPORT_IDEIO)
@@ -324,29 +324,34 @@ static GtkRadioActionEntry beepvol_entries[] = {
 static const guint n_beepvol_entries = G_N_ELEMENTS(beepvol_entries);
 
 static GtkRadioActionEntry soundboard_entries[] = {
-{ "disableboards",  NULL, "_Disable boards",         NULL, NULL, 0x00 },
-{ "pc-9801-14",     NULL, "PC-9801-_14",             NULL, NULL, 0x01 },
-{ "pc-9801-26k",    NULL, "PC-9801-_26K",            NULL, NULL, 0x02 },
-{ "pc-9801-86",     NULL, "PC-9801-8_6",             NULL, NULL, 0x04 },
-{ "pc-9801-26k-86", NULL, "PC-9801-26_K + 86",       NULL, NULL, 0x06 },
-{ "pc-9801-86-cb",  NULL, "PC-9801-86 + _Chibi-oto", NULL, NULL, 0x14 },
-{ "pc-9801-118",    NULL, "PC-9801-11_8",            NULL, NULL, 0x08 },
-{ "pc-9801-86-mx",  NULL, "PC-9801-86 + Mate-X PCM(B460)", NULL, NULL, 0x64 },
-{ "pc-9801-86-118", NULL, "PC-9801-86 + 118",        NULL, NULL, 0x68 },
-{ "pc-9801-mx",     NULL, "Mate-X PCM(B460)",        NULL, NULL, 0x60 },
-{ "speakboard",     NULL, "S_peak board",            NULL, NULL, 0x20 },
-{ "speakboard86",   NULL, "PC-9801-86 + Speak board", NULL, NULL, 0x24 },
-{ "sparkboard",     NULL, "Sp_ark board",            NULL, NULL, 0x40 },
-{ "sndorchestra",   NULL, "Sound Orchestra",         NULL, NULL, 0x32 },
-{ "sndorchestrav",  NULL, "Sound Orchestra-V",       NULL, NULL, 0x82 },
+{ "disableboards",         NULL, "_Disable boards",                                  NULL, NULL, 0x00 },
+{ "pc-9801-14",            NULL, "PC-9801-_14",                                      NULL, NULL, 0x01 },
+{ "pc-9801-26k",           NULL, "PC-9801-_26K",                                     NULL, NULL, 0x02 },
+{ "pc-9801-86",            NULL, "PC-9801-8_6",                                      NULL, NULL, 0x04 },
+{ "pc-9801-26k-86",        NULL, "PC-9801-26_K + 86",                                NULL, NULL, 0x06 },
+{ "pc-9801-86-cb",         NULL, "PC-9801-86 + _Chibi-oto",                          NULL, NULL, 0x14 },
+{ "pc-9801-118",           NULL, "PC-9801-11_8",                                     NULL, NULL, 0x08 },
+{ "pc-9801-86-mx",         NULL, "PC-9801-86 + Mate-X PCM(B460)",                    NULL, NULL, SOUNDID_PC_9801_86_WSS },
+{ "pc-9801-86-118",        NULL, "PC-9801-86 + 118(B460)",                           NULL, NULL, SOUNDID_PC_9801_86_118 },
+{ "pc-9801-mx",            NULL, "Mate-X PCM",                                       NULL, NULL, SOUNDID_MATE_X_PCM },
+{ "speakboard",            NULL, "S_peak board",                                     NULL, NULL, 0x20 },
+{ "speakboard86",          NULL, "PC-9801-86 + Speak board",                         NULL, NULL, SOUNDID_86_SPEAKBOARD },
+{ "sparkboard",            NULL, "Sp_ark board",                                     NULL, NULL, 0x40 },
+{ "sndorchestra",          NULL, "Sound Orchestra",                                  NULL, NULL, 0x32 },
+{ "sndorchestrav",         NULL, "Sound Orchestra-V",                                NULL, NULL, 0x82 },
 #if defined(SUPPORT_SOUND_SB16)
-{ "sb16",	    NULL, "Sound Blaster 16",        NULL, NULL, 0x41 },
+{ "sb16",	                 NULL, "Sound Blaster 16",                                 NULL, NULL, SOUNDID_SB16 },
+{ "pc-9801-86-sb16",       NULL, "PC-9801-86 + Sound Blaster 16",                    NULL, NULL, SOUNDID_PC_9801_86_SB16 },
+{ "pc-9801-mx-sb16",       NULL, "Mate-X PCM + Sound Blaster 16",                    NULL, NULL, SOUNDID_WSS_SB16 },
+{ "pc-9801-118-sb16",      NULL, "PC-9801-118 + Sound Blaster 16",                   NULL, NULL, SOUNDID_PC_9801_118_SB16 },
+{ "pc-9801-86-mx-sb16",    NULL, "PC-9801-86 + Mate-X PCM(B460) + Sound Blaster 16", NULL, NULL, SOUNDID_PC_9801_86_WSS_SB16 },
+{ "pc-9801-86-118-sb16",   NULL, "PC-9801-86 + 118(B460) + Sound Blaster 16",        NULL, NULL, SOUNDID_PC_9801_86_118_SB16 },
 #endif	/* SUPPORT_SOUND_SB16 */
-{ "amd98",          NULL, "_AMD98",                  NULL, NULL, 0x80 },
-{ "wavestar",       NULL, "_WaveStar",               NULL, NULL, 0x70 },
+{ "amd98",                 NULL, "_AMD98",                                           NULL, NULL, 0x80 },
+{ "wavestar",              NULL, "_WaveStar",                                        NULL, NULL, 0x70 },
 #if defined(SUPPORT_PX)
-{ "px1",            NULL, "Otomi-chanx2",            NULL, NULL, 0x30 },
-{ "px2",            NULL, "Otomi-chanx2 + 86",       NULL, NULL, 0x50 },
+{ "px1",                   NULL, "Otomi-chanx2",                                     NULL, NULL, 0x30 },
+{ "px2",                   NULL, "Otomi-chanx2 + 86",                                NULL, NULL, 0x50 },
 #endif	/* SUPPORT_PX */
 };
 static const guint n_soundboard_entries = G_N_ELEMENTS(soundboard_entries);
@@ -364,6 +369,8 @@ static GtkRadioActionEntry memory_entries[] = {
 { "64.6mb", NULL, "64.6MB", NULL, NULL, 64 },
 { "120.6mb", NULL, "120.6MB", NULL, NULL, 120 },
 { "230.6mb", NULL, "230.6MB", NULL, NULL, 230 },
+{ "512.6mb", NULL, "512.6MB", NULL, NULL, 512 },
+{ "1024.6mb", NULL, "1024.6MB", NULL, NULL, 1024 },
 };
 static const guint n_memory_entries = G_N_ELEMENTS(memory_entries);
 
@@ -442,7 +449,7 @@ static const gchar *ui_info =
 "    <menuitem action='newfdisk'/>\n"
 "    <menuitem action='newhdisk'/>\n"
 "   </menu>\n"
-"   <menuitem action='font'/>\n"
+//"   <menuitem action='font'/>\n"
 "   <separator/>\n"
 "   <menuitem action='exit'/>\n"
 "  </menu>\n"
@@ -562,6 +569,11 @@ static const gchar *ui_info =
 "    <menuitem action='sndorchestrav'/>\n"
 #if defined(SUPPORT_SOUND_SB16)
 "    <menuitem action='sb16'/>\n"
+"    <menuitem action='pc-9801-86-sb16'/>\n"
+"    <menuitem action='pc-9801-mx-sb16'/>\n"
+"    <menuitem action='pc-9801-118-sb16'/>\n"
+"    <menuitem action='pc-9801-86-mx-sb16'/>\n"
+"    <menuitem action='pc-9801-86-118-sb16'/>\n"
 #endif	/* SUPPORT_SOUND_SB16 */
 "    <menuitem action='amd98'/>\n"
 "    <menuitem action='wavestar'/>\n"
@@ -592,6 +604,8 @@ static const gchar *ui_info =
 "    <menuitem action='64.6mb'/>\n"
 "    <menuitem action='120.6mb'/>\n"
 "    <menuitem action='230.6mb'/>\n"
+"    <menuitem action='512.6mb'/>\n"
+"    <menuitem action='1024.6mb'/>\n"
 #endif
 "   </menu>\n"
 "   <menu name='FPU' action='FPUMenu'>\n"

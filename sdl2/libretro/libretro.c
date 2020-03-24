@@ -78,7 +78,9 @@ static char CMDFILE[512];
 bool did_reset, joy2key;
 int lr_init = 0;
 
-static char base_dir[MAX_PATH];
+char lr_game_base_dir[MAX_PATH];
+
+int lr_uselasthddmount;
 
 #ifdef _WIN32
 static char slash = '\\';
@@ -90,10 +92,10 @@ static void update_variables(void);
 
 /* media swap support */
 struct retro_disk_control_callback dskcb;
-static char disk_paths[50][MAX_PATH] = {0};
+extern char np2_main_disk_images_paths[50][MAX_PATH];
+extern unsigned int np2_main_disk_images_count;
 static unsigned drvno = 1;
 static unsigned disk_index = 0;
-static unsigned disk_images = 0;
 static bool disk_inserted = false;
 static unsigned int lastidx = 0;
 
@@ -113,32 +115,32 @@ unsigned getdskindex(){
 
 bool setdskindex(unsigned index){
    disk_index = index;
-   if(disk_index == disk_images)
+   if(disk_index == np2_main_disk_images_count)
    {
       //retroarch is trying to set "no disk in tray"
       return true;
    }
 
    update_variables();
-   strcpy(np2cfg.fddfile[drvno], disk_paths[disk_index]);
-   diskdrv_setfdd(drvno, disk_paths[disk_index], 0);
+   strcpy(np2cfg.fddfile[drvno], np2_main_disk_images_paths[disk_index]);
+   diskdrv_setfdd(drvno, np2_main_disk_images_paths[disk_index], 0);
    return true;
 }
 
 unsigned getnumimages(){
-   return disk_images;
+   return np2_main_disk_images_count;
 }
 
 bool addimageindex() {
-   if (disk_images >= 50)
+   if (np2_main_disk_images_count >= 50)
       return false;
 
-   disk_images++;
+   np2_main_disk_images_count++;
    return true;
 }
 
 bool replacedsk(unsigned index,const struct retro_game_info *info){
-   strcpy(disk_paths[index], info->path);
+   strcpy(np2_main_disk_images_paths[index], info->path);
    return true;
 }
 
@@ -151,13 +153,16 @@ void attach_disk_swap_interface(){
    dskcb.get_num_images  = getnumimages;
    dskcb.add_image_index = addimageindex;
    dskcb.replace_image_index = replacedsk;
+   if(np2_main_disk_images_count) {
+      disk_inserted = true;
+   }
 
    environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE,&dskcb);
 }
 
 void setnxtdskindex(void){
-	if(disk_images > 2) {
-		if(disk_index + 1 != disk_images) {
+	if(np2_main_disk_images_count > 2) {
+		if(disk_index + 1 != np2_main_disk_images_count) {
 			setdskindex(disk_index + 1);
 		} else {
 			setdskindex(0);
@@ -166,9 +171,9 @@ void setnxtdskindex(void){
 }
 
 void setpredskindex(void){
-	if(disk_images > 2) {
+	if(np2_main_disk_images_count > 2) {
 		if(disk_index == 0) {
-			setdskindex(disk_images - 1);
+			setdskindex(np2_main_disk_images_count - 1);
 		} else {
 			setdskindex(disk_index - 1);
 		}
@@ -238,47 +243,6 @@ static void extract_directory(char *buf, const char *path, size_t size)
       buf[0] = '\0';
 }
 
-static bool read_m3u(const char *file)
-{
-   char line[MAX_PATH];
-   char name[MAX_PATH];
-   RFILE *f = filestream_open(file, RETRO_VFS_FILE_ACCESS_READ, RETRO_VFS_FILE_ACCESS_HINT_NONE);
-
-   if (!f)
-      return false;
-
-   while (filestream_gets(f, line, sizeof(line)) && disk_images < sizeof(disk_paths) / sizeof(disk_paths[0]))
-   {
-      if (line[0] == '#')
-         continue;
-
-      char *carriage_return = strchr(line, '\r');
-      if (carriage_return)
-         *carriage_return = '\0';
-
-      char *newline = strchr(line, '\n');
-      if (newline)
-         *newline = '\0';
-
-      // Remove any beginning and ending quotes as these can cause issues when feeding the paths into command line later
-      if (line[0] == '"')
-          memmove(line, line + 1, strlen(line));
-
-      if (line[strlen(line) - 1] == '"')
-          line[strlen(line) - 1]  = '\0';
-
-      if (line[0] != '\0')
-      {
-         snprintf(name, sizeof(name), "%s%c%s", base_dir, slash, line);
-         strcpy(disk_paths[disk_images], name);
-         disk_images++;
-      }
-   }
-
-   filestream_close(f);
-   return (disk_images != 0);
-}
-
 void Add_Option(const char* option)
 {
    static int first=0;
@@ -301,23 +265,6 @@ int pre_main(const char *argv)
    {
       if( HandleExtension((char*)argv,"cmd") || HandleExtension((char*)argv,"CMD"))
          i=loadcmdfile((char*)argv);
-      else if (HandleExtension((char*)argv, "m3u") || HandleExtension((char*)argv, "M3U"))
-      {
-         if (!read_m3u((char*)argv))
-         {
-            if (log_cb)
-               log_cb(RETRO_LOG_ERROR, "%s\n", "[libretro]: failed to read m3u file ...");
-            return false;
-         }
-
-         sprintf((char*)argv, "np2kai \"%s\"", disk_paths[0]);
-         if(disk_images > 1)
-         {
-            sprintf((char*)argv, "%s \"%s\"", argv, disk_paths[1]);
-         }
-         disk_inserted = true;
-         attach_disk_swap_interface();
-      }
    }
 
    if(i==1)
@@ -494,6 +441,8 @@ static bool joyNP2menu;
 static int joyNP2menubtn;
 static bool joyNP2menu_oldjoymouse;
 static bool joyNP2menu_oldjoymouse;
+static int stick2mouse;
+static int s2m_no;
 
 bool mapkey_down[12];
 
@@ -612,68 +561,76 @@ void updateInput(){
       input_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_MIDDLE)) && menukey==1)
       menukey=0;
 
-   if (!joymouse) {
-      int mouse_x = input_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_X);
-      int mouse_y = input_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_Y);
+   int mouse_x_device = input_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_X);
+   int mouse_y_device = input_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_Y);
 
-      if (menuvram == NULL)
-         mousemng_sync(mouse_x,mouse_y);
+   if (menuvram == NULL)
+      mousemng_sync(mouse_x_device,mouse_y_device);
 
-      mposx+=mouse_x;if(mposx<0)mposx=0;if(mposx>=w)mposx=w-1;
-      mposy+=mouse_y;if(mposy<0)mposy=0;if(mposy>=h)mposy=h-1;
+   mposx+=mouse_x_device;if(mposx<0)mposx=0;if(mposx>=w)mposx=w-1;
+   mposy+=mouse_y_device;if(mposy<0)mposy=0;if(mposy>=h)mposy=h-1;
 
-      if(lastx!=mposx || lasty!=mposy)
-         if (menuvram != NULL)
-            menubase_moving(mposx, mposy, 0);
+   if(lastx!=mposx || lasty!=mposy)
+      if (menuvram != NULL)
+          menubase_moving(mposx, mposy, 0);
 
-      int mouse_l = input_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_LEFT);
-      int mouse_r = input_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_RIGHT);
+   int mouse_l_device = input_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_LEFT);
+   int mouse_r_device = input_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_RIGHT);
+   int mouse_event = 0;
 
-      if(mbL==0 && mouse_l)
+   if(mbL==0 && mouse_l_device)
+   {
+      mbL=1;
+      if(menuvram == NULL)
       {
-         mbL=1;
-         if(menuvram == NULL)
-         {
-            mousemng_buttonevent(MOUSEMNG_LEFTDOWN);
-         }
-         else
-         {
-            menubase_moving(mposx, mposy, 1);
-         }
+         mousemng_buttonevent(MOUSEMNG_LEFTDOWN);
       }
-      else if(mbL==1 && !mouse_l)
+      else
       {
-         mbL=0;
-         if(menuvram == NULL)
-         {
-            mousemng_buttonevent(MOUSEMNG_LEFTUP);
-         }
-         else
-         {
-            menubase_moving(mposx, mposy, 2);
-            scrndraw_redraw();
-         }
+         menubase_moving(mposx, mposy, 1);
+         scrndraw_redraw();
       }
+      mouse_event = 1;
+   }
+   else if(mbL==1 && !mouse_l_device)
+   {
+      mbL=0;
+      if(menuvram == NULL)
+      {
+         mousemng_buttonevent(MOUSEMNG_LEFTUP);
+      }
+      else
+      {
+         menubase_moving(mposx, mposy, 2);
+         scrndraw_redraw();
+      }
+      mouse_event = 1;
+   }
 
-      if(mbR==0 && mouse_r)
+   if(mbR==0 && mouse_r_device)
+   {
+      mbR=1;
+      if(menuvram == NULL)
       {
-         mbR=1;
-         if(menuvram == NULL)
-         {
-            mousemng_buttonevent(MOUSEMNG_RIGHTDOWN);
-         }
+         mousemng_buttonevent(MOUSEMNG_RIGHTDOWN);
+         scrndraw_redraw();
       }
-      else if(mbR==1 && !mouse_r)
+      mouse_event = 1;
+   }
+   else if(mbR==1 && !mouse_r_device)
+   {
+      mbR=0;
+      if(menuvram == NULL)
       {
-         mbR=0;
-         if(menuvram == NULL)
-         {
-            mousemng_buttonevent(MOUSEMNG_RIGHTUP);
-         }
+         mousemng_buttonevent(MOUSEMNG_RIGHTUP);
+         scrndraw_redraw();
       }
-   } else {
-      int mouse_x = 0;
-      int mouse_y = 0;
+      mouse_event = 1;
+   }
+
+   if (joymouse) {
+      int mouse_x_dpad = 0;
+      int mouse_y_dpad = 0;
 
       if((input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP) ||
          input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN) ||
@@ -700,41 +657,41 @@ void updateInput(){
 
       if(input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP) && joymousemovebtn == 1) {
          if(input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT)) {
-            mouse_x = 1.0 * -joymouseaxel;
-            mouse_y = 1.0 * -joymouseaxel;
+            mouse_x_dpad = 1.0 * -joymouseaxel;
+            mouse_y_dpad = 1.0 * -joymouseaxel;
          } else if(input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT)) {
-            mouse_x = 1.0 * joymouseaxel;
-            mouse_y = 1.0 * -joymouseaxel;
+            mouse_x_dpad = 1.0 * joymouseaxel;
+            mouse_y_dpad = 1.0 * -joymouseaxel;
          } else {
-            mouse_y = 1.0 * -joymouseaxel / 1.414;
+            mouse_y_dpad = 1.0 * -joymouseaxel / 1.414;
          }
       } else if(input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN) && joymousemovebtn == 1) {
          if(input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT)) {
-            mouse_x = 1.0 * -joymouseaxel;
-            mouse_y = 1.0 * joymouseaxel;
+            mouse_x_dpad = 1.0 * -joymouseaxel;
+            mouse_y_dpad = 1.0 * joymouseaxel;
          } else if(input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT)) {
-            mouse_x = 1.0 * joymouseaxel;
-            mouse_y = 1.0 * joymouseaxel;
+            mouse_x_dpad = 1.0 * joymouseaxel;
+            mouse_y_dpad = 1.0 * joymouseaxel;
          } else {
-            mouse_y = 1.0 * joymouseaxel / 1.414;
+            mouse_y_dpad = 1.0 * joymouseaxel / 1.414;
          }
       } else {
          if(input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT) && joymousemovebtn == 1)
-            mouse_x = 1.0 * -joymouseaxel / 1.414;
+            mouse_x_dpad = 1.0 * -joymouseaxel / 1.414;
          else if(input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT) && joymousemovebtn == 1)
-            mouse_x = 1.0 * joymouseaxel / 1.414;
+            mouse_x_dpad = 1.0 * joymouseaxel / 1.414;
       }
 
       if (menuvram == NULL)
-         mousemng_sync(mouse_x,mouse_y);
+         mousemng_sync(mouse_x_dpad,mouse_y_dpad);
 
-      mposx += mouse_x;
+      mposx += mouse_x_dpad;
       if(mposx < 0)
          mposx = 0;
       if(mposx >= w)
          mposx = w - 1;
 
-      mposy += mouse_y;
+      mposy += mouse_y_dpad;
       if(mposy < 0)
          mposy = 0;
       if(mposy >= h)
@@ -744,49 +701,133 @@ void updateInput(){
          if (menuvram != NULL)
             menubase_moving(mposx, mposy, 0);
 
-      int mouse_l = input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B);
-      int mouse_r = input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A);
+      if(mouse_event == 0) {
+         int mouse_l_dpad = input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B);
+         int mouse_r_dpad = input_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A);
 
-      if(mbL==0 && mouse_l)
-      {
-         mbL=1;
-         if(menuvram == NULL)
+         if(mbL==0 && mouse_l_dpad)
          {
-            mousemng_buttonevent(MOUSEMNG_LEFTDOWN);
+            mbL=1;
+            if(menuvram == NULL)
+            {
+               mousemng_buttonevent(MOUSEMNG_LEFTDOWN);
+            }
+            else
+            {
+               menubase_moving(mposx, mposy, 1);
+               scrndraw_redraw();
+            }
+            mouse_event = 1;
          }
-         else
+         else if(mbL==1 && !mouse_l_dpad)
          {
-            menubase_moving(mposx, mposy, 1);
+            mbL=0;
+            if(menuvram == NULL)
+            {
+               mousemng_buttonevent(MOUSEMNG_LEFTUP);
+            }
+            else
+            {
+               menubase_moving(mposx, mposy, 2);
+               scrndraw_redraw();
+            }
+            mouse_event = 1;
+         }
+
+         if(mbR==0 && mouse_r_dpad)
+         {
+            mbR=1;
+            if(menuvram == NULL)
+            {
+               mousemng_buttonevent(MOUSEMNG_RIGHTDOWN);
+               scrndraw_redraw();
+            }
+            mouse_event = 1;
+         }
+         else if(mbR==1 && !mouse_r_dpad)
+         {
+            mbR=0;
+            if(menuvram == NULL)
+            {
+               mousemng_buttonevent(MOUSEMNG_RIGHTUP);
+               scrndraw_redraw();
+            }
+            mouse_event = 1;
          }
       }
-      else if(mbL==1 && !mouse_l)
-      {
-         mbL=0;
-         if(menuvram == NULL)
+   }
+
+   if (stick2mouse) {
+      int use_stick;
+      int use_thumb;
+      int16_t analog_x;
+      int16_t analog_y;
+      int16_t analog_thumb;
+      int mouse_move_x;
+      int mouse_move_y;
+      
+      if(s2m_no) {
+         use_stick = RETRO_DEVICE_INDEX_ANALOG_RIGHT;
+         use_thumb = RETRO_DEVICE_ID_JOYPAD_R3;
+      } else {
+         use_stick = RETRO_DEVICE_INDEX_ANALOG_LEFT;
+         use_thumb = RETRO_DEVICE_ID_JOYPAD_L3;
+      }
+
+      analog_x = input_cb(0, RETRO_DEVICE_ANALOG, use_stick, RETRO_DEVICE_ID_ANALOG_X);
+      analog_y = input_cb(0, RETRO_DEVICE_ANALOG, use_stick, RETRO_DEVICE_ID_ANALOG_Y);
+      analog_thumb = input_cb(0, RETRO_DEVICE_JOYPAD, 0, use_thumb);
+
+      mouse_move_x = (int)(analog_x * ((float)60 / 0x10000));
+      mouse_move_y = (int)(analog_y * ((float)60 / 0x10000));
+
+      if (menuvram == NULL)
+         mousemng_sync(mouse_move_x,mouse_move_y);
+
+      mposx += mouse_move_x;
+      if(mposx < 0)
+         mposx = 0;
+      if(mposx >= w)
+         mposx = w - 1;
+
+      mposy += mouse_move_y;
+      if(mposy < 0)
+         mposy = 0;
+      if(mposy >= h)
+         mposy = h - 1;
+
+      if(lastx!=mposx || lasty!=mposy)
+         if (menuvram != NULL)
+            menubase_moving(mposx, mposy, 0);
+
+      if(mouse_event == 0) {
+         if(mbL==0 && analog_thumb)
          {
+            mbL=1;
+            if(menuvram == NULL)
+            {
+               mousemng_buttonevent(MOUSEMNG_LEFTDOWN);
+            }
+            else
+            {
+               menubase_moving(mposx, mposy, 1);
+               scrndraw_redraw();
+            }
+            mouse_event = 1;
+         }
+         else if(mbL==1 && !analog_thumb)
+         {
+            mbL=0;
+            if(menuvram == NULL)
+            {
             mousemng_buttonevent(MOUSEMNG_LEFTUP);
-         }
-         else
-         {
-            menubase_moving(mposx, mposy, 2);
-            scrndraw_redraw();
-         }
-      }
-
-      if(mbR==0 && mouse_r)
-      {
-         mbR=1;
-         if(menuvram == NULL)
-         {
-            mousemng_buttonevent(MOUSEMNG_RIGHTDOWN);
-         }
-      }
-      else if(mbR==1 && !mouse_r)
-      {
-         mbR=0;
-         if(menuvram == NULL)
-         {
-            mousemng_buttonevent(MOUSEMNG_RIGHTUP);
+            }
+            else
+            {
+               menubase_moving(mposx, mposy, 2);
+               scrndraw_redraw();
+            }
+            mouse_event = 1;
          }
       }
    }
@@ -906,6 +947,48 @@ static void update_variables(void)
          np2cfg.baseclock = 2457600;
    }
 
+   var.key = "np2kai_cpu_feature";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      UINT cpu_index;
+
+      if (strcmp(var.value, "Intel 80386") == 0)
+         cpu_index = 1;
+      else if (strcmp(var.value, "Intel i486SX") == 0)
+         cpu_index = 2;
+      else if (strcmp(var.value, "Intel i486DX") == 0)
+         cpu_index = 3;
+      else if (strcmp(var.value, "Intel Pentium") == 0)
+         cpu_index = 4;
+      else if (strcmp(var.value, "Intel MMX Pentium") == 0)
+         cpu_index = 5;
+      else if (strcmp(var.value, "Intel Pentium Pro") == 0)
+         cpu_index = 6;
+      else if (strcmp(var.value, "Intel Pentium II") == 0)
+         cpu_index = 7;
+      else if (strcmp(var.value, "Intel Pentium III") == 0)
+         cpu_index = 8;
+      else if (strcmp(var.value, "Intel Pentium M") == 0)
+         cpu_index = 9;
+      else if (strcmp(var.value, "Intel Pentium 4") == 0)
+         cpu_index = 10;
+      else if (strcmp(var.value, "AMD K6-2") == 0)
+         cpu_index = 15;
+      else if (strcmp(var.value, "AMD K6-III") == 0)
+         cpu_index = 16;
+      else if (strcmp(var.value, "AMD K7 Athlon") == 0)
+         cpu_index = 17;
+      else if (strcmp(var.value, "AMD K7 Athlon XP") == 0)
+         cpu_index = 18;
+      else if (strcmp(var.value, "Neko Processor II") == 0)
+         cpu_index = 255;
+      else
+         cpu_index = 0;
+      SetCpuTypeIndex(cpu_index);
+   }
+
    var.key = "np2kai_clk_mult";
    var.value = NULL;
 
@@ -933,6 +1016,17 @@ static void update_variables(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
       np2cfg.EXTMEM = atoi(var.value);
+   }
+
+   var.key = "np2kai_uselasthddmount";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "OFF") == 0)
+         lr_uselasthddmount = 0;
+      else
+         lr_uselasthddmount = 1;
    }
 
    var.key = "np2kai_FastMC";
@@ -987,15 +1081,15 @@ static void update_variables(void)
       else if (strcmp(var.value, "PC9801-118") == 0)
          np2cfg.SOUND_SW = 0x08;
       else if (strcmp(var.value, "PC9801-86 + Mate-X PCM(B460)") == 0)
-         np2cfg.SOUND_SW = 0x64;
-      else if (strcmp(var.value, "PC9801-86 + 118") == 0)
-         np2cfg.SOUND_SW = 0x68;
-      else if (strcmp(var.value, "Mate-X PCM(B460)") == 0)
-         np2cfg.SOUND_SW = 0x60;
+         np2cfg.SOUND_SW = SOUNDID_PC_9801_86_WSS;
+      else if (strcmp(var.value, "PC9801-86 + 118(B460)") == 0)
+         np2cfg.SOUND_SW = SOUNDID_PC_9801_86_118;
+      else if (strcmp(var.value, "Mate-X PCM") == 0)
+         np2cfg.SOUND_SW = SOUNDID_MATE_X_PCM;
       else if (strcmp(var.value, "Speak Board") == 0)
          np2cfg.SOUND_SW = 0x20;
       else if (strcmp(var.value, "PC9801-86 + Speak Board") == 0)
-         np2cfg.SOUND_SW = 0x24;
+         np2cfg.SOUND_SW = SOUNDID_86_SPEAKBOARD;
       else if (strcmp(var.value, "Spark Board") == 0)
          np2cfg.SOUND_SW = 0x40;
       else if (strcmp(var.value, "Sound Orchestra") == 0)
@@ -1003,7 +1097,17 @@ static void update_variables(void)
       else if (strcmp(var.value, "Sound Orchestra-V") == 0)
          np2cfg.SOUND_SW = 0x82;
       else if (strcmp(var.value, "Sound Blaster 16") == 0)
-         np2cfg.SOUND_SW = 0x41;
+         np2cfg.SOUND_SW = SOUNDID_SB16;
+      else if (strcmp(var.value, "PC9801-86 + Sound Blaster 16") == 0)
+         np2cfg.SOUND_SW = SOUNDID_PC_9801_86_SB16;
+      else if (strcmp(var.value, "Mate-X PCM + Sound Blaster 16") == 0)
+         np2cfg.SOUND_SW = SOUNDID_WSS_SB16;
+      else if (strcmp(var.value, "PC9801-118 + Sound Blaster 16") == 0)
+         np2cfg.SOUND_SW = SOUNDID_PC_9801_118_SB16;
+      else if (strcmp(var.value, "PC9801-86 + Mate-X PCM(B460) + Sound Blaster 16") == 0)
+         np2cfg.SOUND_SW = SOUNDID_PC_9801_86_WSS_SB16;
+      else if (strcmp(var.value, "PC9801-86 + 118(B460) + Sound Blaster 16") == 0)
+         np2cfg.SOUND_SW = SOUNDID_PC_9801_86_118_SB16;
       else if (strcmp(var.value, "AMD-98") == 0)
          np2cfg.SOUND_SW = 0x80;
       else if (strcmp(var.value, "WaveStar") == 0)
@@ -1311,19 +1415,25 @@ static void update_variables(void)
          np2cfg.usecdecc = 0;
    }
 
-   var.key = "np2kai_j2msuratio";
-   var.value = NULL;
+  var.key = "np2kai_stick2mouse";
+  var.value = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-      if (strcmp(var.value, "up stop") == 0)
-         joymouseaxelratio = 1;
-      else if (strcmp(var.value, "x5") == 0)
-         joymouseaxelratio = 5;
-      else if (strcmp(var.value, "x20") == 0)
-         joymouseaxelratio = 20;
+      if (strcmp(var.value, "L-stick") == 0)
+      {
+         stick2mouse = true;
+         s2m_no = 0;
+      }
+      else if (strcmp(var.value, "R-stick") == 0)
+      {
+         stick2mouse = true;
+         s2m_no = 1;
+      }
       else
-         joymouseaxelratio = 10;
+      {
+         stick2mouse = false;
+      }
    }
 
   var.key = "np2kai_joy2mousekey";
@@ -1358,6 +1468,21 @@ static void update_variables(void)
          joymouse = false;
          joy2key = false;
       }
+   }
+
+   var.key = "np2kai_j2msuratio";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "up stop") == 0)
+         joymouseaxelratio = 1;
+      else if (strcmp(var.value, "x5") == 0)
+         joymouseaxelratio = 5;
+      else if (strcmp(var.value, "x20") == 0)
+         joymouseaxelratio = 20;
+      else
+         joymouseaxelratio = 10;
    }
 
    var.key = "np2kai_joynp2menu";
@@ -1612,7 +1737,7 @@ bool retro_load_game(const struct retro_game_info *game)
    if(!worked)abort();
 
    if(game != NULL)
-      extract_directory(base_dir, game->path, sizeof(base_dir));
+      extract_directory(lr_game_base_dir, game->path, sizeof(lr_game_base_dir));
 
    strcpy(np2path, syspath);
    lr_init = 1;

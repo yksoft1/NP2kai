@@ -75,6 +75,7 @@ ifneq ($(STATIC_LINKING), 1)
 			$(NP2_PATH)/sdl2/libretro/libretro-common/file/config_file.c \
 			$(NP2_PATH)/sdl2/libretro/libretro-common/file/config_file_userdata.c \
 			$(NP2_PATH)/sdl2/libretro/libretro-common/file/file_path.c \
+			$(NP2_PATH)/sdl2/libretro/libretro-common/file/file_path_io.c \
 			$(NP2_PATH)/sdl2/libretro/libretro-common/file/retro_dirent.c \
 			$(NP2_PATH)/sdl2/libretro/libretro-common/file/nbio/nbio_intf.c \
 			$(NP2_PATH)/sdl2/libretro/libretro-common/file/nbio/nbio_orbis.c \
@@ -95,7 +96,6 @@ ifneq ($(STATIC_LINKING), 1)
 			$(NP2_PATH)/sdl2/libretro/libretro-common/formats/png/rpng_encode.c \
 			$(NP2_PATH)/sdl2/libretro/libretro-common/formats/tga/rtga.c \
 			$(NP2_PATH)/sdl2/libretro/libretro-common/formats/wav/rwav.c \
-			$(NP2_PATH)/sdl2/libretro/libretro-common/formats/xml/rxml.c \
 			$(NP2_PATH)/sdl2/libretro/libretro-common/formats/image_texture.c \
 			$(NP2_PATH)/sdl2/libretro/libretro-common/formats/image_transfer.c \
 			$(NP2_PATH)/sdl2/libretro/libretro-common/hash/rhash.c \
@@ -116,7 +116,7 @@ ifneq ($(STATIC_LINKING), 1)
 			$(NP2_PATH)/sdl2/libretro/libretro-common/vfs/vfs_implementation.c
 endif
 
-COREFLAGS := -D__LIBRETRO__ $(INCFLAGS) -DCPUCORE_IA32 -DSUPPORT_PC9821 -DUSE_FPU -DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DHOOK_SYSKEY -DALLOW_MULTIRUN -DSUPPORT_WAB -DSUPPORT_LARGE_MEMORY -DSUPPORT_CL_GD5430 -DUSE_MAME -DSUPPORT_FMGEN -DSUPPORT_SOUND_SB16 -DSUPPORT_FPU_DOSBOX -DSUPPORT_FPU_DOSBOX2 -DSUPPORT_FPU_SOFTFLOAT -DSUPPORT_FAST_MEMORYCHECK -DSUPPORT_ASYNC_CPU -DSUPPORT_RS232C_FIFO -DSUPPORT_PEGC -DSUPPORT_GPIB -DSUPPORT_PCI -DUSE_MMX -DUSE_3DNOW -DUSE_SSE -DUSE_SSE2 -DUSE_SSE3 -DUSE_TSC -DUSE_FASTPAGING -DUSE_VME -DBIOS_IO_EMULATION -DSUPPORT_NP2_THREAD -DNP2_THREAD_LR
+COREFLAGS := -D__LIBRETRO__ $(INCFLAGS) -DCPUCORE_IA32 -DSUPPORT_PC9821 -DUSE_FPU -DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DHOOK_SYSKEY -DALLOW_MULTIRUN -DSUPPORT_WAB -DSUPPORT_LARGE_MEMORY -DSUPPORT_CL_GD5430 -DUSE_MAME -DSUPPORT_FMGEN -DSUPPORT_SOUND_SB16 -DSUPPORT_GAMEPORT -DSUPPORT_FPU_DOSBOX -DSUPPORT_FPU_DOSBOX2 -DSUPPORT_FPU_SOFTFLOAT -DSUPPORT_FAST_MEMORYCHECK -DSUPPORT_ASYNC_CPU -DSUPPORT_RS232C_FIFO -DSUPPORT_PEGC -DSUPPORT_GPIB -DSUPPORT_PCI -DUSE_MMX -DUSE_3DNOW -DUSE_SSE -DUSE_SSE2 -DUSE_SSE3 -DUSE_TSC -DUSE_FASTPAGING -DUSE_VME -DBIOS_IO_EMULATION -DSUPPORT_NP2_THREAD
 # -DSUPPORT_SMPU98 -DSUPPORT_NVL_IMAGES
 
 GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"

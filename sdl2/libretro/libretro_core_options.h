@@ -74,6 +74,31 @@ struct retro_core_option_definition option_defs_us[] = {
       "2.4576 MHz"
    },
    {
+      "np2kai_cpu_feature",
+      "CPU Feature (Restart)",
+      NULL,
+      {
+         { "(custom)", NULL },
+         { "Intel 80386", NULL },
+         { "Intel i486SX", NULL },
+         { "Intel i486DX", NULL },
+         { "Intel Pentium", NULL },
+         { "Intel MMX Pentium", NULL },
+         { "Intel Pentium Pro", NULL },
+         { "Intel Pentium II", NULL },
+         { "Intel Pentium III", NULL },
+         { "Intel Pentium M", NULL },
+         { "Intel Pentium 4", NULL },
+         { "AMD K6-2", NULL },
+         { "AMD K6-III", NULL },
+         { "AMD K7 Athlon", NULL },
+         { "AMD K7 Athlon XP", NULL },
+         { "Neko Processor II", NULL },
+         { NULL, NULL},
+      },
+      "Intel 80386"
+   },
+   {
       "np2kai_clk_mult",
       "CPU Clock Multiplier (Restart)",
       "Higher values require a fast machine. Can make some games run too fast.",
@@ -130,6 +155,8 @@ struct retro_core_option_definition option_defs_us[] = {
          { "64", NULL },
          { "120", NULL },
          { "230", NULL },
+         { "512", NULL },
+         { "1024", NULL },
 #endif
          { NULL, NULL},
       },
@@ -139,6 +166,17 @@ struct retro_core_option_definition option_defs_us[] = {
       "np2kai_FastMC",
       "Fast memcheck",
       "Do a faster memory checking at startup.",
+      {
+         { "OFF", NULL },
+         { "ON", NULL },
+         { NULL, NULL},
+      },
+      "OFF"
+   },
+   {
+      "np2kai_uselasthddmount",
+      "Use last HDD mount",
+      "Last HDD mount at core start.",
       {
          { "OFF", NULL },
          { "ON", NULL },
@@ -198,20 +236,27 @@ struct retro_core_option_definition option_defs_us[] = {
       {
          { "PC9801-14", NULL },
          { "PC9801-86", NULL },
-         { "PC9801-86 + 118", NULL },
+         { "PC9801-86 + 118(B460)", NULL },
          { "PC9801-86 + Mate-X PCM(B460)", NULL },
          { "PC9801-86 + Chibi-oto", NULL },
          { "PC9801-86 + Speak Board", NULL },
          { "PC9801-26K", NULL },
          { "PC9801-26K + 86", NULL },
          { "PC9801-118", NULL },
-         { "Mate-X PCM(B460)", NULL },
+         { "Mate-X PCM", NULL },
          { "Chibi-oto", NULL },
          { "Speak Board", NULL },
          { "Spark Board", NULL },
          { "Sound Orchestra", NULL },
          { "Sound Orchestra-V", NULL },
+#if defined(SUPPORT_SOUND_SB16)
          { "Sound Blaster 16", NULL },
+         { "PC9801-86 + Sound Blaster 16", NULL },
+         { "Mate-X PCM + Sound Blaster 16", NULL },
+         { "PC9801-118 + Sound Blaster 16", NULL },
+         { "PC9801-86 + Mate-X PCM(B460) + Sound Blaster 16", NULL },
+         { "PC9801-86 + 118(B460) + Sound Blaster 16", NULL },
+#endif	/* SUPPORT_SOUND_SB16 */
          { "AMD-98", NULL },
          { "WaveStar", NULL },
          { "Otomi-chanx2", NULL },
@@ -731,21 +776,20 @@ struct retro_core_option_definition option_defs_us[] = {
       "ON"
    },
    {
-      "np2kai_j2msuratio",
-      "J2M Cursor Speed up Ratio",
-      NULL,
+      "np2kai_stick2mouse",
+      "Joypad(Analog Stick) to Mouse Mapping",
+      "Emulate a mouse on your gamepad's analog stick.",
       {
-         { "x5", NULL },
-         { "x10", NULL },
-         { "x20", NULL },
-         { "up stop", NULL },
+         { "OFF", NULL },
+         { "L-stick", NULL },
+         { "R-stick", NULL },
          { NULL, NULL},
       },
-      "x10"
+      "R-stick"
    },
    {
       "np2kai_joy2mousekey",
-      "Joypad to Mouse/Keyboard Mapping",
+      "Joypad(D-pad) to Mouse/Keyboard Mapping",
       "Emulate a keyboard or mouse on your gamepad. Map keyboard 'Arrows' or 'Keypad' on the D-pad.",
       {
          { "OFF", NULL },
@@ -756,6 +800,19 @@ struct retro_core_option_definition option_defs_us[] = {
          { NULL, NULL},
       },
       "OFF"
+   },
+   {
+      "np2kai_j2msuratio",
+      "J2M Mouse Cursor Speed up Ratio",
+      "(Mouse cursor accelerates faster by holding down a direction key.)",
+      {
+         { "x5", NULL },
+         { "x10", NULL },
+         { "x20", NULL },
+         { "up stop", NULL },
+         { NULL, NULL},
+      },
+      "x10"
    },
    {
       "np2kai_joynp2menu",
@@ -832,6 +889,31 @@ struct retro_core_option_definition option_defs_ja[] = {
       "2.4576 MHz"
    },
    {
+      "np2kai_cpu_feature",
+      "CPU仕様 (要リスタート)",
+      NULL,
+      {
+         { "(custom)", NULL },
+         { "Intel 80386", NULL },
+         { "Intel i486SX", NULL },
+         { "Intel i486DX", NULL },
+         { "Intel Pentium", NULL },
+         { "Intel MMX Pentium", NULL },
+         { "Intel Pentium Pro", NULL },
+         { "Intel Pentium II", NULL },
+         { "Intel Pentium III", NULL },
+         { "Intel Pentium M", NULL },
+         { "Intel Pentium 4", NULL },
+         { "AMD K6-2", NULL },
+         { "AMD K6-III", NULL },
+         { "AMD K7 Athlon", NULL },
+         { "AMD K7 Athlon XP", NULL },
+         { "Neko Processor II", NULL },
+         { NULL, NULL},
+      },
+      "Intel 80386"
+   },
+   {
       "np2kai_clk_mult",
       "CPUクロック倍率 (要リスタート)",
       "動作が遅い場合は値を増やしてください。ゲームによってはオーバースピードになる可能性があります。",
@@ -888,6 +970,8 @@ struct retro_core_option_definition option_defs_ja[] = {
          { "64", NULL },
          { "120", NULL },
          { "230", NULL },
+         { "512", NULL },
+         { "1024", NULL },
 #endif
          { NULL, NULL},
       },
@@ -897,6 +981,17 @@ struct retro_core_option_definition option_defs_ja[] = {
       "np2kai_FastMC",
       "高速メモリチェック",
       "スタートアップ時のメモリチェックを素早くします。",
+      {
+         { "OFF", NULL },
+         { "ON", NULL },
+         { NULL, NULL},
+      },
+      "OFF"
+   },
+   {
+      "np2kai_uselasthddmount",
+      "前回のHDDマウントを使用",
+      "前回のHDDをコア開始時にマウントします。",
       {
          { "OFF", NULL },
          { "ON", NULL },
@@ -956,20 +1051,27 @@ struct retro_core_option_definition option_defs_ja[] = {
       {
          { "PC9801-14", NULL },
          { "PC9801-86", NULL },
-         { "PC9801-86 + 118", NULL },
+         { "PC9801-86 + 118(B460)", NULL },
          { "PC9801-86 + Mate-X PCM(B460)", NULL },
          { "PC9801-86 + Chibi-oto", NULL },
          { "PC9801-86 + Speak Board", NULL },
          { "PC9801-26K", NULL },
          { "PC9801-26K + 86", NULL },
          { "PC9801-118", NULL },
-         { "Mate-X PCM(B460)", NULL },
+         { "Mate-X PCM", NULL },
          { "Chibi-oto", NULL },
          { "Speak Board", NULL },
          { "Spark Board", NULL },
          { "Sound Orchestra", NULL },
          { "Sound Orchestra-V", NULL },
+#if defined(SUPPORT_SOUND_SB16)
          { "Sound Blaster 16", NULL },
+         { "PC9801-86 + Sound Blaster 16", NULL },
+         { "Mate-X PCM + Sound Blaster 16", NULL },
+         { "PC9801-118 + Sound Blaster 16", NULL },
+         { "PC9801-86 + Mate-X PCM(B460) + Sound Blaster 16", NULL },
+         { "PC9801-86 + 118(B460) + Sound Blaster 16", NULL },
+#endif	/* SUPPORT_SOUND_SB16 */
          { "AMD-98", NULL },
          { "WaveStar", NULL },
          { "Otomi-chanx2", NULL },
@@ -1489,22 +1591,21 @@ struct retro_core_option_definition option_defs_ja[] = {
       "ON"
    },
    {
-      "np2kai_j2msuratio",
-      "J2M カーソルスピード上昇率",
-      NULL,
+      "np2kai_stick2mouse",
+      "Joypad（アナログスティック）->マウス マッピング",
+      "ジョイパッドのアナログスティックをマウスに割り当てる。",
       {
-         { "x5", NULL },
-         { "x10", NULL },
-         { "x20", NULL },
-         { "up stop", NULL },
+         { "OFF", NULL },
+         { "L-stick", NULL },
+         { "R-stick", NULL },
          { NULL, NULL},
       },
-      "x10"
+      "R-stick"
    },
    {
       "np2kai_joy2mousekey",
-      "Joypad->Mouse/Keyboardマッピング",
-      "Emulate a keyboard or mouse on your gamepad. Map keyboard 'Arrows' or 'Keypad' on the D-pad.",
+      "Joypad（デジタルボタン）->マウス/キーボード マッピング",
+      "ジョイパッドのデジタルボタンをキーボードやマウスの操作に割り当てる。",
       {
          { "OFF", NULL },
          { "Mouse", NULL },
@@ -1516,9 +1617,22 @@ struct retro_core_option_definition option_defs_ja[] = {
       "OFF"
    },
    {
+      "np2kai_j2msuratio",
+      "J2M時のマウスカーソルスピード上昇率",
+      "（マウスカーソルは方向ボタンを押し続けることで加速度的に速くなる。）",
+      {
+         { "x5", NULL },
+         { "x10", NULL },
+         { "x20", NULL },
+         { "up stop", NULL },
+         { NULL, NULL},
+      },
+      "x10"
+   },
+   {
       "np2kai_joynp2menu",
       "NP2メニュー表示ボタン設定",
-      "Select a gamepad button to open NP2 Menu.",
+      NULL,
       {
          { "OFF", NULL },
          { "L", NULL },

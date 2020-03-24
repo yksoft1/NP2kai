@@ -1,6 +1,11 @@
+#ifndef COMPILER_H
+#define COMPILER_H
+
 #include	<sys/param.h>
 #include	<stdio.h>
 #include	<stdlib.h>
+#include	<stdint.h>
+#include	<stdbool.h>
 #include	<setjmp.h>
 #include	<stdarg.h>
 #include	<stddef.h>
@@ -62,8 +67,17 @@ __extension__
 typedef unsigned long long int  UINT64;
 #endif
 
-typedef	int				BOOL;
-#define bool BOOL
+typedef union {
+    struct {
+        UINT32 LowPart;
+        SINT32 HighPart;
+    } u;
+    SINT64 QuadPart;
+} LARGE_INTEGER;
+
+#define NP2_64_COPY(pd, ps) *(UINT64*)pd = *(UINT64*)ps;
+
+typedef	bool				BOOL;
 typedef	signed char		CHAR;
 typedef	signed char		TCHAR;
 typedef	unsigned char	BYTE;
@@ -72,13 +86,11 @@ typedef	unsigned short	WORD;
 
 
 #ifndef	TRUE
-#define	TRUE	1
-#define true TRUE
+#define	TRUE	true
 #endif
 
 #ifndef	FALSE
-#define	FALSE	0
-#define false FALSE
+#define	FALSE	false
 #endif
 
 #ifndef	MAX_PATH
@@ -216,11 +228,6 @@ typedef SINT32	FILELEN;
 
 #define	SUPPORT_STATSAVE
 
-#define SUPPORT_ARC
-#define SUPPORT_ZLIB
-
-#define	SUPPORT_FMGEN
-
 #define SUPPORT_PX
 #define SUPPORT_V30ORIGINAL
 #define SUPPORT_V30EXT
@@ -239,4 +246,13 @@ typedef SINT32	FILELEN;
 #define	VERMOUTHCL
 #define	INLINE inline
 
+#if defined(SUPPORT_LARGE_MEMORY)
+#define	MEMORY_MAXSIZE		4000
+#else
+#define	MEMORY_MAXSIZE		230
+#endif
+
 #include	"common.h"
+
+#endif  // COMPILER_H
+

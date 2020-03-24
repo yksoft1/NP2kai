@@ -501,12 +501,17 @@ static void sys_cmd(MENUID id) {
 			break;
 
 		case MID_PC9801_86_MX:
-			np2cfg.SOUND_SW = 0x64;
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_86_WSS;
+			update |= SYS_UPDATECFG;
+			break;
+
+		case MID_PC9801_86_118:
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_86_118;
 			update |= SYS_UPDATECFG;
 			break;
 
 		case MID_PC9801_MX:
-			np2cfg.SOUND_SW = 0x60;
+			np2cfg.SOUND_SW = SOUNDID_MATE_X_PCM;
 			update |= SYS_UPDATECFG;
 			break;
 
@@ -516,7 +521,7 @@ static void sys_cmd(MENUID id) {
 			break;
 
 		case MID_SPEAKBOARD86:
-			np2cfg.SOUND_SW = 0x24;
+			np2cfg.SOUND_SW = SOUNDID_86_SPEAKBOARD;
 			update |= SYS_UPDATECFG;
 			break;
 
@@ -537,7 +542,32 @@ static void sys_cmd(MENUID id) {
 
 #if defined(SUPPORT_SOUND_SB16)
 		case MID_SB16:
-			np2cfg.SOUND_SW = 0x41;
+			np2cfg.SOUND_SW = SOUNDID_SB16;
+			update |= SYS_UPDATECFG;
+			break;
+
+		case MID_86_SB16:
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_86_SB16;
+			update |= SYS_UPDATECFG;
+			break;
+
+		case MID_MX_SB16:
+			np2cfg.SOUND_SW = SOUNDID_WSS_SB16;
+			update |= SYS_UPDATECFG;
+			break;
+
+		case MID_118_SB16:
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_118_SB16;
+			update |= SYS_UPDATECFG;
+			break;
+
+		case MID_86MXSB16:
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_86_WSS_SB16;
+			update |= SYS_UPDATECFG;
+			break;
+
+		case MID_86118SB16:
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_86_118_SB16;
 			update |= SYS_UPDATECFG;
 			break;
 #endif	/* SUPPORT_SOUND_SB16 */
@@ -644,6 +674,16 @@ static void sys_cmd(MENUID id) {
 
 		case MID_MEM2306:
 			np2cfg.EXTMEM = 230;
+			update |= SYS_UPDATECFG;
+			break;
+
+		case MID_MEM5126:
+			np2cfg.EXTMEM = 512;
+			update |= SYS_UPDATECFG;
+			break;
+
+		case MID_MEM10246:
+			np2cfg.EXTMEM = 1024;
 			update |= SYS_UPDATECFG;
 			break;
 #if 0
@@ -922,6 +962,8 @@ BRESULT sysmenu_menuopen(UINT menutype, int x, int y) {
 	menusys_setcheck(MID_MEM646, (b == 64));
 	menusys_setcheck(MID_MEM1206, (b == 120));
 	menusys_setcheck(MID_MEM2306, (b == 230));
+	menusys_setcheck(MID_MEM5126, (b == 512));
+	menusys_setcheck(MID_MEM10246, (b == 1024));
 	menusys_setcheck(MID_JOYX, (np2cfg.BTN_MODE & 1));
 	menusys_setcheck(MID_RAPID, (np2cfg.BTN_RAPID & 1));
 	menusys_setcheck(MID_MSRAPID, (np2cfg.MOUSERAPID & 1));

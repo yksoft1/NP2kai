@@ -1114,7 +1114,8 @@ void dialog_newdisk_ex(HWND hWnd, int mode)
 			if (dlg2.DoModal() != IDOK)
 			{
 				_mt_cancel = 1;
-				WaitForSingleObject((HANDLE)newdisk_ThreadFunc, INFINITE);
+				WaitForSingleObject(newdisk_ThreadFunc, INFINITE);
+				CloseHandle(newdisk_ThreadFunc);
 			}
 			_mt_cancel = 1;
 		}

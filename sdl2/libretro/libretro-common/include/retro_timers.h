@@ -1,4 +1,4 @@
-/* Copyright  (C) 2010-2018 The RetroArch team
+/* Copyright  (C) 2010-2020 The RetroArch team
  *
  * ---------------------------------------------------------------------------------------
  * The following license statement only applies to this file (retro_timers.h).
@@ -34,7 +34,7 @@
 #elif defined(WIIU)
 #include <wiiu/os/thread.h>
 #elif defined(PSP)
-#include <pthread.h>
+#include <pspthreadman.h>
 #elif defined(VITA)
 #include <psp2/kernel/threadmgr.h>
 #elif defined(PS2)

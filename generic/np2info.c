@@ -271,20 +271,20 @@ static void info_sound(OEMCHAR *str, int maxlen, const NP2INFOEX *ex)
 			lpBoard = OEMTEXT("PC-9801-86 + Chibi-oto");
 			break;
 
-		case SOUNDID_SPEAKBOARD:
-			lpBoard = OEMTEXT("Speak board");
-			break;
-
-		case SOUNDID_SPARKBOARD:
-			lpBoard = OEMTEXT("Spark board");
-			break;
-
 		case SOUNDID_WAVESTAR:
 			lpBoard = OEMTEXT("Wave Star");
 			break;
 
+		case SOUNDID_SPEAKBOARD:
+			lpBoard = OEMTEXT("Speak board");
+			break;
+
 		case SOUNDID_86_SPEAKBOARD:
 			lpBoard = OEMTEXT("PC-9801-86 + Speak board");
+			break;
+
+		case SOUNDID_SPARKBOARD:
+			lpBoard = OEMTEXT("Spark board");
 			break;
 
 		case SOUNDID_AMD98:
@@ -302,6 +302,26 @@ static void info_sound(OEMCHAR *str, int maxlen, const NP2INFOEX *ex)
 #if defined(SUPPORT_SOUND_SB16)
 		case SOUNDID_SB16:
 			lpBoard = OEMTEXT("Sound Blaster 16");
+			break;
+			
+		case SOUNDID_PC_9801_86_SB16:
+			lpBoard = OEMTEXT("PC-9801-86 + Sound Blaster 16");
+			break;
+			
+		case SOUNDID_WSS_SB16:
+			lpBoard = OEMTEXT("Mate-X PCM + Sound Blaster 16");
+			break;
+			
+		case SOUNDID_PC_9801_86_WSS_SB16:
+			lpBoard = OEMTEXT("PC-9801-86 + Mate-X PCM + Sound Blaster 16");
+			break;
+			
+		case SOUNDID_PC_9801_118_SB16:
+			lpBoard = OEMTEXT("PC-9801-118 + Sound Blaster 16");
+			break;
+			
+		case SOUNDID_PC_9801_86_118_SB16:
+			lpBoard = OEMTEXT("PC-9801-86 + PC-9801-118 + Sound Blaster 16");
 			break;
 #endif	// defined(SUPPORT_SOUND_SB16)
 
@@ -407,10 +427,8 @@ static void info_display(OEMCHAR *str, int maxlen, const NP2INFOEX *ex) {
 
 	bpp = scrnmng_getbpp();
 	milstr_ncpy(str, milstr_list(str_winclr, ((bpp >> 3) - 1) & 3), maxlen);
-#if defined(NP2_WIN)
-	OEMSPRINTF(buf, OEMTEXT(" %dx%d"), scrnmngp->width, scrnmngp->height);
-	milstr_ncat(str, buf, maxlen);
-#endif	/* NP2_WIN */
+//	OEMSPRINTF(buf, OEMTEXT(" %dx%d"), scrnmngp->width, scrnmngp->height);
+//	milstr_ncat(str, buf, maxlen);
 	milstr_ncat(str, milstr_list(str_winmode, (scrnmng_isfullscreen())?1:0),
 																	maxlen);
 	(void)ex;

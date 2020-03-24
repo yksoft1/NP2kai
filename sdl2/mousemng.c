@@ -148,7 +148,11 @@ void mousemng_hidecursor() {
 #else
 	if (!--mousemng.showcount) {
 		SDL_ShowCursor(SDL_DISABLE);
+#if SDL_MAJOR_VERSION == 1
+		SDL_WM_GrabInput(SDL_GRAB_ON);
+#else
 		SDL_SetRelativeMouseMode(SDL_TRUE);
+#endif
 	}
 #endif
 }
@@ -160,7 +164,11 @@ void mousemng_showcursor() {
 #else
 	if (!mousemng.showcount++) {
 		SDL_ShowCursor(SDL_ENABLE);
+#if SDL_MAJOR_VERSION == 1
+		SDL_WM_GrabInput(SDL_GRAB_OFF);
+#else
 		SDL_SetRelativeMouseMode(SDL_FALSE);
+#endif
 	}
 #endif
 }

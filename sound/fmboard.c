@@ -29,10 +29,12 @@
 
 
 	SOUNDID g_nSoundID;
-	OPL3 g_opl3;
+	OPL3 g_opl3[OPL3_MAX]; // index: 0=PC-9891-118, 1=Sound Blaster 16, 2=Sound Orchestra
 	OPNA g_opna[OPNA_MAX];
+#ifdef USE_MAME
+	void *g_mame_opl3[OPL3_MAX] = {0};
+#endif
 	
-	OPL			g_opl;
 #if defined(SUPPORT_SOUND_SB16)
 	SB16		g_sb16;
 #endif	// defined(SUPPORT_SOUND_SB16)
@@ -119,7 +121,10 @@ void fmboard_construct(void)
 	{
 		opna_construct(&g_opna[i]);
 	}
-	opl3_construct(&g_opl3);
+	for (i = 0; i < NELEMENTS(g_opl3); i++)
+	{
+		opl3_construct(&g_opl3[i]);
+	}
 }
 
 /**
@@ -133,7 +138,10 @@ void fmboard_destruct(void)
 	{
 		opna_destruct(&g_opna[i]);
 	}
-	opl3_destruct(&g_opl3);
+	for (i = 0; i < NELEMENTS(g_opl3); i++)
+	{
+		opl3_destruct(&g_opl3[i]);
+	}
 
 	board118_finalize();
 #ifdef SUPPORT_SOUND_SB16
@@ -153,11 +161,24 @@ void fmboard_reset(const NP2CFG *pConfig, SOUNDID nSoundID)
 	soundrom_reset();
 	beep_reset();												// ver0.27a
 
+	if (g_nSoundID != nSoundID)
+	{
+		for (i = 0; i < NELEMENTS(g_opna); i++)
+		{
+			opna_reset(&g_opna[i], 0);
+		}
+		for (i = 0; i < NELEMENTS(g_opl3); i++)
+		{
+			opl3_reset(&g_opl3[i], 0);
+		}
+	}
+
 	extfn = NULL;
 	pcm86_reset();
 	cs4231_reset();
 
 	board14_reset(pConfig, (nSoundID == SOUNDID_PC_9801_14) ? TRUE : FALSE);
+	amd98_reset(pConfig);
 	
 	g_nSoundID = nSoundID; // XXX: 先に設定
 	switch (nSoundID)
@@ -233,6 +254,34 @@ void fmboard_reset(const NP2CFG *pConfig, SOUNDID nSoundID)
 		case SOUNDID_SB16:
 			boardsb16_reset(pConfig);
 			break;
+			
+		case SOUNDID_PC_9801_86_SB16:
+			boardsb16_reset(pConfig);
+			board86_reset(pConfig, FALSE);
+			break;
+			
+		case SOUNDID_WSS_SB16:
+			boardsb16_reset(pConfig);
+			board118_reset(pConfig);
+			break;
+			
+		case SOUNDID_PC_9801_86_WSS_SB16:
+			boardsb16_reset(pConfig);
+			board118_reset(pConfig);
+			board86_reset(pConfig, FALSE);
+			break;
+			break;
+			
+		case SOUNDID_PC_9801_118_SB16:
+			boardsb16_reset(pConfig);
+			board118_reset(pConfig);
+			break;
+			
+		case SOUNDID_PC_9801_86_118_SB16:
+			boardsb16_reset(pConfig);
+			board118_reset(pConfig);
+			board86_reset(pConfig, FALSE);
+			break;
 #endif	// defined(SUPPORT_SOUND_SB16)
 
 #if defined(SUPPORT_PX)
@@ -295,7 +344,7 @@ void fmboard_bind(void) {
 		case SOUNDID_PC_9801_86_ADPCM:
 			board86_bind();
 			break;
-			
+
 		case SOUNDID_WAVESTAR:
 			board118_bind();
 			board86_bind();
@@ -326,6 +375,33 @@ void fmboard_bind(void) {
 #if defined(SUPPORT_SOUND_SB16)
 		case SOUNDID_SB16:
 			boardsb16_bind();
+			break;
+			
+		case SOUNDID_PC_9801_86_SB16:
+			boardsb16_bind();
+			board86_bind();
+			break;
+			
+		case SOUNDID_WSS_SB16:
+			boardsb16_bind();
+			board118_bind();
+			break;
+			
+		case SOUNDID_PC_9801_86_WSS_SB16:
+			boardsb16_bind();
+			board118_bind();
+			board86_bind();
+			break;
+			
+		case SOUNDID_PC_9801_118_SB16:
+			boardsb16_bind();
+			board118_bind();
+			break;
+			
+		case SOUNDID_PC_9801_86_118_SB16:
+			boardsb16_bind();
+			board118_bind();
+			board86_bind();
 			break;
 #endif	// defined(SUPPORT_SOUND_SB16)
 
@@ -375,6 +451,11 @@ void fmboard_unbind(void) {
 			board86_unbind();
 			break;
 			
+		case SOUNDID_PC_9801_86_118:
+			board118_unbind();
+			board86_unbind();
+			break;
+			
 		case SOUNDID_MATE_X_PCM:
 			board118_unbind();
 			break;
@@ -382,7 +463,7 @@ void fmboard_unbind(void) {
 		case SOUNDID_PC_9801_86_ADPCM:
 			board86_unbind();
 			break;
-			
+
 		case SOUNDID_WAVESTAR:
 			board118_unbind();
 			board86_unbind();
@@ -413,6 +494,33 @@ void fmboard_unbind(void) {
 #if defined(SUPPORT_SOUND_SB16)
 		case SOUNDID_SB16:
 			boardsb16_unbind();
+			break;
+			
+		case SOUNDID_PC_9801_86_SB16:
+			boardsb16_unbind();
+			board86_unbind();
+			break;
+			
+		case SOUNDID_WSS_SB16:
+			boardsb16_unbind();
+			board118_unbind();
+			break;
+			
+		case SOUNDID_PC_9801_86_WSS_SB16:
+			boardsb16_unbind();
+			board118_unbind();
+			board86_unbind();
+			break;
+			
+		case SOUNDID_PC_9801_118_SB16:
+			boardsb16_unbind();
+			board118_unbind();
+			break;
+			
+		case SOUNDID_PC_9801_86_118_SB16:
+			boardsb16_unbind();
+			board118_unbind();
+			board86_unbind();
 			break;
 #endif	// defined(SUPPORT_SOUND_SB16)
 

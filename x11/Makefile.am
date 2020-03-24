@@ -66,7 +66,6 @@ COMMON_SOURCES=	$(real_topsrcdir)/x11/main.c \
 		$(real_topsrcdir)/x11/gtk2/window_softkbd.c \
 		$(real_topsrcdir)/x11/gtk2/gtk_drawmng.c \
 		$(real_topsrcdir)/x11/gtk2/gtk_screen.c \
-		$(real_topsrcdir)/x11/gtk2/gtk_font.c \
 		$(real_topsrcdir)/x11/gtk2/gtk_keyboard.c \
 		$(real_topsrcdir)/x11/gtk2/gtk_menu.c \
 		$(real_topsrcdir)/x11/gtk2/gtk_mouse.c \
@@ -320,7 +319,7 @@ AM_CPPFLAGS=	-I$(real_topsrcdir) \
 		-I$(real_topsrcdir)/wab \
 		$(GTK_CFLAGS) $(GDK_CFLAGS) $(GDK_PIXBUF_CFLAGS) $(SDL_CFLAGS) $(LIBUSB1_CFLAGS) \
 		$(X11_CFLAGS) $(XEXT_CFLAGS) \
-		 -DGIT_VERSION=\"$(GIT_VERSION)\" -DNP2_X11 -DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DHOOK_SYSKEY -DALLOW_MULTIRUN -DSUPPORT_NET -DSUPPORT_LGY98 -DUSE_MAME -DSUPPORT_SOUND_SB16 -DSUPPORT_NVL_IMAGES -DSUPPORT_FMGEN -DSUPPORT_GPIB -DSUPPORT_SMPU98 -DSUPPORT_FAST_MEMORYCHECK -DSUPPORT_ASYNC_CPU -DSUPPORT_STATSAVE -DSUPPORT_NP2_THREAD -DNP2_THREAD_POSIX
+		 -DGIT_VERSION=\"$(GIT_VERSION)\" -DNP2_X11 -DSUPPORT_LARGE_HDD -DSUPPORT_VPCVHD -DSUPPORT_KAI_IMAGES -DHOOK_SYSKEY -DALLOW_MULTIRUN -DSUPPORT_NET -DSUPPORT_LGY98 -DUSE_MAME -DSUPPORT_SOUND_SB16 -DSUPPORT_GAMEPORT -DSUPPORT_NVL_IMAGES -DSUPPORT_FMGEN -DSUPPORT_GPIB -DSUPPORT_SMPU98 -DSUPPORT_FAST_MEMORYCHECK -DSUPPORT_ASYNC_CPU -DSUPPORT_STATSAVE -DSUPPORT_NP2_THREAD -DNP2_THREAD_POSIX
 
 if BUILD_ALL
 AM_CPPFLAGS+=	-DX11_BUILD_ALL
@@ -742,9 +741,16 @@ xnp2kai_CPPFLAGS=	$(AM_CPPFLAGS) $(I286C_CPPFLAGS)
 endif	# CPUCORE_IA32
 endif	# BUILD_ALL
 
-CLEANFILES=	$(nodist_man1_MANS) make.log
+CLEANFILES=	$(nodist_man1_MANS) make.log compile_commands.json cppcheck.xml
 
 cleandir:: distclean
 
 .man1.1 .jman1.1j:
 	@sed -e 's;@PKGDATADIR@;${DESTDIR}${pkgdatadir};' < $< > $@
+
+cppcheck: compile_commands.json
+	cppcheck --project=compile_commands.json --xml 2> cppcheck.xml
+
+compile_commands.json:
+	bear make -f Makefile
+

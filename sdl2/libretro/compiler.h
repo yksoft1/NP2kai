@@ -5,7 +5,8 @@
  *			but are changed infrequently
  */
 
-#pragma once
+#ifndef COMPILER_H
+#define COMPILER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,6 +63,18 @@ typedef	uint32_t		UINT32;
 typedef	int64_t		SINT64;
 typedef	int64_t		INT64;
 typedef	uint64_t		UINT64;
+
+#if !defined(_WINDOWS) && !defined(__MINGW32__) && !defined(__CYGWIN__)
+typedef union {
+    struct {
+        UINT32 LowPart;
+        SINT32 HighPart;
+    } u;
+    SINT64 QuadPart;
+} LARGE_INTEGER;
+#endif
+
+#define NP2_64_COPY(pd, ps) *(UINT64*)pd = *(UINT64*)ps;
 
 typedef  int32_t*    INTPTR;
 
@@ -210,8 +223,6 @@ typedef SINT32	FILELEN;
 #define	SUPPORT_ROMEO
 #define	SUPPORT_HRTIMER
 
-#define  SUPPORT_ARC
-
 #define	SUPPORT_NORMALDISP
 
 #define SUPPORT_PX
@@ -232,7 +243,6 @@ typedef SINT32	FILELEN;
 //retroarch does these on its own
 //#define  SUPPORT_WAVEREC
 //#define  SUPPORT_RECVIDEO
-//#define  SUPPORT_ZLIB
 
 //the emulator must be self contained to work with retroarch
 //#define	SUPPORT_EXTERNALCHIP
@@ -267,4 +277,6 @@ typedef SINT32	FILELEN;
 #ifdef __cplusplus
 }
 #endif
+
+#endif  // COMPILER_H
 

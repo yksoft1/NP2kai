@@ -1,4 +1,4 @@
-/* Copyright  (C) 2010-2018 The RetroArch team
+/* Copyright  (C) 2010-2020 The RetroArch team
  *
  * ---------------------------------------------------------------------------------------
  * The following license statement only applies to this file (retro_miscellaneous.h).
@@ -40,11 +40,7 @@
 #endif
 
 #if defined(__CELLOS_LV2__)
-#if defined(__PSL1GHT__)
-#define CELL_FS_MAX_FS_PATH_LENGTH 1024
-#else
 #include <sys/fs_external.h>
-#endif
 #endif
 
 #include <limits.h>
@@ -170,7 +166,7 @@ typedef struct
 #    endif
 #  endif
 #elif PS2
-#  define PRI_SIZET "lu"
+#  define PRI_SIZET "u"
 #else
 #  if (SIZE_MAX == 0xFFFF)
 #    define PRI_SIZET "hu"

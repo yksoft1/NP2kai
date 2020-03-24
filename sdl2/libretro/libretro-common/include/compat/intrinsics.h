@@ -1,4 +1,4 @@
-/* Copyright  (C) 2010-2018 The RetroArch team
+/* Copyright  (C) 2010-2020 The RetroArch team
  *
  * ---------------------------------------------------------------------------------------
  * The following license statement only applies to this file (intrinsics.h).
@@ -61,7 +61,7 @@ static INLINE int compat_ctz(unsigned x)
 {
 #if defined(__GNUC__) && !defined(RARCH_CONSOLE)
    return __builtin_ctz(x);
-#elif _MSC_VER >= 1400 && !defined(_XBOX)
+#elif _MSC_VER >= 1400 && !defined(_XBOX) && !defined(__WINRT__)
    unsigned long r = 0;
    _BitScanReverse((unsigned long*)&r, x);
    return (int)r;

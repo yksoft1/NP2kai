@@ -32,6 +32,9 @@
 #include "maketext.h"
 #include "sound.h"
 #include "fmboard.h"
+#ifdef SUPPORT_SOUND_SB16
+#include "ct1741io.h"
+#endif
 #include "beep.h"
 #include "diskimage/fddfile.h"
 #include "fdd/fdd_mtr.h"
@@ -44,17 +47,17 @@
 #include "keystat.h"
 #include "bmsio.h"
 #if defined(SUPPORT_WAB)
-#include "wab.h"
+#include "wab/wab.h"
 #endif
 #if defined(SUPPORT_CL_GD5430)
-#include "cirrus_vga_extern.h"
+#include "wab/cirrus_vga_extern.h"
 #endif
 #if defined(SUPPORT_NET)
-#include "net.h"
+#include "network/net.h"
 #endif
 #if defined(SUPPORT_LGY98)
-#include "lgy98.h"
-#include "lgy98dev.h"
+#include "network/lgy98.h"
+#include "network/lgy98dev.h"
 #endif
 #if defined(CPUCORE_IA32)
 #include "ia32/instructions/fpu/fp.h"
@@ -65,6 +68,13 @@
 #if defined(SUPPORT_IA32_HAXM)
 #include	"i386hax/haxfunc.h"
 #include	"i386hax/haxcore.h"
+#endif
+
+#ifdef USE_MAME
+UINT8 YMF262Read(void *chip, INT a);
+INT YMF262Write(void *chip, INT a, INT v);
+int YMF262FlagSave(void *chip, void *dstbuf);
+int YMF262FlagLoad(void *chip, void *srcbuf, int size);
 #endif
 
 extern int sxsi_unittbl[];
@@ -121,7 +131,11 @@ enum
 #if defined(SUPPORT_BMS)
 	STATFLAG_BMS,
 #endif
-	STATFLAG_SXSI
+	STATFLAG_SXSI,
+	STATFLAG_MASK				= 0x3fff,
+	
+	STATFLAG_BWD_COMPATIBLE			= 0x4000, // このフラグが立っているとき、古いバージョンのステートセーブと互換性がある（足りないデータは0で埋められるので注意する）いまのところSTATFLAG_BINのみサポート
+	STATFLAG_FWD_COMPATIBLE			= 0x8000, // このフラグが立っているとき、新しいバージョンのステートセーブと互換性がある（足りないデータは無かったことになるので注意する）いまのところSTATFLAG_BINのみサポート
 };
 
 typedef struct {
@@ -490,7 +504,8 @@ static int flagsave_common(STFLAGH sfh, const SFENTRY *tbl) {
 
 static int flagload_common(STFLAGH sfh, const SFENTRY *tbl) {
 
-	return(statflag_read(sfh, tbl->arg1, tbl->arg2));
+	memset(tbl->arg1, 0, tbl->arg2);
+	return(statflag_read(sfh, tbl->arg1, np2min(tbl->arg2, sfh->hdr.size)));
 }
 
 
@@ -815,7 +830,8 @@ enum
 	FLAG_AMD98		= 0x0040,
 	FLAG_PCM86		= 0x0080,
 	FLAG_CS4231		= 0x0100,
-	FLAG_OPL3		= 0x0200
+	FLAG_OPL3		= 0x0200,
+	FLAG_SB16		= 0x0400
 };
 
 /**
@@ -840,14 +856,13 @@ static UINT GetSoundFlags(SOUNDID nSoundID)
 			return FLAG_OPNA1 | FLAG_OPNA2 | FLAG_PCM86;
 
 		case SOUNDID_PC_9801_118:
-			return FLAG_OPNA1 | FLAG_CS4231;
+			return FLAG_OPNA1 | FLAG_OPL3 | FLAG_CS4231;
 			
 		case SOUNDID_PC_9801_86_WSS:
 			return FLAG_OPNA1 | FLAG_PCM86 | FLAG_CS4231;
-			break;
 			
 		case SOUNDID_PC_9801_86_118:
-			return FLAG_OPNA1 | FLAG_OPNA2 | FLAG_PCM86 | FLAG_CS4231;
+			return FLAG_OPNA1 | FLAG_OPNA2 | FLAG_OPL3 | FLAG_PCM86 | FLAG_CS4231;
 			
 		case SOUNDID_MATE_X_PCM:
 			return FLAG_OPNA1 | FLAG_CS4231;
@@ -870,6 +885,27 @@ static UINT GetSoundFlags(SOUNDID nSoundID)
 		case SOUNDID_SOUNDORCHESTRA:
 		case SOUNDID_SOUNDORCHESTRAV:
 			return FLAG_OPNA1 | FLAG_OPL3;
+			
+#if defined(SUPPORT_SOUND_SB16)
+		case SOUNDID_SB16:
+			return FLAG_OPL3 | FLAG_SB16;
+			
+		case SOUNDID_PC_9801_86_SB16:
+			return FLAG_OPNA1 | FLAG_PCM86 | FLAG_OPL3 | FLAG_SB16;
+			
+		case SOUNDID_WSS_SB16:
+			return FLAG_CS4231 | FLAG_OPL3 | FLAG_SB16;
+			
+		case SOUNDID_PC_9801_86_WSS_SB16:
+			return FLAG_OPNA1 | FLAG_PCM86 | FLAG_CS4231 | FLAG_OPL3 | FLAG_SB16;
+			
+		case SOUNDID_PC_9801_118_SB16:
+			return FLAG_OPNA1 | FLAG_OPNA2 | FLAG_OPL3 | FLAG_PCM86 | FLAG_CS4231 | FLAG_SB16;
+
+		case SOUNDID_PC_9801_86_118_SB16:
+			return FLAG_OPNA1 | FLAG_OPNA2 | FLAG_PCM86 | FLAG_CS4231 | FLAG_OPL3 | FLAG_SB16;
+			
+#endif	// defined(SUPPORT_SOUND_SB16)
 
 #if defined(SUPPORT_PX)
 		case SOUNDID_PX1:
@@ -918,7 +954,34 @@ static int flagsave_fm(STFLAGH sfh, const SFENTRY *tbl)
 	}
 	if (nSaveFlags & FLAG_OPL3)
 	{
-		ret |= opl3_sfsave(&g_opl3, sfh, tbl);
+		for (i = 0; i < NELEMENTS(g_opl3); i++)
+		{
+			ret |= opl3_sfsave(&g_opl3[i], sfh, tbl);
+		}
+#ifdef USE_MAME
+		{
+			void* buffer;
+			SINT32 bufsize = 0;
+			bufsize = YMF262FlagSave(NULL, NULL);
+			buffer = malloc(bufsize);
+			for (i = 0; i < NELEMENTS(g_mame_opl3); i++)
+			{
+				if(g_mame_opl3[i]){
+					YMF262FlagSave(g_mame_opl3[i], buffer);
+					ret |= statflag_write(sfh, &bufsize, sizeof(SINT32));
+					ret |= statflag_write(sfh, buffer, bufsize);
+				}else{
+					SINT32 tmpsize = 0;
+					ret |= statflag_write(sfh, &tmpsize, sizeof(SINT32));
+				}
+			}
+			free(buffer);
+		}
+#endif
+	}
+	if (nSaveFlags & FLAG_SB16)
+	{
+		ret |= statflag_write(sfh, &g_sb16, sizeof(g_sb16));
 	}
 	return ret;
 }
@@ -960,7 +1023,35 @@ static int flagload_fm(STFLAGH sfh, const SFENTRY *tbl)
 	}
 	if (nSaveFlags & FLAG_OPL3)
 	{
-		ret |= opl3_sfload(&g_opl3, sfh, tbl);
+		for (i = 0; i < NELEMENTS(g_opl3); i++)
+		{
+			ret |= opl3_sfload(&g_opl3[i], sfh, tbl);
+		}
+#ifdef USE_MAME
+		for (i = 0; i < NELEMENTS(g_mame_opl3); i++)
+		{
+			void* buffer;
+			int bufsize = 0;
+			ret |= statflag_read(sfh, &bufsize, sizeof(SINT32));
+			if(bufsize!=0){
+				if(YMF262FlagSave(NULL, NULL) != bufsize){
+					ret = STATFLAG_FAILURE;
+					break;
+				}else{
+					buffer = malloc(bufsize);
+					ret |= statflag_read(sfh, buffer, bufsize);
+					if(g_mame_opl3[i]){
+						YMF262FlagLoad(g_mame_opl3[i], buffer, bufsize);
+					}
+					free(buffer);
+				}
+			}
+		}
+#endif
+	}
+	if (nSaveFlags & FLAG_SB16)
+	{
+		ret |= statflag_read(sfh, &g_sb16, sizeof(g_sb16));
 	}
 
 	// 復元。 これ移動すること！
@@ -1299,7 +1390,9 @@ static int flagload_bms(STFLAGH sfh, const SFENTRY *tbl) {
 
 static int flagcheck_versize(STFLAGH sfh, const SFENTRY *tbl) {
 
-	if ((sfh->hdr.ver == tbl->ver) && (sfh->hdr.size == tbl->arg2)) {
+	if ((sfh->hdr.ver == tbl->ver) && ((sfh->hdr.size == tbl->arg2) || 
+		((tbl->type & STATFLAG_BWD_COMPATIBLE) && sfh->hdr.size < tbl->arg2) || 
+		((tbl->type & STATFLAG_FWD_COMPATIBLE) && sfh->hdr.size > tbl->arg2))) {
 		return(STATFLAG_SUCCESS);
 	}
 	return(STATFLAG_FAILURE);
@@ -1342,7 +1435,7 @@ const SFENTRY	*tblterm;
 	tblterm = tbl + NELEMENTS(np2tbl);
 	while(tbl < tblterm) {
 		ret |= statflag_createsection(sffh, tbl);
-		switch(tbl->type) {
+		switch(tbl->type & STATFLAG_MASK) {
 			case STATFLAG_BIN:
 			case STATFLAG_TERM:
 				ret |= flagsave_common(&sffh->sfh, tbl);
@@ -1438,7 +1531,7 @@ const SFENTRY	*tblterm;
 			tbl++;
 		}
 		if (tbl < tblterm) {
-			switch(tbl->type) {
+			switch(tbl->type & STATFLAG_MASK) {
 				case STATFLAG_BIN:
 				case STATFLAG_MEM:
 					ret |= flagcheck_versize(&sffh->sfh, tbl);
@@ -1544,7 +1637,7 @@ const SFENTRY	*tblterm;
 			tbl++;
 		}
 		if (tbl < tblterm) {
-			switch(tbl->type) {
+			switch(tbl->type & STATFLAG_MASK) {
 				case STATFLAG_BIN:
 					ret |= flagload_common(&sffh->sfh, tbl);
 					break;
@@ -1621,6 +1714,9 @@ const SFENTRY	*tblterm;
 		}
 	}
 	statflag_close(sffh);
+
+	// ステートセーブ互換性維持用
+	if(pccore.maxmultiple == 0) pccore.maxmultiple = pccore.multiple;
 	
 #if defined(SUPPORT_IA32_HAXM)
 	memcpy(vramex, vramex_base, sizeof(vramex_base));
@@ -1691,6 +1787,35 @@ const SFENTRY	*tblterm;
 	pc98_cirrus_vga_bind();
 	pc98_cirrus_vga_load();
 #endif
+	
+	// OPNAボリューム再設定
+	if(g_nSoundID == SOUNDID_WAVESTAR){
+		opngen_setvol(np2cfg.vol_fm * cs4231.devvolume[0xff] / 15);
+		psggen_setvol(np2cfg.vol_ssg * cs4231.devvolume[0xff] / 15);
+		rhythm_setvol(np2cfg.vol_rhythm * cs4231.devvolume[0xff] / 15);
+#if defined(SUPPORT_FMGEN)
+		if(np2cfg.usefmgen) {
+			opna_fmgen_setallvolumeFM_linear(np2cfg.vol_fm * cs4231.devvolume[0xff] / 15);
+			opna_fmgen_setallvolumePSG_linear(np2cfg.vol_ssg * cs4231.devvolume[0xff] / 15);
+			opna_fmgen_setallvolumeRhythmTotal_linear(np2cfg.vol_rhythm * cs4231.devvolume[0xff] / 15);
+		}
+#endif
+	}else{
+		opngen_setvol(np2cfg.vol_fm);
+		psggen_setvol(np2cfg.vol_ssg);
+		rhythm_setvol(np2cfg.vol_rhythm);
+#if defined(SUPPORT_FMGEN)
+		if(np2cfg.usefmgen) {
+			opna_fmgen_setallvolumeFM_linear(np2cfg.vol_fm);
+			opna_fmgen_setallvolumePSG_linear(np2cfg.vol_ssg);
+			opna_fmgen_setallvolumeRhythmTotal_linear(np2cfg.vol_rhythm);
+		}
+#endif
+	}
+	for (i = 0; i < NELEMENTS(g_opna); i++)
+	{
+		rhythm_update(&g_opna[i].rhythm);
+	}
 
 	gdcs.textdisp |= GDCSCRN_EXT;
 	gdcs.textdisp |= GDCSCRN_ALLDRAW2;

@@ -1,13 +1,14 @@
+#ifndef COMPILER_H
+#define COMPILER_H
+
 #include	<windows.h>
 #include	<stdio.h>
+#include	<stdint.h>
+#include	<stdbool.h>
 #include	<setjmp.h>
 #include	<stddef.h>
 #include	<limits.h>
-#if defined(USE_SDL_CONFIG)
-#include	"SDL.h"
-#else
-#include	<SDL2\SDL.h>
-#endif
+#include	<SDL.h>
 
 //#define TRACE
 
@@ -27,8 +28,7 @@
 #define	siglongjmp(env, val)	longjmp(env, val)
 #endif
 
-typedef	int				BOOL;
-#define bool BOOL
+//typedef	bool				BOOL;
 #ifndef __GNUC__
 typedef	signed int			SINT;
 typedef	signed char			SINT8;
@@ -68,6 +68,8 @@ typedef	unsigned int		UINT;
 #define	REG8		UINT8
 #define REG16		UINT16
 
+#define NP2_64_COPY(pd, ps) *pd = *ps;
+
 #define	BRESULT				UINT
 #define	OEMCHAR				char
 #define	OEMTEXT(string)		string
@@ -77,17 +79,11 @@ typedef	unsigned int		UINT;
 #define	_tcsnicmp	strncasecmp
 
 #ifndef	TRUE
-#define	TRUE	1
-#endif
-#ifndef	true
-#define true TRUE
+#define	TRUE	true
 #endif
 
 #ifndef	FALSE
-#define	FALSE	0
-#endif
-#ifndef	false
-#define false FALSE
+#define	FALSE	false
 #endif
 
 #if defined(SUPPORT_LARGE_HDD)
@@ -185,9 +181,6 @@ typedef SINT32	FILELEN;
 
 #define	SUPPORT_STATSAVE
 
-#define SUPPORT_ARC
-#define SUPPORT_ZLIB
-
 #define SUPPORT_PX
 #define SUPPORT_V30ORIGINAL
 #define SUPPORT_V30EXT
@@ -214,4 +207,5 @@ typedef SINT32	FILELEN;
 
 #include	"common.h"
 
+#endif  // COMPILER_H
 

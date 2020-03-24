@@ -106,8 +106,8 @@ static const char str_pc980126k86[] = "PC-9801-26K + 86";
 static const char str_pc980186cb[] = "PC-9801-86 + Chibi-oto";
 static const char str_pc9801118[] = "PC-9801-118";
 static const char str_pc980186mx[] = "PC-9801-86 + Mate-X PCM(B460)";
-static const char str_pc980186118[] = "PC-9801-86 + 118";
-static const char str_pc9801mx[] = "Mate-X PCM(B460)";
+static const char str_pc980186118[] = "PC-9801-86 + 118(B460)";
+static const char str_pc9801mx[] = "Mate-X PCM";
 static const char str_spreakboard[] = "Speak board";
 static const char str_spreakboard86[] = "PC-9801-86 + Speak board";
 static const char str_sparkboard[] = "Spark board";
@@ -115,6 +115,11 @@ static const char str_sndorchestra[] = "Sound Orchestra";
 static const char str_sndorchestrav[] = "Sound Orchestra-V";
 #if defined(SUPPORT_SOUND_SB16)
 static const char str_sb16[] = "Sound Blaster 16";
+static const char str_86sb16[] = "PC-9801-86 + Sound Blaster 16";
+static const char str_mxsb16[] = "Mate-X PCM + Sound Blaster 16";
+static const char str_118sb16[] = "PC-9801-118 + Sound Blaster 16";
+static const char str_86mxsb16[] = "PC-9801-86 + Mate-X PCM(B460) + Sound Blaster 16";
+static const char str_86118sb16[] = "PC-9801-86 + 118(B460) + Sound Blaster 16";
 #endif	/* SUPPORT_SOUND_SB16 */
 static const char str_amd98[] = "AMD-98";
 static const char str_wavestar[] = "WaveStar";
@@ -141,6 +146,8 @@ static const char str_mem326[] = "32.6MB";
 static const char str_mem646[] = "64.6MB";
 static const char str_mem1206[] = "120.6MB";
 static const char str_mem2306[] = "230.6MB";
+static const char str_mem5126[] = "512.6MB";
+static const char str_mem10246[] = "10240.6MB";
 
 static const char str_seropt[] = "Serial option...";
 static const char str_midiopt[] = "MIDI option...";
@@ -322,9 +329,15 @@ static const MSYSITEM s_screen[] = {
 		{str_window,		NULL,		MID_WINDOW,			MENU_GRAY},
 		{str_fullscrn,		NULL,		MID_FULLSCREEN,		MENU_GRAY},
 		{NULL,				NULL,		MID_STATIC,			MENU_SEPARATOR},
+#if SDL_MAJOR_VERSION == 1
+		{str_normal,		NULL,		MID_ROLNORMAL,		MENU_GRAY},
+		{str_leftrol,		NULL,		MID_ROLLEFT,		MENU_GRAY},
+		{str_rightrol,		NULL,		MID_ROLRIGHT,		MENU_GRAY},
+#else
 		{str_normal,		NULL,		MID_ROLNORMAL,		0},
 		{str_leftrol,		NULL,		MID_ROLLEFT,		0},
 		{str_rightrol,		NULL,		MID_ROLRIGHT,		0},
+#endif
 		{NULL,				NULL,		MID_STATIC,			MENU_SEPARATOR},
 		{str_dispsync,		NULL,		MID_DISPSYNC,		0},
 		{str_realpal,		NULL,		MID_RASTER,			0},
@@ -401,6 +414,11 @@ static const MSYSITEM s_snd[] = {
 		{str_sndorchestrav,	NULL,		MID_SOUNDORCHESTRAV,	0},
 #if defined(SUPPORT_SOUND_SB16)
 		{str_sb16,		NULL,		MID_SB16,		0},
+		{str_86sb16,		NULL,		MID_86_SB16,		0},
+		{str_mxsb16,		NULL,		MID_MX_SB16,		0},
+		{str_118sb16,		NULL,		MID_118_SB16,		0},
+		{str_86mxsb16,		NULL,		MID_86MXSB16,		0},
+		{str_86118sb16,		NULL,		MID_86118SB16,		0},
 #endif	/* SUPPORT_SOUND_SB16 */
 		{str_amd98,			NULL,		MID_AMD98,			0},
 		{str_wavestar,		NULL,		MID_WAVESTAR,			0},
@@ -425,13 +443,17 @@ static const MSYSITEM s_mem[] = {
 		{str_mem326,			NULL,		MID_MEM326,			0},
 		{str_mem646,			NULL,		MID_MEM646,			0},
 		{str_mem1206,			NULL,		MID_MEM1206,			0},
-		{str_mem2306,			NULL,		MID_MEM2306,			MENU_DELETED}};
+		{str_mem2306,			NULL,		MID_MEM2306,			0},
+		{str_mem5126,			NULL,		MID_MEM5126,			0},
+		{str_mem10246,		NULL,		MID_MEM10246,			MENU_DELETED}};
 #else
 		{str_mem166,			NULL,		MID_MEM166,			MENU_GRAY},
 		{str_mem326,			NULL,		MID_MEM326,			MENU_GRAY},
 		{str_mem646,			NULL,		MID_MEM646,			MENU_GRAY},
 		{str_mem1206,			NULL,		MID_MEM1206,			MENU_GRAY},
-		{str_mem2306,			NULL,		MID_MEM2306,			MENU_GRAY | MENU_DELETED}};
+		{str_mem2306,			NULL,		MID_MEM2306,			MENU_GRAY},
+		{str_mem5126,			NULL,		MID_MEM5126,			MENU_GRAY},
+		{str_mem10246,		NULL,		MID_MEM10246,			MENU_GRAY | MENU_DELETED}};
 #endif
 
 static const MSYSITEM s_device[] = {
