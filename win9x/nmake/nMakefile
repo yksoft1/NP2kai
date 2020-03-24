@@ -243,8 +243,6 @@ OBJS2 = 	$(NP2_PATH)\sound\vermouth\midimod.obj \
 			$(NP2_PATH)\vram\sdrawq16.obj \
 			$(NP2_PATH)\vram\vram.obj \
 			$(NP2_PATH)\common\_memory.obj \
-			$(NP2_PATH)\common\arc.obj \
-			$(NP2_PATH)\common\arcunzip.obj \
 			$(NP2_PATH)\common\bmpdata.obj \
 			$(NP2_PATH)\common\lstarray.obj \
 			$(NP2_PATH)\common\milstr.obj \
@@ -698,13 +696,6 @@ OBJS_W9X =	$(NP2_PATH)\win9x\commng.obj \
 			$(NP2_PATH)\win9x\ext\romeo\juliet.obj \
 			$(NP2_PATH)\win9x\ext\scci\scciif.obj \
 			$(NP2_PATH)\win9x\resources\1252\np2.res
-			
-OBJS_Z = 	$(NP2_PATH)\zlib\adler32.obj \
-			$(NP2_PATH)\zlib\crc32.obj \
-			$(NP2_PATH)\zlib\inffast.obj \
-			$(NP2_PATH)\zlib\inflate.obj \
-			$(NP2_PATH)\zlib\inftrees.obj \
-			$(NP2_PATH)\zlib\zutil.obj
 
 LIBS = kernel32.lib user32.lib gdi32.lib imm32.lib winmm.lib dxguid.lib shell32.lib shlwapi.lib ole32.lib comdlg32.lib opengl32.lib advapi32.lib ws2_32.lib d3d9.lib
 
@@ -719,8 +710,8 @@ LFLAGS = $(LFLAGS) -LTCG
 
 all: $(TARGET) $(SDLMAIN)
 
-$(TARGET):	$(OBJS) $(OBJS2) $(OBJS_IA32) $(OBJS_SOFTFLOAT1) $(OBJS_SOFTFLOAT2) $(OBJS_SOFTFLOAT3) $(OBJS_SOFTFLOAT4) $(OBJS_W9X) $(OBJS_Z)
-	$(LD) $(LFLAGS) -OUT:$@ $(OBJS) $(OBJS2) $(OBJS_IA32) $(OBJS_SOFTFLOAT1) $(OBJS_SOFTFLOAT2) $(OBJS_SOFTFLOAT3) $(OBJS_SOFTFLOAT4) $(OBJS_W9X) $(OBJS_Z) $(LIBS)
+$(TARGET):	$(OBJS) $(OBJS2) $(OBJS_IA32) $(OBJS_SOFTFLOAT1) $(OBJS_SOFTFLOAT2) $(OBJS_SOFTFLOAT3) $(OBJS_SOFTFLOAT4) $(OBJS_W9X) 
+	$(LD) $(LFLAGS) -OUT:$@ $(OBJS) $(OBJS2) $(OBJS_IA32) $(OBJS_SOFTFLOAT1) $(OBJS_SOFTFLOAT2) $(OBJS_SOFTFLOAT3) $(OBJS_SOFTFLOAT4) $(OBJS_W9X) $(LIBS)
 	
 .c.obj:
 	$(CC) $(CFLAGS) -c -Fo$@ $<
@@ -737,5 +728,4 @@ clean:
 	del $(OBJS_IA32)
 	del $(NP2_PATH)\i386c\ia32\instructions\fpu\softfloat\*.obj
 	del $(OBJS_W9X)
-	del $(OBJS_Z)
 	del *.manifest

@@ -233,9 +233,6 @@ typedef	signed __int64		SINT64;
 #define SUPPORT_WIN2000HOST
 #endif
 
-#define np2max max
-#define np2min min
-
 #if defined(SUPPORT_IA32_HAXM)
 #define USE_CUSTOM_HOOKINST
 #endif

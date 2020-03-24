@@ -99,8 +99,6 @@ CPPSRCS	=	$(NP2_PATH)/calendar.c \
 			$(wildcard $(NP2_PATH)/wab/*.c) \
 			$(wildcard $(NP2_PATH)/i286c/*.c) \
 			$(NP2_PATH)/common/_memory.c \
-			$(NP2_PATH)/common/arc.c \
-			$(NP2_PATH)/common/arcunzip.c \
 			$(NP2_PATH)/common/bmpdata.c \
 			$(NP2_PATH)/common/lstarray.c \
 			$(NP2_PATH)/common/milstr.c \
@@ -121,8 +119,7 @@ CPPSRCS	=	$(NP2_PATH)/calendar.c \
 			$(wildcard $(NP2_PATH)/win9x/ext/*.cpp)\
 			$(wildcard $(NP2_PATH)/win9x/ext/c86ctl/*.cpp)\
 			$(wildcard $(NP2_PATH)/win9x/ext/romeo/*.cpp)\
-			$(wildcard $(NP2_PATH)/win9x/ext/scci/*.cpp)\
-			$(wildcard $(NP2_PATH)/zlib/*.c)
+			$(wildcard $(NP2_PATH)/win9x/ext/scci/*.cpp)
 
 OBJS = $(addsuffix .o,$(basename $(CPPSRCS)))
 LIBS =  -lstdc++ -lm -lcomctl32 -lcomdlg32 -lwinmm -ldxguid -lddraw -ldsound -lavifil32 -lvfw32 -ldinput8 -luuid -lole32 -lshlwapi

@@ -228,9 +228,6 @@ typedef SINT32	FILELEN;
 #define	SUPPORT_KEYDISP
 //#define	SUPPORT_STATSAVE
 
-#define SUPPORT_ARC
-#define SUPPORT_ZLIB
-
 #define	SUPPORT_FMGEN
 
 
