@@ -197,19 +197,15 @@ void taskmng_rol(void) {
 			}
 #ifdef EMSCRIPTEN
 			}
-#endif
 #if SDL_MAJOR_VERSION == 1
 			if (e.key.keysym.sym == SDLK_F12) {
 #else
 			else if (e.key.keysym.scancode == SDL_SCANCODE_F12) {
 #endif
-#ifdef EMSCRIPTEN
 				if ((e.key.keysym.mod == KMOD_LCTRL) || (e.key.keysym.mod == KMOD_RCTRL)) {
-#endif
 					//use CTRL+F12 to lock mouse like win32 builds do
 					mousemng_toggle(MOUSEPROC_SYSTEM);
 				}
-#ifdef EMSCRIPTEN
 			}
 #endif
 			else {
