@@ -227,6 +227,8 @@
     <ClCompile Include="..\cbus\board14.c" />
     <ClCompile Include="..\cbus\board26k.c" />
     <ClCompile Include="..\cbus\board86.c" />
+    <ClCompile Include="..\cbus\boardlol.c" />
+    <ClCompile Include="..\cbus\boardmo.c" />
     <ClCompile Include="..\cbus\boardpx.c" />
     <ClCompile Include="..\cbus\boardsb16.c" />
     <ClCompile Include="..\cbus\boardso.c" />
@@ -654,6 +656,8 @@
     <ClInclude Include="..\cbus\board14.h" />
     <ClInclude Include="..\cbus\board26k.h" />
     <ClInclude Include="..\cbus\board86.h" />
+    <ClInclude Include="..\cbus\boardlol.h" />
+    <ClInclude Include="..\cbus\boardmo.h" />
     <ClInclude Include="..\cbus\boardpx.h" />
     <ClInclude Include="..\cbus\boardsb16.h" />
     <ClInclude Include="..\cbus\boardso.h" />
