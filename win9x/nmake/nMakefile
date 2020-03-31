@@ -82,6 +82,8 @@ OBJS	=	$(NP2_PATH)\calendar.obj \
 			$(NP2_PATH)\cbus\boardso.obj \
 			$(NP2_PATH)\cbus\boardspb.obj \
 			$(NP2_PATH)\cbus\boardx2.obj \
+			$(NP2_PATH)\cbus\boardlol.obj \
+			$(NP2_PATH)\cbus\boardmo.obj \
 			$(NP2_PATH)\cbus\cbuscore.obj \
 			$(NP2_PATH)\cbus\cs4231io.obj \
 			$(NP2_PATH)\cbus\ct1741io.obj \
