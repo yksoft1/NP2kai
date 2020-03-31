@@ -1273,37 +1273,37 @@ static void OnCommand(HWND hWnd, WPARAM wParam)
 			break;
 
 		case IDM_NOSOUND:
-			np2cfg.SOUND_SW = 0x00;
+			np2cfg.SOUND_SW = SOUNDID_NONE;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 
 		case IDM_PC9801_14:
-			np2cfg.SOUND_SW = 0x01;
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_14;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 
 		case IDM_PC9801_26K:
-			np2cfg.SOUND_SW = 0x02;
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_26K;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 
 		case IDM_PC9801_86:
-			np2cfg.SOUND_SW = 0x04;
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_86;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 
 		case IDM_PC9801_26_86:
-			np2cfg.SOUND_SW = 0x06;
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_86_26K;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 
 		case IDM_PC9801_86_CB:
-			np2cfg.SOUND_SW = 0x14;
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_86_ADPCM;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 
 		case IDM_PC9801_118:
-			np2cfg.SOUND_SW = 0x08;
+			np2cfg.SOUND_SW = SOUNDID_PC_9801_118;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 			
@@ -1333,7 +1333,7 @@ static void OnCommand(HWND hWnd, WPARAM wParam)
 			break;
 
 		case IDM_SPARKBOARD:
-			np2cfg.SOUND_SW = 0x40;
+			np2cfg.SOUND_SW = SOUNDID_SPARKBOARD;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 			
@@ -1371,28 +1371,38 @@ static void OnCommand(HWND hWnd, WPARAM wParam)
 
 #if defined(SUPPORT_PX)
 		case IDM_PX1:
-			np2cfg.SOUND_SW = 0x30;
+			np2cfg.SOUND_SW = SOUNDID_PX1;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 
 		case IDM_PX2:
-			np2cfg.SOUND_SW = 0x50;
+			np2cfg.SOUND_SW = SOUNDID_PX2;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 #endif	// defined(SUPPORT_PX)
 
 		case IDM_SOUNDORCHESTRA:
-			np2cfg.SOUND_SW = 0x32;
+			np2cfg.SOUND_SW = SOUNDID_SOUNDORCHESTRA;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 
 		case IDM_SOUNDORCHESTRAV:
-			np2cfg.SOUND_SW = 0x82;
+			np2cfg.SOUND_SW = SOUNDID_SOUNDORCHESTRAV;
+ 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
+ 			break;
+
+ 		case IDM_LITTLEORCHESTRAL:
+ 			np2cfg.SOUND_SW = SOUNDID_LITTLEORCHESTRAL;
+ 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
+ 			break;
+
+ 		case IDM_MMORCHESTRA:
+ 			np2cfg.SOUND_SW = SOUNDID_MMORCHESTRA;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 
 		case IDM_AMD98:
-			np2cfg.SOUND_SW = 0x80;
+			np2cfg.SOUND_SW = SOUNDID_AMD98;
 			update |= SYS_UPDATECFG | SYS_UPDATESBOARD;
 			break;
 			
