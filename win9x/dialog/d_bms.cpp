@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-#include	"compiler.h"
-#include	"strres.h"
-#include	"resource.h"
-#include	"np2.h"
-#include	"sysmng.h"
-#include	"dialog.h"
-=======
 /**
  * @file	d_bms.cpp
  * @brief	BMS設定ダイアログ
@@ -21,7 +13,6 @@
 #include "misc/DlgProc.h"
 #include "pccore.h"
 #include "common/strres.h"
->>>>>>> db92b28... add LittleOrchestraL, MultimediaOrchestra
 
 #include	"bmsio.h"
 
