@@ -4,6 +4,7 @@
 #include	"cbuscore.h"
 #include	"boardlol.h"
 #include	"sound.h"
+#include	"soundrom.h"
 #include	"fmboard.h"
 #include	"s98.h"
 
